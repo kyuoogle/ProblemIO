@@ -7,6 +7,7 @@ import com.problemio.user.dto.UserSignupRequest;
 
 public interface UserService {
 
+
     UserResponse signup(UserSignupRequest request);
 
     String login(UserLoginRequest request); // JWT 토큰 문자열 반환 가정

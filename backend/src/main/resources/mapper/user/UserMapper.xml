@@ -3,4 +3,60 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.problemio.user.mapper.UserMapper">
+    <!--    Id로 찾기-->
+    <select id="findById" resultType="com.problemio.user.domain.User">
+        SELECT *
+        FROM users
+        WHERE id = #{id}
+    </select>
+
+    <!--  이메일 검색  -->
+    <select id="findByEmail" resultType="com.problemio.user.domain.User">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!--  닉네임 검색  -->
+    <select id="findByNickname" resultType="com.problemio.user.domain.User">
+        SELECT *
+        FROM users
+        WHERE nickname = #{nickname}
+    </select>
+
+    <!--  회원가입  -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (email,
+                           password_hash,
+                           nickname)
+        VALUES (#{email},
+                #{passwordHash},
+                #{nickname})
+    </insert>
+
+    <!--  비밀번호 변경  -->
+    <update id="updateUserPassword">
+        UPDATE users
+        SET password_hash = #{passwordHash},
+            updated_at    = NOW()
+        WHERE id = #{id}
+          AND email = #{email}
+    </update>
+
+    <!-- 상태메세지 + 이미지 변경 -->
+    <update id="updateUserStatus">
+        UPDATE users
+        SET profile_image_url = #{profileImageUrl},
+            status_message    = #{statusMessage},
+            updated_at        = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 유저 삭제 -->
+    <update id="userDelete">
+        UPDATE users
+        SET is_deleted = 1
+        WHERE id = #{id}
+    </update>
+
 </mapper>
