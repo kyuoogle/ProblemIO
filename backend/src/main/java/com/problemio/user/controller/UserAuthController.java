@@ -65,17 +65,4 @@ public class UserAuthController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    // 카카오 로그인 URL 조회
-    @GetMapping("/kakao/login-url")
-    public ResponseEntity<ApiResponse<Map<String, String>>> getKakaoLoginUrl() {
-        // TODO: 구현 필요
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    // 카카오 콜백 처리
-    @GetMapping("/kakao/callback")
-    public ResponseEntity<ApiResponse<TokenResponse>> handleKakaoCallback(@RequestParam String code) {
-        // TODO: 구현 필요
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
 }

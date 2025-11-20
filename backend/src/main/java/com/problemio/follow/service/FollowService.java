@@ -1,16 +1,22 @@
 package com.problemio.follow.service;
 
-import com.problemio.user.dto.UserSummaryDto;
+import com.problemio.follow.dto.FollowUserDto;
 
 import java.util.List;
 
 public interface FollowService {
 
-    void follow(Long followerId, Long followingId);
+    void follow(Long followerId, Long targetUserId);
 
-    void unfollow(Long followerId, Long followingId);
+    void unfollow(Long followerId, Long targetUserId);
 
-    List<UserSummaryDto> getFollowers(Long userId);
+    boolean isFollowing(Long followerId, Long targetUserId);
 
-    List<UserSummaryDto> getFollowings(Long userId);
+    List<FollowUserDto> getFollowers(Long userId);
+
+    List<FollowUserDto> getFollowings(Long userId);
+
+    int getFollowerCount(Long userId);
+
+    int getFollowingCount(Long userId);
 }

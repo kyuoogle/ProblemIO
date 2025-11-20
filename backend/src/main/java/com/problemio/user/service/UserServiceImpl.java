@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_LOGIN));
 
-        // 탈퇴 여부 확인 (Soft Delete 체크)
+        // 탈퇴 여부 확인 (is_Deleted 체크)
         if (user.isDeleted()) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }

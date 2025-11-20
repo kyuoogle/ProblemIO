@@ -1,6 +1,8 @@
+// src/main/java/com/problemio/follow/mapper/FollowMapper.java
 package com.problemio.follow.mapper;
 
 import com.problemio.follow.domain.Follow;
+import com.problemio.follow.dto.FollowUserDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,11 +11,19 @@ import java.util.List;
 @Mapper
 public interface FollowMapper {
 
-    void insertFollow(Follow follow);
+    int insert(Follow follow);
 
-    void deleteFollow(@Param("followerId") Long followerId, @Param("followingId") Long followingId);
+    int delete(@Param("followerId") Long followerId,
+               @Param("followingId") Long followingId);
 
-    List<Follow> findFollowers(@Param("userId") Long userId);
+    int exists(@Param("followerId") Long followerId,
+               @Param("followingId") Long followingId);
 
-    List<Follow> findFollowings(@Param("userId") Long userId);
+    List<FollowUserDto> findFollowers(@Param("userId") Long userId);
+
+    List<FollowUserDto> findFollowings(@Param("userId") Long userId);
+
+    int countFollowers(@Param("userId") Long userId);
+
+    int countFollowings(@Param("userId") Long userId);
 }

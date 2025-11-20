@@ -1,9 +1,11 @@
 package com.problemio.follow.service;
 
+import com.problemio.follow.domain.Follow;
+import com.problemio.follow.dto.FollowUserDto;
 import com.problemio.follow.mapper.FollowMapper;
-import com.problemio.user.dto.UserSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,24 +16,55 @@ public class FollowServiceImpl implements FollowService {
     private final FollowMapper followMapper;
 
     @Override
-    public void follow(Long followerId, Long followingId) {
-        // TODO
+    @Transactional
+    public void follow(Long followerId, Long targetUserId) {
+        if (followerId.equals(targetUserId)) {
+            // 자기 자신 팔로우 방지
+            return;
+        }
+
+        int exists = followMapper.exists(followerId, targetUserId);
+        if (exists > 0) {
+            // 이미 팔로우 중이면 무시 (또는 예외 던져도 됨)
+            return;
+        }
+
+        Follow follow = Follow.builder()
+                .followerId(followerId)
+                .followingId(targetUserId)
+                .build();
+
+        followMapper.insert(follow);
     }
 
     @Override
-    public void unfollow(Long followerId, Long followingId) {
-        // TODO
+    @Transactional
+    public void unfollow(Long followerId, Long targetUserId) {
+        followMapper.delete(followerId, targetUserId);
     }
 
     @Override
-    public List<UserSummaryDto> getFollowers(Long userId) {
-        // TODO
-        return null;
+    public boolean isFollowing(Long followerId, Long targetUserId) {
+        return followMapper.exists(followerId, targetUserId) > 0;
     }
 
     @Override
-    public List<UserSummaryDto> getFollowings(Long userId) {
-        // TODO
-        return null;
+    public List<FollowUserDto> getFollowers(Long userId) {
+        return followMapper.findFollowers(userId);
+    }
+
+    @Override
+    public List<FollowUserDto> getFollowings(Long userId) {
+        return followMapper.findFollowings(userId);
+    }
+
+    @Override
+    public int getFollowerCount(Long userId) {
+        return followMapper.countFollowers(userId);
+    }
+
+    @Override
+    public int getFollowingCount(Long userId) {
+        return followMapper.countFollowings(userId);
     }
 }
