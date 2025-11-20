@@ -1,6 +1,6 @@
 package com.problemio.user.mapper;
 
-import com.problemio.user.domain.User;
+import com.problemio.user.dto.UserResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,28 +9,20 @@ import java.util.Optional;
 @Mapper
 public interface UserMapper {
 
-    // Id로 찾기
-    Optional<User> findById(@Param("id") Long id);
+    // 1. 마이페이지/상대방 프로필 조회 (비밀번호 제외된 DTO)
+    Optional<UserResponse> findById(Long id);
 
-    // 이메일 검색
-    Optional<User> findByEmail(@Param("email") String email);
+    // 2. 프로필 수정 (닉네임, 이미지, 상태메시지)
+    void updateProfile(UserResponse user);
 
-    // 닉네임 검색
-    Optional<User> findByNickname(@Param("nickname") String nickname);
+    // 3. 비밀번호 변경
+    void updatePassword(@Param("id") Long id, @Param("passwordHash") String passwordHash);
 
-    // 회원가입
-    void insertUser(User user);
+    // 4. 회원 탈퇴 (Soft Delete)
+    void deleteUser(Long id);
 
-    // 비밀번호 변경 (파라미터 3개 -> @Param 필수)
-    void updateUserPassword(@Param("id") Long id,
-                            @Param("email") String email,
-                            @Param("passwordHash") String passwordHash);
-
-    // 상태메세지 + 이미지 변경
-    void updateUserStatus(@Param("id") Long id,
-                          @Param("profileImageUrl") String profileImageUrl,
-                          @Param("statusMessage") String statusMessage);
-
-    // 유저 삭제 (소프트 삭제)
-    void userDelete(@Param("id") Long id);
+    // 5. 마이페이지 통계용 카운트
+    int countFollowers(Long userId);
+    int countFollowings(Long userId);
+    int countCreatedQuizzes(Long userId); // 퀴즈 DTO는 없어도 개수는 셀 수 있음
 }

@@ -48,6 +48,10 @@ public class SecurityConfig {
 
                         // 이메일 인증 관련
                         .requestMatchers("/api/auth/email/**").permitAll()
+
+                        // 유저, follow 정보는 authenticated (명시적 작성)
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/follows/**").authenticated()
                         
                         // 나머지는 인증 필요 (예: 마이페이지, 퀴즈 생성/삭제 등)
                         .anyRequest().authenticated()

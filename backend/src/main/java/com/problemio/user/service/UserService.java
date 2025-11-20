@@ -1,24 +1,29 @@
 package com.problemio.user.service;
 
-import com.problemio.user.dto.TokenResponse;
-import com.problemio.user.dto.UserLoginRequest;
+import com.problemio.quiz.dto.QuizSummaryDto;
 import com.problemio.user.dto.UserResponse;
-import com.problemio.user.dto.UserSignupRequest;
+import com.problemio.user.dto.UserSummaryDto;
+
+import java.util.List;
 
 public interface UserService {
+    // 내 정보 조회
+    UserResponse getUserById(Long id);
 
-    // 회원가입
-    UserResponse signup(UserSignupRequest request);
+    // 프로필 수정
+    UserResponse updateProfile(Long userId, UserResponse request);
 
-    // 로그인 (Access Token + Refresh Token 반환)
-    TokenResponse login(UserLoginRequest request);
+    // 비밀번호 변경
+    void changePassword(Long userId, String oldPassword, String newPassword);
 
-    // 토큰 재발급 (Refresh Token 사용)
-    TokenResponse reissue(String refreshToken);
+    // 회원 탈퇴
+    void deleteAccount(Long userId, String password);
 
-    // 로그아웃 (Refresh Token 삭제)
-    void logout(String email);
+    // 마이페이지 요약
+    UserSummaryDto getMySummary(Long userId);
 
-    // 회원 탈퇴 (Soft Delete)
-    void withdraw(String email, String password);
+    // 퀴즈 관련 (임시)
+    List<QuizSummaryDto> getMyQuizzes(Long userId);
+    List<QuizSummaryDto> getMyLikedQuizzes(Long userId);
+    List<QuizSummaryDto> getFollowingQuizzes(Long userId);
 }

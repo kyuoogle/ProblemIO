@@ -3,60 +3,52 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.problemio.user.mapper.UserMapper">
-    <!--    Id로 찾기-->
-    <select id="findById" resultType="com.problemio.user.domain.User">
-        SELECT *
+
+    <resultMap id="UserResponseMap" type="com.problemio.user.dto.UserResponse">
+        <id property="id" column="id"/>
+        <result property="email" column="email"/>
+        <result property="nickname" column="nickname"/>
+        <result property="profileImageUrl" column="profile_image_url"/>
+        <result property="statusMessage" column="status_message"/>
+    </resultMap>
+
+    <select id="findById" resultMap="UserResponseMap">
+        SELECT id, email, nickname, profile_image_url, status_message
         FROM users
-        WHERE id = #{id}
+        WHERE id = #{id} AND is_deleted = 0
     </select>
 
-    <!--  이메일 검색  -->
-    <select id="findByEmail" resultType="com.problemio.user.domain.User">
-        SELECT *
-        FROM users
-        WHERE email = #{email}
-    </select>
-
-    <!--  닉네임 검색  -->
-    <select id="findByNickname" resultType="com.problemio.user.domain.User">
-        SELECT *
-        FROM users
-        WHERE nickname = #{nickname}
-    </select>
-
-    <!--  회원가입  -->
-    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO users (email,
-                           password_hash,
-                           nickname)
-        VALUES (#{email},
-                #{passwordHash},
-                #{nickname})
-    </insert>
-
-    <!--  비밀번호 변경  -->
-    <update id="updateUserPassword">
+    <update id="updateProfile">
         UPDATE users
-        SET password_hash = #{passwordHash},
-            updated_at    = NOW()
-        WHERE id = #{id}
-          AND email = #{email}
-    </update>
-
-    <!-- 상태메세지 + 이미지 변경 -->
-    <update id="updateUserStatus">
-        UPDATE users
-        SET profile_image_url = #{profileImageUrl},
-            status_message    = #{statusMessage},
-            updated_at        = NOW()
+        <set>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="profileImageUrl != null">profile_image_url = #{profileImageUrl},</if>
+            <if test="statusMessage != null">status_message = #{statusMessage},</if>
+            updated_at = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 
-    <!-- 유저 삭제 -->
-    <update id="userDelete">
-        UPDATE users
-        SET is_deleted = 1
+    <update id="updatePassword">
+        UPDATE users SET password_hash = #{passwordHash}, updated_at = NOW()
         WHERE id = #{id}
     </update>
+
+    <update id="deleteUser">
+        UPDATE users SET is_deleted = 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="countFollowers" resultType="int">
+        SELECT COUNT(*) FROM follows WHERE following_id = #{userId}
+    </select>
+
+    <select id="countFollowings" resultType="int">
+        SELECT COUNT(*) FROM follows WHERE follower_id = #{userId}
+    </select>
+
+    <select id="countCreatedQuizzes" resultType="int">
+        SELECT COUNT(*) FROM quizzes WHERE user_id = #{userId} AND is_public = 1
+    </select>
 
 </mapper>
