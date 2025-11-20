@@ -1,15 +1,26 @@
 package com.problemio.comment.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.problemio.comment.dto.CommentCreateRequest;
 import com.problemio.comment.dto.CommentResponse;
 import com.problemio.comment.service.CommentService;
 import com.problemio.global.common.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/quizzes/{quizId}/comments")
@@ -49,19 +60,21 @@ public class CommentController {
         return null;
     }
 
-    @PostMapping("/{commentId}/likes")
+    @PostMapping("/{commentId}/like")
     public ResponseEntity<ApiResponse<Void>> likeComment(
             @PathVariable Long quizId,
-            @PathVariable Long commentId) {
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
         // TODO
-        return null;
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @DeleteMapping("/{commentId}/likes")
+    @DeleteMapping("/{commentId}/like")
     public ResponseEntity<ApiResponse<Void>> unlikeComment(
             @PathVariable Long quizId,
-            @PathVariable Long commentId) {
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
         // TODO
-        return null;
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

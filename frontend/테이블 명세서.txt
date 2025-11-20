@@ -1,0 +1,118 @@
+테이블 명세서
+    
+    ## 1. Users (사용자)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 사용자 고유 식별자 |
+    | 이메일 | email | VARCHAR(100) | N | **UQ** |  | 로그인 아이디 (중복 불가) |
+    | 비밀번호 | password_hash | VARCHAR(255) | N |  |  | 비밀번호 해시값 |
+    | 닉네임 | nickname | VARCHAR(50) | N | **UQ** |  | 서비스 내 표시 이름 (중복 불가) |
+    | 프로필 이미지 | profile_image_url | VARCHAR(500) | Y |  |  | 프로필 이미지 경로 |
+    | 상태 메시지 | status_message | VARCHAR(255) | Y |  |  | 한 줄 소개 |
+    | 삭제 여부 | is_deleted | TINYINT(1) | N |  | 0 | 0: 활동, 1: 탈퇴 (소프트 삭제) |
+    | 가입일 | created_at | DATETIME | N |  | NOW |  |
+    | 수정일 | updated_at | DATETIME | N |  | NOW |  |
+    
+    ## 2. Quizzes (퀴즈)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 퀴즈 고유 식별자 |
+    | 작성자 ID | user_id | BIGINT | N | **FK** |  | [users.id](http://users.id/) 참조 |
+    | 제목 | title | VARCHAR(100) | N |  |  | 퀴즈 제목 |
+    | 설명 | description | TEXT | N |  |  | 퀴즈 설명 |
+    | 썸네일 | thumbnail_url | VARCHAR(500) | N |  |  | 대표 이미지 URL |
+    | 공개 여부 | is_public | TINYINT(1) | N |  | 1 | 1: 공개, 0: 비공개 |
+    | 좋아요 수 | like_count | INT | N | IDX | 0 | 정렬용 반정규화 데이터 |
+    | 플레이 수 | play_count | INT | N | IDX | 0 | 정렬용 반정규화 데이터 |
+    | 생성일 | created_at | DATETIME | N |  | NOW |  |
+    | 수정일 | updated_at | DATETIME | N |  | NOW |  |
+    
+    ## 3. Questions (문제)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 문제 고유 식별자 |
+    | 퀴즈 ID | quiz_id | BIGINT | N | **FK** |  | [quizzes.id](http://quizzes.id/) 참조 |
+    | 문제 순서 | question_order | INT | N | **UQ** |  | 퀴즈 내 순서 (1, 2...) |
+    | 이미지 | image_url | VARCHAR(500) | N |  |  | 문제 이미지 경로 |
+    | 설명 | description | VARCHAR(255) | Y |  |  | 힌트 또는 문제 설명 |
+    | 생성일 | created_at | DATETIME | N |  | NOW |  |
+    
+    ## 4. Question Answers (허용 단답)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 정답 고유 식별자 |
+    | 문제 ID | question_id | BIGINT | N | **FK** |  | [questions.id](http://questions.id/) 참조 |
+    | 정답 텍스트 | answer_text | VARCHAR(100) | N |  |  | 허용되는 정답 문자열 |
+    | 정렬 순서 | sort_order | INT | N |  | 1 | 대표 정답 우선순위 |
+    
+    ## 5. Submissions (제출 기록)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 제출 기록 식별자 |
+    | 퀴즈 ID | quiz_id | BIGINT | Y | **FK** |  | [quizzes.id](http://quizzes.id/) 참조 |
+    | 사용자 ID | user_id | BIGINT | Y | **FK** |  | [users.id](http://users.id/) 참조 (비회원 NULL) |
+    | 총 문제 수 | total_questions | INT | N |  |  | 당시 퀴즈의 총 문제 수 |
+    | 정답 수 | correct_count | INT | N |  |  | 맞힌 문제 개수 |
+    | 제출일 | submitted_at | DATETIME | N |  | NOW |  |
+    
+    ## 6. Submission Details (제출 상세)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 상세 기록 식별자 |
+    | 제출 ID | submission_id | BIGINT | N | **FK** |  | [submissions.id](http://submissions.id/) 참조 |
+    | 문제 ID | question_id | BIGINT | N | **FK** |  | [questions.id](http://questions.id/) 참조 |
+    | 사용자 답안 | user_answer | VARCHAR(255) | N |  |  | 사용자가 입력한 답 |
+    | 정답 여부 | is_correct | TINYINT(1) | N |  |  | 1: 정답, 0: 오답 |
+    
+    ## 7. Quiz Likes (퀴즈 좋아요)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | 사용자 ID | user_id | BIGINT | N | **PK, FK** |  | [users.id](http://users.id/) 참조 |
+    | 퀴즈 ID | quiz_id | BIGINT | N | **PK, FK** |  | [quizzes.id](http://quizzes.id/) 참조 |
+    | 생성일 | created_at | DATETIME | N |  | NOW |  |
+    
+    ## 8. Comments (댓글)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 댓글 고유 식별자 |
+    | 퀴즈 ID | quiz_id | BIGINT | N | **FK** |  | [quizzes.id](http://quizzes.id/) 참조 |
+    | 작성자 ID | user_id | BIGINT | N | **FK** |  | [users.id](http://users.id/) 참조 |
+    | 내용 | content | TEXT | N |  |  | 댓글 본문 |
+    | 좋아요 수 | like_count | INT | N |  | 0 | 좋아요 수 (캐싱) |
+    | 삭제 여부 | is_deleted | TINYINT(1) | N |  | 0 | 1: 삭제됨 |
+    | 작성일 | created_at | DATETIME | N |  | NOW |  |
+    | 수정일 | updated_at | DATETIME | N |  | NOW |  |
+    
+    ## 9. Comment Likes (댓글 좋아요)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | 사용자 ID | user_id | BIGINT | N | **PK, FK** |  | [users.id](http://users.id/) 참조 |
+    | 댓글 ID | comment_id | BIGINT | N | **PK, FK** |  | [comments.id](http://comments.id/) 참조 |
+    | 생성일 | created_at | DATETIME | N |  | NOW |  |
+    
+    ## 10. Follows (팔로우)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | 팔로워 ID | follower_id | BIGINT | N | **PK, FK** |  | 팔로우 하는 유저 |
+    | 팔로잉 ID | following_id | BIGINT | N | **PK, FK** |  | 팔로우 받는 유저 |
+    | 생성일 | created_at | DATETIME | N |  | NOW |  |
+    
+    ## 11. Refresh Tokens (리프레시 토큰)
+    
+    | 논리명 | 물리명 | 타입 | Null | Key | Default | 설명 |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | ID | id | BIGINT | N | **PK** | AI | 토큰 식별자 |
+    | 사용자 ID | user_id | BIGINT | N | **FK** |  | [users.id](http://users.id/) 참조 |
+    | 토큰 값 | token_value | VARCHAR(512) | N |  |  | 리프레시 토큰 |
+    | 만료일 | expires_at | DATETIME | N |  |  | 토큰 만료 시간 |
+    | 생성일 | created_at | DATETIME | Y |  | NOW |  |

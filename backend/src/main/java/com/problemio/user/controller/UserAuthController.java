@@ -1,18 +1,27 @@
 package com.problemio.user.controller;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.problemio.global.common.ApiResponse;
 import com.problemio.user.dto.TokenResponse;
 import com.problemio.user.dto.UserLoginRequest;
 import com.problemio.user.dto.UserResponse;
 import com.problemio.user.dto.UserSignupRequest;
 import com.problemio.user.service.UserService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -46,6 +55,27 @@ public class UserAuthController {
         // userDetails가 null이면 SecurityConfig에서 이미 403 에러로 막아줍니다.
 
         userService.logout(userDetails.getUsername()); // getUsername() == email
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 내 정보 조회
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getMe(@AuthenticationPrincipal UserDetails userDetails) {
+        // TODO: 구현 필요
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 카카오 로그인 URL 조회
+    @GetMapping("/kakao/login-url")
+    public ResponseEntity<ApiResponse<Map<String, String>>> getKakaoLoginUrl() {
+        // TODO: 구현 필요
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 카카오 콜백 처리
+    @GetMapping("/kakao/callback")
+    public ResponseEntity<ApiResponse<TokenResponse>> handleKakaoCallback(@RequestParam String code) {
+        // TODO: 구현 필요
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
