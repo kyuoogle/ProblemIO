@@ -127,7 +127,7 @@
   import { useConfirm } from 'primevue/useconfirm'
   import { useAuthStore } from '@/stores/auth'
   import {  updateMyProfile, changePassword, deleteAccount } from '@/api/user'
-  import { getMe } from '@/api/auth'
+  import { getMe } from '@/api/user'
   
   const router = useRouter()
   const toast = useToast()

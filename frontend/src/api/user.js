@@ -71,3 +71,9 @@ export const getFollowingQuizzes = async (sort = 'latest') => {
   const response = await apiClient.get(`/users/me/following-quizzes?sort=${sort}`)
   return response.data.data
 }
+
+// 내 정보 조회
+export const getMe = async () => {
+  const response = await apiClient.get(`/users/me`)
+  return response.data.data
+}
