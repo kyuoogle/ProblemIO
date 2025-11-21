@@ -15,7 +15,7 @@
               <div class="flex flex-column gap-2 align-items-center">
                 <div class="relative inline-block">
                   <Avatar
-                    :image="previewUrl"
+                   :image="authStore.user?.profileImageUrl ? `http://localhost:8080${authStore.user.profileImageUrl}` : null"
                     :label="!previewUrl && profileForm.nickname ? profileForm.nickname.charAt(0).toUpperCase() : ''"
                     :icon="!previewUrl && !profileForm.nickname ? 'pi pi-user' : ''"
                     class="w-32 h-32 text-6xl font-bold border-2 border-gray-200"

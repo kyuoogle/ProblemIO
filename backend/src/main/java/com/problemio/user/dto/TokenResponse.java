@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor // JSON 파싱을 위해 기본 생성자 추가 권장
+@NoArgsConstructor
 public class TokenResponse {
     private String accessToken;
     private String refreshToken;

@@ -11,8 +11,9 @@
             <template #content>
               <div class="flex flex-column md:flex-row gap-6 align-items-center md:align-items-start">
                 <Avatar
-                  :image="summary.profileImageUrl"
-                  :label="summary.nickname?.charAt(0)"
+                :image="authStore.user?.profileImageUrl ? `http://localhost:8080${authStore.user.profileImageUrl}` : null"
+                :label="!authStore.user?.profileImageUrl && authStore.user?.nickname ? authStore.user.nickname.charAt(0).toUpperCase() : ''"
+                :icon="!authStore.user?.profileImageUrl && !authStore.user?.nickname ? 'pi pi-user' : ''"
                   shape="circle"
                   size="xlarge"
                   class="w-32 h-32"
@@ -85,12 +86,14 @@
   <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
+  import { useAuthStore } from '@/stores/auth'
   import { useToast } from 'primevue/usetoast'
   import { getMySummary } from '@/api/user'
   
   const router = useRouter()
   const toast = useToast()
-  
+  const authStore = useAuthStore()
+
   const summary = ref(null)
   const loading = ref(false)
   
