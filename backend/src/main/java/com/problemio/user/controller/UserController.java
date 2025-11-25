@@ -78,6 +78,4 @@ public class UserController {
         Long userId = userDetails.getUser().getId();
         return ResponseEntity.ok(ApiResponse.success(userService.getMySummary(userId)));
     }
-
-    // (이하 퀴즈 관련 메서드는 동일)
 }

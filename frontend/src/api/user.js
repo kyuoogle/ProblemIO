@@ -30,13 +30,13 @@ export const deleteAccount = async (password) => {
 
 // 팔로우
 export const followUser = async (userId) => {
-  const response = await apiClient.post(`/users/${userId}/follow`)
+  const response = await apiClient.post(`/follows/${userId}`)
   return response.data.data
 }
 
 // 언팔로우
 export const unfollowUser = async (userId) => {
-  await apiClient.delete(`/users/${userId}/follow`)
+  await apiClient.delete(`/follows/${userId}`)
 }
 
 // 내 팔로워 목록
@@ -74,3 +74,4 @@ export const getMe = async () => {
   const response = await apiClient.get(`/users/me`)
   return response.data.data
 }
+
