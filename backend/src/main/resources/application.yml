@@ -4,7 +4,7 @@ server:
 spring:
   # .env 파일 로드 (backend 디렉토리 내 .env)
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:backend/.env[.properties]
 
   # 데이터베이스 연결 설정 (MySQL)
   datasource:
