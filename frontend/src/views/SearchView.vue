@@ -57,7 +57,7 @@ const currentPage = ref(1);
 const pageSize = ref(12);
 const totalPages = ref(0);
 const totalElements = ref(0);
-const sort = ref("latest");
+const sort = ref("popular");
 
 const loadQuizzes = async () => {
   if (!searchKeyword.value) {
