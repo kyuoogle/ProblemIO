@@ -8,8 +8,13 @@
       <div v-else class="flex flex-col gap-6">
         <div class="mb-4">
           <div class="flex justify-between items-center mb-2">
-            <h2 class="text-2xl font-bold m-0">{{ quizStore.currentQuiz.title }}</h2>
-            <Badge :value="`${quizStore.currentQuestionIndex + 1} / ${quizStore.currentQuiz.questions.length}`" severity="info" />
+            <h2 class="text-2xl font-bold m-0">
+              {{ quizStore.currentQuiz.title }}
+            </h2>
+            <Badge
+              :value="`${quizStore.currentQuestionIndex + 1} / ${quizStore.currentQuiz.questions.length}`"
+              severity="info"
+            />
           </div>
           <ProgressBar :value="progressPercentage" class="h-1rem" />
         </div>
@@ -17,31 +22,40 @@
         <Card>
           <template #content>
             <div class="flex flex-col gap-6">
-              <div v-if="currentQuestion.imageUrl" class="aspect-video bg-surface-100 overflow-hidden border-round">
-                <img :src="currentQuestion.imageUrl" :alt="currentQuestion.description" class="w-full h-full object-cover" />
+              <div
+                v-if="currentQuestion?.imageUrl"
+                class="aspect-video bg-surface-100 overflow-hidden border-round"
+              >
+                <img
+                  :src="currentQuestion.imageUrl"
+                  :alt="currentQuestion.description"
+                  class="w-full h-full object-cover"
+                />
               </div>
 
-              <div v-if="currentQuestion.description" class="text-xl">
+              <div v-if="currentQuestion?.description" class="text-xl">
                 {{ currentQuestion.description }}
               </div>
 
               <div class="flex flex-col gap-3">
                 <label class="text-lg font-semibold">Your Answer:</label>
-                <InputText v-model="currentAnswer" placeholder="Enter your answer..." class="w-full" @keyup.enter="submitAnswer" />
+                <InputText
+                  v-model="currentAnswer"
+                  placeholder="Enter your answer..."
+                  class="w-full"
+                  @keyup.enter="submitAnswer"
+                />
               </div>
 
-              <div class="flex gap-3">
-                <Button v-if="quizStore.currentQuestionIndex > 0" label="Previous" icon="pi pi-arrow-left" severity="secondary" outlined @click="previousQuestion" />
+              <div class="flex">
                 <Button
-                  v-if="quizStore.currentQuestionIndex < quizStore.currentQuiz.questions.length - 1"
-                  label="Next"
-                  icon="pi pi-arrow-right"
-                  iconPos="right"
+                  label="Submit"
+                  icon="pi pi-check"
                   class="flex-1"
-                  :disabled="!currentAnswer.trim()"
-                  @click="nextQuestion"
+                  :disabled="!currentAnswer.trim() || submitting"
+                  :loading="submitting"
+                  @click="submitAnswer"
                 />
-                <Button v-else label="Submit Quiz" icon="pi pi-check" class="flex-1" :disabled="!currentAnswer.trim()" :loading="submitting" @click="submitQuiz" />
               </div>
             </div>
           </template>
@@ -52,104 +66,103 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useToast } from "primevue/usetoast";
-import { useQuizStore } from "@/stores/quiz";
-import { submitQuiz as submitQuizAPI } from "@/api/submission";
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import { useQuizStore } from '@/stores/quiz'
+import { submitQuiz as submitQuizAPI } from '@/api/submission'
 
-const route = useRoute();
-const router = useRouter();
-const toast = useToast();
-const quizStore = useQuizStore();
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
+const quizStore = useQuizStore()
 
-const currentAnswer = ref("");
-const submitting = ref(false);
+const currentAnswer = ref('')
+const submitting = ref(false)
 
 const currentQuestion = computed(() => {
-  if (!quizStore.currentQuiz) return null;
-  return quizStore.currentQuiz.questions[quizStore.currentQuestionIndex];
-});
+  if (!quizStore.currentQuiz) return null
+  return quizStore.currentQuiz.questions[quizStore.currentQuestionIndex]
+})
 
 const progressPercentage = computed(() => {
-  if (!quizStore.currentQuiz) return 0;
-  return ((quizStore.currentQuestionIndex + 1) / quizStore.currentQuiz.questions.length) * 100;
-});
+  if (!quizStore.currentQuiz) return 0
+  return (
+    ((quizStore.currentQuestionIndex + 1) /
+      quizStore.currentQuiz.questions.length) *
+    100
+  )
+})
 
-const submitAnswer = () => {
-  if (!currentAnswer.value.trim()) return;
+/**
+ * 한 문제에 대한 답안을 제출하고 → 서버에 채점 요청 → 결과 화면으로 이동
+ */
+const submitAnswer = async () => {
+  if (!currentQuestion.value || !currentAnswer.value.trim()) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Warning',
+      detail: 'Please enter an answer',
+      life: 3000,
+    })
+    return
+  }
 
+  // 프론트 쪽 상태에도 답안 저장 (나중에 필요하면 사용)
   quizStore.submitAnswer({
     questionId: currentQuestion.value.id,
     answerText: currentAnswer.value.trim(),
-  });
+  })
 
-  if (quizStore.currentQuestionIndex < quizStore.currentQuiz.questions.length - 1) {
-    nextQuestion();
-  } else {
-    submitQuiz();
-  }
-};
-
-const nextQuestion = () => {
-  if (currentAnswer.value.trim()) {
-    quizStore.submitAnswer({
+  submitting.value = true
+  try {
+    const payload = {
+      // 첫 문제면 null, 이후엔 이전 결과에서 받은 submissionId 재사용
+      submissionId: quizStore.quizResult?.submissionId ?? null,
       questionId: currentQuestion.value.id,
       answerText: currentAnswer.value.trim(),
-    });
-  }
-  quizStore.nextQuestion();
-  currentAnswer.value = "";
-};
+    }
 
-const previousQuestion = () => {
-  if (quizStore.currentQuestionIndex > 0) {
-    quizStore.currentQuestionIndex--;
-    // 이전 답변 복원
-    const prevAnswer = quizStore.userAnswers[quizStore.currentQuestionIndex];
-    currentAnswer.value = prevAnswer?.answerText || "";
-  }
-};
+    const result = await submitQuizAPI(
+      Number(route.params.id),
+      payload,
+    )
 
-const submitQuiz = async () => {
-  if (!currentAnswer.value.trim()) {
-    toast.add({
-      severity: "warn",
-      summary: "Warning",
-      detail: "Please enter an answer",
-      life: 3000,
-    });
-    return;
-  }
+    // 이번 문제에 대한 채점 결과 + 전체 누적 정답 수/총 문제 수 등 저장
+    quizStore.setQuizResult(result)
 
-  // 마지막 답변 저장
-  quizStore.submitAnswer({
-    questionId: currentQuestion.value.id,
-    answerText: currentAnswer.value.trim(),
-  });
+    // 입력창은 비워두고
+    currentAnswer.value = ''
 
-  submitting.value = true;
-  try {
-    const result = await submitQuizAPI(Number(route.params.id), quizStore.userAnswers);
-    quizStore.setQuizResult(result);
-    router.push(`/quiz/${route.params.id}/result`);
+    // 결과 페이지로 이동
+    router.push(`/quiz/${route.params.id}/result`)
   } catch (error: any) {
+    console.error(error)
     toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Failed to submit quiz",
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to submit quiz',
       life: 3000,
-    });
+    })
   } finally {
-    submitting.value = false;
+    submitting.value = false
   }
-};
+}
 
 onMounted(() => {
   if (!quizStore.currentQuiz) {
-    router.push("/");
+    router.push('/')
+    return
   }
-});
+
+  // 이미 답을 적어둔 문제가 있다면 복원 (뒤로가기 등)
+  const q = currentQuestion.value
+  if (!q) return
+  const existing = quizStore.userAnswers.find(
+    (a) => a.questionId === q.id,
+  )
+  currentAnswer.value = existing?.answerText || ''
+})
 </script>
 
 <style scoped>
