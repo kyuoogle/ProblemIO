@@ -6,6 +6,11 @@ export const getUserProfile = async (userId) => {
   return response.data.data;
 };
 
+// 팝오버용 프로필 조회
+export function getUserPopover(userId) {
+  return api.get(`/api/users/${userId}/popover`);
+}
+
 // 내 프로필 수정 (닉네임 + 상태메시지 + 프로필 이미지)
 export const updateMyProfile = async (formData) => {
   const response = await apiClient.patch("/users/me", formData);

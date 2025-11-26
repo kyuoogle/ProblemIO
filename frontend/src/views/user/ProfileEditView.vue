@@ -40,9 +40,27 @@
                 </div>
                 <small class="text-gray-500 mt-2">Click camera icon to change image</small>
               </div>
+
+              <!-- 닉네임 변경 부분 수정 -->
               <div class="flex flex-col gap-2">
                 <label class="text-sm font-medium">닉네임 변경하기</label>
-                <InputText v-model="profileForm.nickname" placeholder="닉네임을 써주세요" class="w-full" />
+                <div class="flex gap-2">
+                  <InputText v-model="profileForm.nickname" placeholder="닉네임을 써주세요" class="flex-1" :class="{ 'p-invalid': nicknameState.error }" maxlength="10" @input="handleNicknameChange" />
+                  <!-- 본인 닉네임일 경우 버튼 비활성화 -->
+                  <Button
+                    label="중복 확인"
+                    icon="pi pi-check-circle"
+                    severity="secondary"
+                    :loading="nicknameState.isChecking"
+                    :disabled="!profileForm.nickname || profileForm.nickname === originalNickname || nicknameState.isChecked"
+                    @click="handleCheckNickname"
+                  />
+                </div>
+
+                <!-- 상태 메시지 표시 -->
+                <small v-if="nicknameState.error" class="text-red-500">{{ nicknameState.error }}</small>
+                <small v-else-if="profileForm.nickname !== originalNickname && nicknameState.isChecked" class="text-green-500">사용 가능한 닉네임입니다.</small>
+                <small v-else class="text-gray-500">닉네임 변경 시 중복 확인이 필요합니다.</small>
               </div>
 
               <div class="flex flex-col gap-2">
@@ -94,7 +112,8 @@ import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
-import { updateMyProfile, changePassword, deleteAccount, getMe } from "@/api/user";
+// checkNickname 추가
+import { updateMyProfile, changePassword, deleteAccount, getMe, checkNickname } from "@/api/user";
 
 const router = useRouter();
 const toast = useToast();
@@ -104,6 +123,16 @@ const authStore = useAuthStore();
 const profileForm = ref({
   nickname: "",
   statusMessage: "",
+});
+
+//  원래 닉네임 보관용 (변경 여부 판단)
+const originalNickname = ref("");
+
+//  닉네임 중복 확인 상태 관리
+const nicknameState = ref({
+  isChecked: true, // 초기값은 본인 닉네임이므로 true
+  isChecking: false,
+  error: "",
 });
 
 const selectedFile = ref<File | null>(null);
@@ -124,7 +153,12 @@ const loadProfile = async () => {
     profileForm.value.nickname = user.nickname || "";
     profileForm.value.statusMessage = user.statusMessage || "";
 
-    // 서버 이미지 주소 설정 (도메인 수정 필요)
+    //  원래 닉네임 저장 및 상태 초기화
+    originalNickname.value = user.nickname || "";
+    nicknameState.value.isChecked = true;
+    nicknameState.value.error = "";
+
+    // 서버 이미지 주소 설정
     if (user.profileImageUrl) {
       previewUrl.value = `http://localhost:8080${user.profileImageUrl}`;
     } else {
@@ -135,17 +169,67 @@ const loadProfile = async () => {
   }
 };
 
-// [로직] 파일 선택 시 즉시 이미지 교체
 const onFileSelect = (event: any) => {
   const file = event.files[0];
   if (file) {
     selectedFile.value = file;
-    // URL.createObjectURL을 사용하여 즉시 미리보기
     previewUrl.value = URL.createObjectURL(file);
   }
 };
 
+//  닉네임 입력 핸들러
+const handleNicknameChange = () => {
+  nicknameState.value.error = "";
+
+  // 원래 닉네임과 같으면 중복확인 필요 없음
+  if (profileForm.value.nickname === originalNickname.value) {
+    nicknameState.value.isChecked = true;
+  } else {
+    // 닉네임이 변경되었으면 중복확인 상태 false
+    nicknameState.value.isChecked = false;
+  }
+};
+
+//  닉네임 중복 확인 핸들러
+const handleCheckNickname = async () => {
+  const nickname = profileForm.value.nickname;
+
+  if (!nickname || nickname.length < 2) {
+    nicknameState.value.error = "닉네임은 2자 이상이어야 합니다.";
+    return;
+  }
+
+  nicknameState.value.isChecking = true;
+  nicknameState.value.error = "";
+
+  try {
+    await checkNickname(nickname);
+    // 에러가 안 나면 성공
+    nicknameState.value.isChecked = true;
+    toast.add({ severity: "success", summary: "확인 완료", detail: "사용 가능한 닉네임입니다.", life: 3000 });
+  } catch (error: any) {
+    nicknameState.value.isChecked = false;
+    // 백엔드 에러 메시지 표시
+    const msg = error.response?.data?.message || "이미 사용 중인 닉네임입니다.";
+    nicknameState.value.error = msg;
+    toast.add({ severity: "error", summary: "중복", detail: msg, life: 3000 });
+  } finally {
+    nicknameState.value.isChecking = false;
+  }
+};
+
 const handleSaveProfile = async () => {
+  // [추가] 저장 전 닉네임 검증 확인
+  if (!nicknameState.value.isChecked) {
+    toast.add({ severity: "warn", summary: "확인 필요", detail: "닉네임 중복 확인을 해주세요.", life: 3000 });
+    return;
+  }
+
+  if (nicknameState.value.error) {
+    toast.add({ severity: "warn", summary: "확인 필요", detail: "닉네임을 확인해주세요.", life: 3000 });
+    return;
+  }
+
   savingProfile.value = true;
   try {
     const formData = new FormData();
@@ -156,9 +240,13 @@ const handleSaveProfile = async () => {
     }
 
     await updateMyProfile(formData);
-    await authStore.refreshUser();
+    await authStore.refreshUser(); // 변경된 정보(특히 닉네임, 프사) 갱신
 
-    toast.add({ severity: "success", summary: "Success", detail: "Profile updated", life: 3000 });
+    //  저장 성공 후 현재 상태를 '원본'으로 갱신
+    originalNickname.value = profileForm.value.nickname;
+    nicknameState.value.isChecked = true;
+
+    toast.add({ severity: "success", summary: "성공", detail: "프로필 업데이트 성공", life: 3000 });
     selectedFile.value = null;
   } catch (error: any) {
     toast.add({ severity: "error", summary: "Error", detail: "Failed update", life: 3000 });
@@ -213,6 +301,7 @@ const handleChangePassword = async () => {
     changingPassword.value = false;
   }
 };
+
 const handleDeleteAccount = () => {
   confirm.require({
     message: "Are you absolutely sure? This action cannot be undone.",
@@ -264,11 +353,26 @@ onMounted(() => {
 }
 
 :deep(.custom-upload input[type="file"]) {
-  opacity: 0 !important; /* 투명하게 만듦 */
-  width: 0 !important; /* 너비를 0으로 만듦 */
-  height: 0 !important; /* 높이를 0으로 만듦 */
-  position: absolute !important; /* 다른 요소에 영향을 주지 않도록 위치 설정 */
-  z-index: -1 !important; /* 화면에서 가장 뒤로 보냄 */
-  overflow: hidden !important; /* 넘치는 내용 숨김 */
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  overflow: hidden !important;
+}
+
+/* 카메라 버튼 스타일 (둥글게, 중앙 정렬) */
+:deep(.p-fileupload-choose) {
+  border-radius: 50%;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fallback: hide any plain span or label siblings that display the filename/text
+   (covers browser default "No file chosen" rendering and PrimeVue variants) */
+:deep(.p-fileupload) span {
+  display: none !important;
 }
 </style>
