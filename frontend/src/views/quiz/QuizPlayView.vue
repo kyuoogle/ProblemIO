@@ -117,8 +117,8 @@ const submitAnswer = async () => {
   submitting.value = true
   try {
     const payload = {
-      // 첫 문제면 null, 이후엔 이전 결과에서 받은 submissionId 재사용
-      submissionId: quizStore.quizResult?.submissionId ?? null,
+      // quizResult에서 꺼내지 말고, store의 submissionId 사용
+      submissionId: quizStore.submissionId,
       questionId: currentQuestion.value.id,
       answerText: currentAnswer.value.trim(),
     }

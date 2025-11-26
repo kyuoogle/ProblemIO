@@ -6,8 +6,10 @@
       </div>
 
       <div v-else class="flex flex-col gap-6">
-        <!-- 전체 요약 -->
-        <Card>
+        <!-- ===================== -->
+        <!--   최종 결과 모드일 때만 -->
+        <!-- ===================== -->
+        <Card v-if="isFinished">
           <template #content>
             <div class="text-center flex flex-col gap-6">
               <div
@@ -34,12 +36,15 @@
               </div>
 
               <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <!-- 제작자의 다른 문제 풀기 -->
                 <Button
-                  :label="primaryButtonLabel"
+                  label="제작자의 다른 문제 풀기"
                   icon="pi pi-arrow-right"
                   size="large"
-                  @click="goNextOrFinish"
+                  :disabled="!authorId"
+                  @click="goAuthorQuizzes"
                 />
+                <!-- 그만 풀기(메인으로) -->
                 <Button
                   label="그만 풀기"
                   icon="pi pi-home"
@@ -53,10 +58,13 @@
           </template>
         </Card>
 
-        <!-- 방금 푼 문제에 대한 결과 -->
+        <!-- ===================== -->
+        <!--     방금 푼 문제 결과   -->
+        <!-- ===================== -->
         <Card>
           <template #content>
             <div class="flex flex-col gap-6 items-center text-center">
+              <!-- 문제 이미지 -->
               <div
                 v-if="imageUrl"
                 class="result-image-wrapper bg-surface-100 overflow-hidden border-round"
@@ -68,10 +76,12 @@
                 />
               </div>
 
+              <!-- 정답 / 오답 -->
               <p class="result-text" :class="isCorrect ? 'correct' : 'wrong'">
                 {{ isCorrect ? '정답!' : '오답!' }}
               </p>
 
+              <!-- 대표 정답 -->
               <div>
                 <p class="font-semibold mb-2">정답은</p>
                 <p class="answer-value">
@@ -79,6 +89,7 @@
                 </p>
               </div>
 
+              <!-- 허용되는 다른 정답들 -->
               <div
                 v-if="correctAnswers && correctAnswers.length > 1"
                 class="extra-answers"
@@ -88,6 +99,15 @@
                   {{ correctAnswers.join(', ') }}
                 </p>
               </div>
+
+              <!-- 아직 끝이 아니라면 '다음 문제로' 버튼 -->
+              <Button
+                v-if="!isFinished"
+                label="다음 문제로"
+                icon="pi pi-arrow-right"
+                size="large"
+                @click="goToNextQuestion"
+              />
             </div>
           </template>
         </Card>
@@ -97,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuizStore } from '@/stores/quiz'
 import Button from 'primevue/button'
@@ -108,14 +128,27 @@ const quizStore = useQuizStore()
 const router = useRouter()
 const route = useRoute()
 
-onMounted(() => {
-  if (!quizStore.quizResult || !quizStore.currentQuiz) {
-    // 결과도 없고 퀴즈도 없으면 홈으로
-    router.push('/')
+// ===== 가드 + 엔터 키 핸들러 =====
+const handleKeyUp = (e: KeyboardEvent) => {
+  if (e.key === 'Enter' && !isFinished.value) {
+    goToNextQuestion()
   }
+}
+
+onMounted(() => {
+  // 결과 없으면 플레이 화면으로 되돌리기
+  if (!quizStore.quizResult) {
+    router.push(`/quiz/${route.params.id}/play`)
+    return
+  }
+  window.addEventListener('keyup', handleKeyUp)
 })
 
-// Derived Data
+onUnmounted(() => {
+  window.removeEventListener('keyup', handleKeyUp)
+})
+
+// ===== Derived Data =====
 const totalQuestions = computed(
   () => quizStore.quizResult?.totalQuestions || 0,
 )
@@ -125,6 +158,7 @@ const correctCount = computed(
 const answeredCount = computed(
   () => quizStore.quizResult?.answeredCount || 0,
 )
+
 const scorePercentage = computed(() =>
   totalQuestions.value
     ? Math.round((correctCount.value / totalQuestions.value) * 100)
@@ -143,14 +177,15 @@ const imageUrl = computed(() => {
   return url ? resolveImageUrl(url) : ''
 })
 
-// 현재 문제가 마지막 문제인지
-const isLastQuestion = computed(() => {
-  const quiz = quizStore.currentQuiz
-  if (!quiz) return true
-  return (
-    quizStore.currentQuestionIndex >= quiz.questions.length - 1
-  )
-})
+// 마지막 문제까지 다 풀었는지
+const isFinished = computed(
+  () => answeredCount.value >= totalQuestions.value && totalQuestions.value > 0,
+)
+
+// 제작자 id (없을 수 있으니 optional)
+const authorId = computed(
+  () => quizStore.currentQuiz?.author?.id ?? null,
+)
 
 const resultMessage = computed(() => {
   const score = scorePercentage.value
@@ -160,23 +195,20 @@ const resultMessage = computed(() => {
   return 'Keep Practicing!'
 })
 
-const primaryButtonLabel = computed(() =>
-  isLastQuestion.value ? '퀴즈 종료' : '다음 문제',
-)
-
-// 다음 문제로 가거나, 마지막이면 종료
-const goNextOrFinish = () => {
-  if (isLastQuestion.value) {
-    router.push('/')
-  } else {
-    quizStore.nextQuestion()
-    quizStore.setQuizResult(null) // 결과 초기화
-    router.push(`/quiz/${route.params.id}/play`)
-  }
+// ===== Actions =====
+const goToNextQuestion = () => {
+  quizStore.nextQuestion()
+  quizStore.setQuizResult(null) // 결과만 초기화 (submissionId는 유지)
+  router.push(`/quiz/${route.params.id}/play`)
 }
 
-// 그만 풀기
+const goAuthorQuizzes = () => {
+  if (!authorId.value) return
+  router.push(`/users/${authorId.value}`)
+}
+
 const goToHome = () => {
+  quizStore.resetQuizPlay()
   router.push('/')
 }
 </script>
