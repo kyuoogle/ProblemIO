@@ -43,6 +43,7 @@ public class SecurityConfig {
                         // 퀴즈 조회 등 외부 노출 가능 구간
                         .requestMatchers("/api/quizzes/**").permitAll()
                         .requestMatchers("/api/submissions/**").permitAll()
+                        .requestMatchers("/api/users/checkNickname").permitAll()
 
                         // 이메일 인증
                         .requestMatchers("/api/auth/email/**").permitAll()

@@ -10,14 +10,12 @@
     <template #end>
       <div class="flex align-items-center gap-3">
         <template v-if="!authStore.isAuthenticated">
-          <Button label="Create Quiz" icon="pi pi-plus" text @click="handleCreateQuiz" />
-          <Button label="My Page" icon="pi pi-user" text @click="handleMyPage" />
-          <Button label="Login" icon="pi pi-sign-in" @click="goToLogin" />
-          <Button label="Signup" severity="secondary" @click="goToSignup" />
+          <Button label="퀴즈 만들기" icon="pi pi-plus" text @click="handleCreateQuiz" />
+          <Button label="로그인" icon="pi pi-sign-in" @click="goToLogin" />
         </template>
 
         <template v-else>
-          <Button label="Create Quiz" icon="pi pi-plus" @click="goToCreateQuiz" />
+          <Button label="퀴즈 만들기" icon="pi pi-plus" text @click="goToCreateQuiz" />
 
           <Button @click="goToMyPage" class="flex align-items-center gap-2 p-button-text p-0" aria-label="My Page">
             <Avatar
@@ -72,15 +70,6 @@ const handleCreateQuiz = () => {
   }
 };
 
-// [비로그인용] 마이페이지 클릭 시 → 로그인 유도
-const handleMyPage = () => {
-  if (!authStore.isAuthenticated) {
-    confirmLoginRedirect();
-  } else {
-    router.push("/mypage");
-  }
-};
-
 // 공통: 로그인 리다이렉트 확인창
 const confirmLoginRedirect = () => {
   confirm.require({
@@ -125,7 +114,6 @@ const handleLogout = () => {
   width: 20rem;
 }
 
-/* 마이페이지 버튼 스타일 조정 (텍스트 버튼처럼 보이게) */
 :deep(.p-button.p-button-text) {
   color: var(--text-color);
 }

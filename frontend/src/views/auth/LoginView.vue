@@ -11,28 +11,21 @@
         </template>
         <template #content>
           <div class="flex flex-col gap-4">
-            <div>
-              <h2 class="text-2xl font-bold mb-2">Welcome Back</h2>
-              <p class="text-color-secondary mb-4">Sign in to your account to continue</p>
-            </div>
-
             <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
               <div class="flex flex-col gap-2">
                 <label for="email" class="text-sm font-medium">Email</label>
-                <InputText id="email" v-model="email" type="email" placeholder="you@example.com" required class="w-full" />
+                <InputText id="email" v-model="email" type="email" placeholder="ID" required class="w-full" />
               </div>
               <div class="flex flex-col gap-2">
                 <label for="password" class="text-sm font-medium">Password</label>
                 <Password id="password" v-model="password" toggleMask placeholder="••••••••" required class="w-full" />
               </div>
-              <Button type="submit" label="Sign In" :loading="loading" class="w-full" size="large" />
+              <Button type="submit" label="로그인" :loading="loading" class="w-full" size="large" />
             </form>
-
             <Divider />
-
             <div class="text-center text-sm">
-              <span class="text-color-secondary">Don't have an account?</span>
-              <router-link to="/signup" class="text-primary font-semibold no-underline">Sign up</router-link>
+              <span class="text-color-secondary">아이디가 없으신가요?</span>
+              <router-link to="/signup" class="text-primary font-semibold no-underline">회원 가입</router-link>
             </div>
           </div>
         </template>

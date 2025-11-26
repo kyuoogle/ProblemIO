@@ -158,6 +158,17 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    //  닉네임 중복 확인 구현
+    @Override
+    @Transactional(readOnly = true)
+    public void checkNicknameDuplicate(String nickname) {
+        if (userMapper.existsByNickname(nickname) > 0) {
+            // 중복된 경우 예외를 던져 컨트롤러가 에러 응답을 하게 함
+            throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
+            // ErrorCode.DUPLICATE_NICKNAME이 없다면 DUPLICATE_VALUE 등을 사용하거나 새로 추가하세요.
+        }
+    }
+
     @Override
     public List<QuizSummaryDto> getMyQuizzes(Long userId) {
         // return userMapper.findMyQuizzes(userId);

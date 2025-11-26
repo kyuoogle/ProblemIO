@@ -62,7 +62,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    // 회원 탈퇴 (비밀번호 확인을 위해 Body로 받거나 Header로 받음. 여기선 Body로 가정)
+    // 회원 탈퇴 (비밀번호 확인을 위해 Body로 받거나 Header로 받음.)
     @PostMapping("/me/withdraw")
     public ResponseEntity<ApiResponse<Void>> deleteAccount(
             @RequestBody Map<String, String> request,
@@ -77,5 +77,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserSummaryDto>> getMySummary(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUser().getId();
         return ResponseEntity.ok(ApiResponse.success(userService.getMySummary(userId)));
+    }
+
+    // 닉네임 중복 확인
+    @GetMapping("/checkNickname")
+    public ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
+        userService.checkNicknameDuplicate(nickname);
+        // 예외가 발생하지 않으면 사용 가능한 닉네임
+        return ResponseEntity.ok(ApiResponse.success(true));
     }
 }

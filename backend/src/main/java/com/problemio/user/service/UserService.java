@@ -27,4 +27,8 @@ public interface UserService {
     List<QuizSummaryDto> getMyQuizzes(Long userId);
     List<QuizSummaryDto> getMyLikedQuizzes(Long userId);
     List<QuizSummaryDto> getFollowingQuizzes(Long userId);
+
+    // 닉네임 중복 확인 (중복 시 예외 발생)
+    void checkNicknameDuplicate(String nickname);
+
 }
