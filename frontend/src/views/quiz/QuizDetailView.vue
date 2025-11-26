@@ -9,11 +9,7 @@
         <Card>
           <template #header>
             <div class="aspect-video bg-surface-100 overflow-hidden">
-              <img
-                :src="quiz.thumbnailUrl || '/placeholder.svg'"
-                :alt="quiz.title"
-                class="w-full h-full object-cover"
-              />
+              <img :src="quiz.thumbnailUrl || '/placeholder.svg'" :alt="quiz.title" class="w-full h-full object-cover" />
             </div>
           </template>
           <template #content>
@@ -34,48 +30,32 @@
                   :label="`${quiz.likeCount || 0}`"
                   :severity="isLiked ? undefined : 'secondary'"
                   :outlined="!isLiked"
-                  :disabled="isMyQuiz"                     
+                  :disabled="isMyQuiz"
                   :title="isMyQuiz ? '내가 만든 퀴즈에는 좋아요를 누를 수 없습니다.' : ''"
                   @click="handleLike"
                 />
               </div>
 
-              <div class="flex items-center gap-3">
-                <Avatar
-                  :image="quiz.author?.profileImageUrl"
-                  :label="quiz.author?.nickname?.charAt(0)"
-                  shape="circle"
-                />
+              <!-- 작성자 영역: 클릭 시 팝오버 오픈 -->
+              <div class="flex items-center gap-3 cursor-pointer" @click="openAuthorPopover">
+                <Avatar :image="quiz.author?.profileImageUrl" :label="quiz.author?.nickname?.charAt(0)" shape="circle" />
                 <div>
                   <p class="font-semibold m-0">
                     {{ quiz.author?.nickname }}
                   </p>
-                  <p class="text-sm text-color-secondary m-0">
-                    {{ quiz.questions?.length || 0 }} questions
-                  </p>
+                  <p class="text-sm text-color-secondary m-0">{{ quiz.questions?.length || 0 }} questions</p>
                 </div>
               </div>
 
               <div class="flex gap-3">
-                <Button
-                  label="Start Quiz"
-                  icon="pi pi-play"
-                  size="large"
-                  class="flex-1"
-                  @click="startQuiz"
-                ></Button>
-                <Button
-                  v-if="authStore.isAuthenticated"
-                  :label="isFollowed ? 'Following' : 'Follow'"
-                  :icon="isFollowed ? 'pi pi-check' : 'pi pi-user-plus'"
-                  :severity="isFollowed ? 'secondary' : undefined"
-                  :outlined="isFollowed"
-                  @click="handleFollow"
-                ></Button>
+                <Button label="Start Quiz" icon="pi pi-play" size="large" class="flex-1" @click="startQuiz"></Button>
               </div>
             </div>
           </template>
         </Card>
+
+        <!-- ✅ 유저 팝오버 컴포넌트 -->
+        <UserPopover ref="userPopoverRef" />
       </div>
     </div>
   </div>
@@ -90,6 +70,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useQuizStore } from "@/stores/quiz";
 import { getQuiz, likeQuiz, unlikeQuiz } from "@/api/quiz";
 import { followUser, unfollowUser } from "@/api/user";
+import UserPopover from "@/components/common/UserPopover.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -102,6 +83,9 @@ const quiz = ref<any | null>(null);
 const loading = ref(false);
 const isLiked = ref(false);
 const isFollowed = ref(false);
+
+// 팝오버 ref
+const userPopoverRef = ref<any | null>(null);
 
 // 로그인한 유저 ID
 const currentUserId = computed(() => authStore.user?.id ?? null);
@@ -129,6 +113,12 @@ const loadQuiz = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// 작성자 프로필 클릭 → 팝오버 오픈
+const openAuthorPopover = (event: MouseEvent) => {
+  if (!quiz.value?.author?.id) return;
+  userPopoverRef.value?.open(event, quiz.value.author.id);
 };
 
 const handleLike = async () => {
@@ -167,9 +157,7 @@ const handleLike = async () => {
       quiz.value.likeCount = (quiz.value.likeCount || 0) + 1;
     }
   } catch (error: any) {
-    // quiz.js에서 normalizeApiError로 던진 에러 처리
     if (error.code === "Q003") {
-      // 자기 퀴즈 좋아요 시도
       toast.add({
         severity: "warn",
         summary: "알림",

@@ -12,6 +12,19 @@
         <result property="statusMessage" column="status_message"/>
     </resultMap>
 
+    <!-- 유저 팝오버용 결과 매핑 -->
+    <resultMap id="UserPopoverMap" type="com.problemio.user.dto.UserPopoverResponse">
+        <id property="Id" column="id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="profileImageUrl" column="profile_image_url"/>
+        <result property="statusMessage" column="status_message"/>
+
+        <result property="followerCount" column="follower_count"/>
+        <result property="followingCount" column="following_count"/>
+
+        <result property="following" column="is_following"/>
+    </resultMap>
+
     <select id="findById" resultMap="UserResponseMap">
         SELECT id, email, nickname, profile_image_url, status_message
         FROM users
@@ -56,5 +69,27 @@
         SELECT COUNT(*)
         FROM users
         WHERE nickname = #{nickname} AND is_deleted = 0
+    </select>
+
+
+    <select id="findUserPopover" resultMap="UserPopoverMap">
+        SELECT
+            u.id,
+            u.nickname,
+            u.profile_image_url,
+            u.status_message,
+            (SELECT COUNT(*) FROM follows f1 WHERE f1.following_id = u.id) AS follower_count,
+            (SELECT COUNT(*) FROM follows f2 WHERE f2.follower_id = u.id) AS following_count,
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM follows f3
+                    WHERE f3.follower_id = #{viewerId}
+                      AND f3.following_id = u.id
+                ) THEN 1 ELSE 0
+                END AS is_following
+        FROM users u
+        WHERE u.id = #{userId}
+          AND u.is_deleted = 0
     </select>
 </mapper>

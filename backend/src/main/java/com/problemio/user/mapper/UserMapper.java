@@ -1,5 +1,6 @@
 package com.problemio.user.mapper;
 
+import com.problemio.user.dto.UserPopoverResponse;
 import com.problemio.user.dto.UserResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -28,4 +29,10 @@ public interface UserMapper {
 
    // 6. 닉네임 중복 존재 여부 확인 (0: 없음, 1이상: 존재)
     int existsByNickname(String nickname);
+
+    // 7. 팝오버 요약 정보
+    UserPopoverResponse findUserPopover(
+            @Param("userId") Long userId,
+            @Param("viewerId") Long viewerId
+    );
 }

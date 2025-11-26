@@ -1,6 +1,7 @@
 package com.problemio.user.service;
 
 import com.problemio.quiz.dto.QuizSummaryDto;
+import com.problemio.user.dto.UserPopoverResponse;
 import com.problemio.user.dto.UserResponse;
 import com.problemio.user.dto.UserSummaryDto;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,4 +32,6 @@ public interface UserService {
     // 닉네임 중복 확인 (중복 시 예외 발생)
     void checkNicknameDuplicate(String nickname);
 
+    // 팝오버용 프로필 조회
+    UserPopoverResponse getUserPopover(Long userId, Long viewerId);
 }

@@ -3,6 +3,7 @@ package com.problemio.user.controller;
 import com.problemio.global.auth.CustomUserDetails;
 import com.problemio.global.common.ApiResponse;
 import com.problemio.quiz.dto.QuizSummaryDto;
+import com.problemio.user.dto.UserPopoverResponse;
 import com.problemio.user.dto.UserResponse;
 import com.problemio.user.dto.UserSummaryDto;
 import com.problemio.user.service.UserService;
@@ -85,5 +86,16 @@ public class UserController {
         userService.checkNicknameDuplicate(nickname);
         // 예외가 발생하지 않으면 사용 가능한 닉네임
         return ResponseEntity.ok(ApiResponse.success(true));
+    }
+
+    // Popover용
+    @GetMapping("/{userId}/popover")
+    public ResponseEntity<ApiResponse<UserPopoverResponse>> getUserPopover(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long viewerId = userDetails.getUser().getId();  // 현재 로그인한 나
+        UserPopoverResponse res = userService.getUserPopover(userId, viewerId);
+        return ResponseEntity.ok(ApiResponse.success(res));
     }
 }

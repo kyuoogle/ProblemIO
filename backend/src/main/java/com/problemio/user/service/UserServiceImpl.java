@@ -4,6 +4,7 @@ import com.problemio.global.exception.BusinessException;
 import com.problemio.global.exception.ErrorCode;
 import com.problemio.quiz.dto.QuizSummaryDto;
 import com.problemio.user.domain.User;
+import com.problemio.user.dto.UserPopoverResponse;
 import com.problemio.user.dto.UserResponse;
 import com.problemio.user.dto.UserSummaryDto;
 import com.problemio.user.mapper.UserAuthMapper;
@@ -185,5 +186,19 @@ public class UserServiceImpl implements UserService {
     public List<QuizSummaryDto> getFollowingQuizzes(Long userId) {
         // return userMapper.findFollowingQuizzes(userId);
         return List.of();
+    }
+
+
+    @Override
+    public UserPopoverResponse getUserPopover(Long userId, Long viewerId) {
+        UserPopoverResponse res = userMapper.findUserPopover(userId, viewerId);
+        if (res == null) {
+            // 프로젝트 전역 예외 형식에 맞춰서
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // 나 자신인지 여부 세팅
+        res.setMe(userId.equals(viewerId));
+        return res;
     }
 }
