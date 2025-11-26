@@ -34,4 +34,7 @@ public interface QuizMapper {
     void incrementLikeCount(@Param("id") Long id);
 
     void decrementLikeCount(@Param("id") Long id);
+
+    // 퀴즈 작성자만 조회: 자기 퀴즈에 좋아요 못하게 막기 위함
+    Long findUserIdByQuizId(@Param("id") Long id);
 }

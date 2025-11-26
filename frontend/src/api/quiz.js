@@ -4,6 +4,21 @@ import { resolveImageUrl, resolveQuizImages } from '@/lib/image'
 const BASE_URL = '/quizzes'
 
 /**
+ * 공통 에러 정규화 헬퍼
+ * - 서버에서 내려주는 code / errorCode / message를 하나로 모아준다.
+ */
+const normalizeApiError = (error) => {
+  const res = error?.response?.data
+
+  return {
+    code: res?.code || res?.errorCode || null,
+    message: res?.message || '요청 처리 중 오류가 발생했습니다.',
+    status: error?.response?.status,
+    raw: error,
+  }
+}
+
+/**
  * 퀴즈 관련 API
  */
 
@@ -15,11 +30,11 @@ export const getQuizzes = async (params = {}) => {
     size: size.toString(),
     sort,
   })
-  
+
   if (keyword) {
     queryParams.append('keyword', keyword)
   }
-  
+
   const response = await apiClient.get(`${BASE_URL}?${queryParams.toString()}`)
   const data = response.data.data
   if (data?.content) {
@@ -71,8 +86,8 @@ export const updateQuiz = async (quizId, data) => {
       description: q.description,
       answers: q.answers.map((a, idx) => ({
         id: a.id,
-        text: a,
-        sortOrder: idx + 1,
+        text: a.text ?? a, // 기존 데이터 구조에 따라 필요시 조정
+        sortOrder: a.sortOrder ?? idx + 1,
       })),
     })),
   })
@@ -86,14 +101,22 @@ export const deleteQuiz = async (quizId) => {
 
 // 퀴즈 좋아요
 export const likeQuiz = async (quizId) => {
-  const response = await apiClient.post(`${BASE_URL}/${quizId}/like`)
-  return response.data.data
+  try {
+    const response = await apiClient.post(`${BASE_URL}/${quizId}/like`)
+    return response.data.data
+  } catch (error) {
+    throw normalizeApiError(error)
+  }
 }
 
 // 퀴즈 좋아요 취소
 export const unlikeQuiz = async (quizId) => {
-  const response = await apiClient.delete(`${BASE_URL}/${quizId}/like`)
-  return response.data.data
+  try {
+    const response = await apiClient.delete(`${BASE_URL}/${quizId}/like`)
+    return response.data.data
+  } catch (error) {
+    throw normalizeApiError(error)
+  }
 }
 
 // 내가 만든 퀴즈 목록
@@ -104,4 +127,3 @@ export const getMyQuizzes = async () => {
     thumbnailUrl: resolveImageUrl(quiz.thumbnailUrl),
   }))
 }
-

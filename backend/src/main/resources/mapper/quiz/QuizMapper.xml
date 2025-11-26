@@ -92,4 +92,10 @@
                  OR description LIKE CONCAT('%', #{keyword}, '%'))
         </if>
     </select>
+
+    <select id="findUserIdByQuizId" parameterType="long" resultType="long">
+        SELECT user_id
+        FROM quizzes
+        WHERE id = #{id}
+    </select>
 </mapper>

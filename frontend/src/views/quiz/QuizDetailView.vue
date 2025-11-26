@@ -9,29 +9,61 @@
         <Card>
           <template #header>
             <div class="aspect-video bg-surface-100 overflow-hidden">
-              <img :src="quiz.thumbnailUrl || '/placeholder.svg'" :alt="quiz.title" class="w-full h-full object-cover" />
+              <img
+                :src="quiz.thumbnailUrl || '/placeholder.svg'"
+                :alt="quiz.title"
+                class="w-full h-full object-cover"
+              />
             </div>
           </template>
           <template #content>
             <div class="flex flex-col gap-4">
               <div class="flex justify-between items-start">
                 <div class="flex-1">
-                  <h1 class="text-3xl font-bold mb-2">{{ quiz.title }}</h1>
-                  <p class="text-color-secondary text-lg">{{ quiz.description }}</p>
+                  <h1 class="text-3xl font-bold mb-2">
+                    {{ quiz.title }}
+                  </h1>
+                  <p class="text-color-secondary text-lg">
+                    {{ quiz.description }}
+                  </p>
                 </div>
-                <Button :icon="isLiked ? 'pi pi-heart-fill' : 'pi pi-heart'" :label="`${quiz.likeCount || 0}`" :severity="isLiked ? undefined : 'secondary'" :outlined="!isLiked" @click="handleLike" />
+
+                <!-- 👍 좋아요 버튼: 내가 만든 퀴즈면 disabled -->
+                <Button
+                  :icon="isLiked ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                  :label="`${quiz.likeCount || 0}`"
+                  :severity="isLiked ? undefined : 'secondary'"
+                  :outlined="!isLiked"
+                  :disabled="isMyQuiz"                     
+                  :title="isMyQuiz ? '내가 만든 퀴즈에는 좋아요를 누를 수 없습니다.' : ''"
+                  @click="handleLike"
+                />
               </div>
 
               <div class="flex items-center gap-3">
-                <Avatar :image="quiz.author?.profileImageUrl" :label="quiz.author?.nickname?.charAt(0)" shape="circle" />
+                <Avatar
+                  :image="quiz.author?.profileImageUrl"
+                  :label="quiz.author?.nickname?.charAt(0)"
+                  shape="circle"
+                />
                 <div>
-                  <p class="font-semibold m-0">{{ quiz.author?.nickname }}</p>
-                  <p class="text-sm text-color-secondary m-0">{{ quiz.questions?.length || 0 }} questions</p>
+                  <p class="font-semibold m-0">
+                    {{ quiz.author?.nickname }}
+                  </p>
+                  <p class="text-sm text-color-secondary m-0">
+                    {{ quiz.questions?.length || 0 }} questions
+                  </p>
                 </div>
               </div>
 
               <div class="flex gap-3">
-                <Button label="Start Quiz" icon="pi pi-play" size="large" class="flex-1" @click="startQuiz" />
+                <Button
+                  label="Start Quiz"
+                  icon="pi pi-play"
+                  size="large"
+                  class="flex-1"
+                  @click="startQuiz"
+                ></Button>
                 <Button
                   v-if="authStore.isAuthenticated"
                   :label="isFollowed ? 'Following' : 'Follow'"
@@ -39,7 +71,7 @@
                   :severity="isFollowed ? 'secondary' : undefined"
                   :outlined="isFollowed"
                   @click="handleFollow"
-                />
+                ></Button>
               </div>
             </div>
           </template>
@@ -66,10 +98,19 @@ const confirm = useConfirm();
 const authStore = useAuthStore();
 const quizStore = useQuizStore();
 
-const quiz = ref(null);
+const quiz = ref<any | null>(null);
 const loading = ref(false);
 const isLiked = ref(false);
 const isFollowed = ref(false);
+
+// 로그인한 유저 ID
+const currentUserId = computed(() => authStore.user?.id ?? null);
+
+// 내가 만든 퀴즈인지 여부 (백엔드 QuizResponse.userId 사용)
+const isMyQuiz = computed(() => {
+  if (!quiz.value || !currentUserId.value) return false;
+  return quiz.value.userId === currentUserId.value;
+});
 
 const loadQuiz = async () => {
   loading.value = true;
@@ -91,6 +132,18 @@ const loadQuiz = async () => {
 };
 
 const handleLike = async () => {
+  // 1. 내 퀴즈면 프론트에서도 바로 막기
+  if (isMyQuiz.value) {
+    toast.add({
+      severity: "warn",
+      summary: "알림",
+      detail: "내가 만든 퀴즈에는 좋아요를 누를 수 없습니다.",
+      life: 3000,
+    });
+    return;
+  }
+
+  // 2. 비로그인인 경우 로그인 유도 (기존 로직 유지)
   if (!authStore.isAuthenticated) {
     confirm.require({
       message: "로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?",
@@ -114,10 +167,22 @@ const handleLike = async () => {
       quiz.value.likeCount = (quiz.value.likeCount || 0) + 1;
     }
   } catch (error: any) {
+    // quiz.js에서 normalizeApiError로 던진 에러 처리
+    if (error.code === "Q003") {
+      // 자기 퀴즈 좋아요 시도
+      toast.add({
+        severity: "warn",
+        summary: "알림",
+        detail: error.message || "내가 만든 퀴즈에는 좋아요를 누를 수 없습니다.",
+        life: 3000,
+      });
+      return;
+    }
+
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: "Failed to toggle like",
+      detail: error.message || "Failed to toggle like",
       life: 3000,
     });
   }

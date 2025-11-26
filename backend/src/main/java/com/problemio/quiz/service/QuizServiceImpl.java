@@ -261,8 +261,14 @@ public class QuizServiceImpl implements QuizService {
      */
     @Override
     public void likeQuiz(Long userId, Long quizId) {
-        quizMapper.findById(quizId)
+        // 퀴즈 조회
+        Quiz quiz = quizMapper.findById(quizId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
+
+        // 자기 퀴즈면 좋아요 금지
+        if (Objects.equals(quiz.getUserId(), userId)) {
+            throw new BusinessException(ErrorCode.CANNOT_LIKE_OWN_QUIZ);
+        }
 
         // 이미 좋아요를 눌렀는지 체크
         boolean alreadyLiked = quizLikeMapper.findByUserIdAndQuizId(userId, quizId).isPresent();
