@@ -85,12 +85,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
-import { getUserProfile, followUser, unfollowUser } from "@/api/user";
+import { getUserProfile, followUser, unfollowUser, getUserQuizzes } from "@/api/user";
 
 const route = useRoute();
 const router = useRouter();
@@ -110,9 +110,6 @@ const loadUserProfile = async () => {
     const data = await getUserProfile(Number(route.params.id));
     user.value = data;
     isFollowing.value = data.isFollowedByMe || false;
-    if (data.quizzes) {
-      quizzes.value = data.quizzes;
-    }
   } catch (error: any) {
     toast.add({
       severity: "error",
@@ -123,6 +120,25 @@ const loadUserProfile = async () => {
     router.push("/");
   } finally {
     loading.value = false;
+  }
+};
+
+const loadUserQuizzes = async () => {
+  loadingQuizzes.value = true;
+  try {
+    quizzes.value = await getUserQuizzes(Number(route.params.id));
+    if (user.value) {
+      user.value.quizCount = quizzes.value.length;
+    }
+  } catch (error: any) {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Failed to load quizzes",
+      life: 3000,
+    });
+  } finally {
+    loadingQuizzes.value = false;
   }
 };
 
@@ -165,7 +181,16 @@ const goToQuiz = (quizId: number) => {
 
 onMounted(() => {
   loadUserProfile();
+  loadUserQuizzes();
 });
+
+watch(
+  () => route.params.id,
+  () => {
+    loadUserProfile();
+    loadUserQuizzes();
+  }
+);
 </script>
 
 <style scoped>

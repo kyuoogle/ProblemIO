@@ -4,6 +4,7 @@ import com.problemio.global.jwt.JwtAuthenticationFilter;
 import com.problemio.global.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,26 +34,30 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 인증(회원가입, 로그인, 토큰 발급)
+                        // Auth endpoints
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/reissue").permitAll()
 
-                        // 파일 업로드 및 정적 업로드 리소스
+                        // Static/file access
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
 
-                        // 퀴즈 조회 등 외부 노출 가능 구간
+                        // Public quiz and submission endpoints
                         .requestMatchers("/api/quizzes/**").permitAll()
                         .requestMatchers("/api/submissions/**").permitAll()
-                        .requestMatchers("/api/users/checkNickname").permitAll()
 
-                        // 이메일 인증
+                        // User lookups available to guests
+                        .requestMatchers("/api/users/checkNickname").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/quizzes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
+
+                        // Email verification
                         .requestMatchers("/api/auth/email/**").permitAll()
 
-                        // 그 외 유저/팔로우는 인증 필요 (명시적 작성)
+                        // Everything else requires auth
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/follows/**").authenticated()
 
-                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

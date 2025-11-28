@@ -13,6 +13,15 @@ export const getUserPopover = async (userId) => {
   return response.data.data;
 };
 
+// 사용자별 퀴즈 목록 조회
+export const getUserQuizzes = async (userId) => {
+  const response = await apiClient.get(`/users/${userId}/quizzes`);
+  return response.data.data.map((quiz) => ({
+    ...quiz,
+    thumbnailUrl: resolveImageUrl(quiz.thumbnailUrl),
+  }));
+};
+
 // 내 프로필 수정 (닉네임 + 상태메시지 + 프로필 이미지)
 export const updateMyProfile = async (formData) => {
   const response = await apiClient.patch("/users/me", formData);
