@@ -14,4 +14,5 @@ public class QuizSummaryDto {
     private String thumbnailUrl;
     private int likeCount;
     private int playCount;
+
 }

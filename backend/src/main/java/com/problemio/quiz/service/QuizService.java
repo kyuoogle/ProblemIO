@@ -16,9 +16,9 @@ public interface QuizService {
     void deleteQuiz(Long userId, Long quizId);
 
     QuizResponse getQuiz(Long quizId, Long viewerId);
-
+    // 공개 퀴즈 목록
     List<QuizSummaryDto> getPublicQuizzes();
-
+    // 제작자 프로필에서 쓸, 특정 유저가 만든 퀴즈 목록
     List<QuizSummaryDto> getUserQuizzes(Long userId);
 
     void likeQuiz(Long userId, Long quizId);
@@ -26,5 +26,6 @@ public interface QuizService {
     void unlikeQuiz(Long userId, Long quizId);
 
     List<QuizSummaryDto> getQuizzesOfFollowings(Long userId, int page, int size);
+
     List<QuizSummaryDto> getLikedQuizzes(Long userId, int page, int size);
 }

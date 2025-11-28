@@ -67,13 +67,7 @@ public class QuizServiceImpl implements QuizService {
 
         // Quiz 엔티티를 요약 DTO로 변환
         List<QuizSummaryDto> content = quizzes.stream()
-                .map(q -> QuizSummaryDto.builder()
-                        .id(q.getId())
-                        .title(q.getTitle())
-                        .thumbnailUrl(q.getThumbnailUrl())
-                        .likeCount(q.getLikeCount())
-                        .playCount(q.getPlayCount())
-                        .build())
+                .map(this::toSummaryDto)
                 .collect(Collectors.toList());
 
         int totalPages = (int) Math.ceil((double) total / safeSize);
@@ -226,30 +220,19 @@ public class QuizServiceImpl implements QuizService {
     @Transactional(readOnly = true)
     public List<QuizSummaryDto> getPublicQuizzes() {
         return quizMapper.findPublicQuizzes().stream()
-                .map(q -> QuizSummaryDto.builder()
-                        .id(q.getId())
-                        .title(q.getTitle())
-                        .thumbnailUrl(q.getThumbnailUrl())
-                        .likeCount(q.getLikeCount())
-                        .playCount(q.getPlayCount())
-                        .build())
+                .map(this::toSummaryDto)
                 .collect(Collectors.toList());
     }
 
     /**
      * 특정 유저가 만든 퀴즈 목록 조회
+     * - 제작자 프로필 화면에서 사용
      */
     @Override
     @Transactional(readOnly = true)
     public List<QuizSummaryDto> getUserQuizzes(Long userId) {
         return quizMapper.findQuizzesByUserId(userId).stream()
-                .map(q -> QuizSummaryDto.builder()
-                        .id(q.getId())
-                        .title(q.getTitle())
-                        .thumbnailUrl(q.getThumbnailUrl())
-                        .likeCount(q.getLikeCount())
-                        .playCount(q.getPlayCount())
-                        .build())
+                .map(this::toSummaryDto)
                 .collect(Collectors.toList());
     }
 
@@ -293,6 +276,19 @@ public class QuizServiceImpl implements QuizService {
 
         quizLikeMapper.deleteQuizLike(userId, quizId);
         quizMapper.decrementLikeCount(quizId);
+    }
+
+    /**
+     * Quiz 엔티티 → QuizSummaryDto 변환 공통 헬퍼
+     */
+    private QuizSummaryDto toSummaryDto(Quiz quiz) {
+        return QuizSummaryDto.builder()
+                .id(quiz.getId())
+                .title(quiz.getTitle())
+                .thumbnailUrl(quiz.getThumbnailUrl())
+                .likeCount(quiz.getLikeCount())
+                .playCount(quiz.getPlayCount())
+                .build();
     }
 
     /**
@@ -444,12 +440,14 @@ public class QuizServiceImpl implements QuizService {
      * 마이 페이지 내 좋아요한 퀴즈, 유저가 팔로우하는 유저의 퀴즈 목록 조회 위한 메서드
      */
     @Override
+    @Transactional(readOnly = true)
     public List<QuizSummaryDto> getQuizzesOfFollowings(Long userId, int page, int size) {
         int offset = (page - 1) * size;
         return quizMapper.findQuizzesOfFollowings(userId, offset, size);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuizSummaryDto> getLikedQuizzes(Long userId, int page, int size) {
         int offset = (page - 1) * size;
         return quizMapper.findLikedQuizzesByUser(userId, offset, size);

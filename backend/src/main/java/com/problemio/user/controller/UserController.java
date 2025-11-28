@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -124,5 +125,14 @@ public class UserController {
         Long userId = userDetails.getUser().getId();
         var data = quizService.getLikedQuizzes(userId, page, size);
         return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
+    // 결과창에서 제작자의 다른 문제 조회
+    @GetMapping("/{userId}/quizzes")
+    public ResponseEntity<ApiResponse<List<QuizSummaryDto>>> getUserQuizzes(
+            @PathVariable Long userId
+    ) {
+        List<QuizSummaryDto> quizzes = quizService.getUserQuizzes(userId);
+        return ResponseEntity.ok(ApiResponse.success(quizzes));
     }
 }
