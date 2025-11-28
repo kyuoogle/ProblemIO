@@ -18,14 +18,10 @@
           <Button label="퀴즈 만들기" icon="pi pi-plus" text @click="goToCreateQuiz" />
 
           <Button @click="goToMyPage" class="flex align-items-center gap-2 p-button-text p-0" aria-label="My Page">
-            <Avatar
-              :image="authStore.user?.profileImageUrl ? `http://localhost:8080${authStore.user.profileImageUrl}` : null"
-              :label="!authStore.user?.profileImageUrl && authStore.user?.nickname ? authStore.user.nickname.charAt(0).toUpperCase() : ''"
-              :icon="!authStore.user?.profileImageUrl && !authStore.user?.nickname ? 'pi pi-user' : ''"
-              class="mr-1 font-bold"
-              :class="{ 'surface-200 text-700': !authStore.user?.profileImageUrl }"
-              shape="circle"
-            />
+
+                <UserAvatar class="mr-1 font-bold" :class="{ 'surface-200 text-700': !authStore.user?.profileImageUrl }"
+                size="medium" />
+          
             <span class="text-color">{{ authStore.user?.nickname || "User" }}</span>
           </Button>
 
@@ -42,7 +38,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
-// import Avatar from 'primevue/avatar';
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const router = useRouter();
 const authStore = useAuthStore();

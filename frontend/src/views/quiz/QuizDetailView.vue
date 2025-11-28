@@ -38,7 +38,12 @@
 
               <!-- 작성자 영역: 클릭 시 팝오버 오픈 -->
               <div class="flex items-center gap-3 cursor-pointer" @click="openAuthorPopover">
-                <Avatar :image="quiz.author?.profileImageUrl" :label="quiz.author?.nickname?.charAt(0)" shape="circle" />
+                           <UserAvatar
+                            :user="quiz.author"
+                            size="medium"
+                            class="mr-1 font-bold"
+                            :class="{ 'surface-200 text-700': !quiz.author?.profileImageUrl }"
+                          />
                 <div>
                   <p class="font-semibold m-0">
                     {{ quiz.author?.nickname }}
@@ -71,6 +76,7 @@ import { useQuizStore } from "@/stores/quiz";
 import { getQuiz, likeQuiz, unlikeQuiz } from "@/api/quiz";
 import { followUser, unfollowUser } from "@/api/user";
 import UserPopover from "@/components/common/UserPopover.vue";
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const route = useRoute();
 const router = useRouter();

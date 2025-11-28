@@ -91,6 +91,7 @@ import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
 import { getUserProfile, followUser, unfollowUser, getUserQuizzes } from "@/api/user";
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const route = useRoute();
 const router = useRouter();

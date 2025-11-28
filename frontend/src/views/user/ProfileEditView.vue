@@ -14,14 +14,17 @@
 
               <div class="flex flex-col gap-2 items-center my-8">
                 <div class="relative inline-block">
-                  <Avatar
+
+                   <UserAvatar class="font-bold border-4 border-gray-200 surface-200" 
+                   style="width: 300px; height: 300px; font-size: 100px"/>
+
+                  <!-- <Avatar
                     :image="previewUrl"
                     :label="!previewUrl && profileForm.nickname ? profileForm.nickname.charAt(0).toUpperCase() : ''"
                     :icon="!previewUrl && !profileForm.nickname ? 'pi pi-user' : ''"
                     class="font-bold border-4 border-gray-200 surface-200"
                     shape="circle"
-                    style="width: 300px; height: 300px; font-size: 100px"
-                  />
+                  /> -->
 
                   <div class="absolute bottom-4 right-4">
                     <FileUpload
@@ -114,6 +117,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
 // checkNickname 추가
 import { updateMyProfile, changePassword, deleteAccount, getMe, checkNickname } from "@/api/user";
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const router = useRouter();
 const toast = useToast();

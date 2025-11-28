@@ -7,17 +7,25 @@
     </div>
 
     <!-- 내용 -->
-    <div v-else class="w-96 p-6">
+    <div v-else class="w-96 p-3">
       <!-- 상단: 아바타 + 닉네임 + 버튼 -->
       <div class="flex items-center gap-4">
-        <Avatar
+
+        <UserAvatar
+          :user="profile"
+          size="large"
+          class="mr-1 font-bold"
+          :class="{ 'surface-200 text-700': !profile?.profileImageUrl }"
+        />
+
+        <!-- <Avatar
           :image="avatarUrl"
           :label="!profile.profileImageUrl && profile.nickname ? profile.nickname.charAt(0).toUpperCase() : ''"
           :icon="!profile.profileImageUrl && !profile.nickname ? 'pi pi-user' : ''"
           shape="circle"
           size="xlarge"
           class="w-32 h-32 border border-gray-200"
-        />
+        /> -->
 
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-base truncate cursor-pointer hover:underline" @click.stop="goToProfile">
@@ -59,9 +67,9 @@
 import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import OverlayPanel from "primevue/overlaypanel";
-import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import { getUserPopover, followUser, unfollowUser } from "@/api/user";
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const op = ref(null);
 const router = useRouter();

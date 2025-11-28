@@ -5,15 +5,7 @@
              <Card class="mb-8">
         <template #content>
           <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
-              <Avatar
-                :image="authStore.user?.profileImageUrl ? `http://localhost:8080${authStore.user.profileImageUrl}` : null"
-                :label="!authStore.user?.profileImageUrl && authStore.user?.nickname ? authStore.user.nickname.charAt(0).toUpperCase() : ''"
-                :icon="!authStore.user?.profileImageUrl && !authStore.user?.nickname ? 'pi pi-user' : ''"
-                shape="circle"
-                size="xlarge"
-                class="w-32 h-32"
-              />
-
+                <UserAvatar class="w-32 h-32" />
             <div class="flex-1 text-center md:text-left">
               <!-- 닉네임 / 상태메시지 + 우측 상단 설정 버튼 -->
               <div class="flex justify-between items-start">
@@ -186,6 +178,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
 import { getFollowingQuizzes, getMyLikedQuizzes } from "@/api/user";
 import { getMyQuizzes, deleteQuiz } from "@/api/quiz";
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const router = useRouter();
 const toast = useToast();

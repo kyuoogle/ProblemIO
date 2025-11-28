@@ -10,14 +10,7 @@
         <Card>
           <template #content>
             <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
-              <Avatar
-                :image="authStore.user?.profileImageUrl ? `http://localhost:8080${authStore.user.profileImageUrl}` : null"
-                :label="!authStore.user?.profileImageUrl && authStore.user?.nickname ? authStore.user.nickname.charAt(0).toUpperCase() : ''"
-                :icon="!authStore.user?.profileImageUrl && !authStore.user?.nickname ? 'pi pi-user' : ''"
-                shape="circle"
-                size="xlarge"
-                class="w-32 h-32"
-              />
+               <UserAvatar class="w-32 h-32" />
               <div class="flex-1 text-center md:text-left">
                 <h1 class="text-3xl font-bold mb-2">{{ summary.nickname }}</h1>
                 <p v-if="summary.statusMessage" class="text-lg text-color-secondary mb-4">
@@ -89,6 +82,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "primevue/usetoast";
 import { getMySummary } from "@/api/user";
+import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
 
 const router = useRouter();
 const toast = useToast();
