@@ -14,7 +14,7 @@
           </template>
           <template #content>
             <div class="flex flex-col gap-4">
-              <div class="flex justify-between items-start">
+              <div class="flex justify-between items-start gap-4">
                 <div class="flex-1">
                   <h1 class="text-3xl font-bold mb-2">
                     {{ quiz.title }}
@@ -24,16 +24,22 @@
                   </p>
                 </div>
 
-                <!-- 👍 좋아요 버튼: 내가 만든 퀴즈면 disabled -->
-                <Button
-                  :icon="isLiked ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                  :label="`${quiz.likeCount || 0}`"
-                  :severity="isLiked ? undefined : 'secondary'"
-                  :outlined="!isLiked"
-                  :disabled="isMyQuiz"
-                  :title="isMyQuiz ? '내가 만든 퀴즈에는 좋아요를 누를 수 없습니다.' : ''"
-                  @click="handleLike"
-                />
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                  <div class="view-chip">
+                    <i class="pi pi-eye text-xs"></i>
+                    <span>{{ quiz.playCount || 0 }}</span>
+                  </div>
+                  <!-- 👍 좋아요 버튼: 내가 만든 퀴즈면 disabled -->
+                  <Button
+                    :icon="isLiked ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                    :label="`${quiz.likeCount || 0}`"
+                    :severity="isLiked ? undefined : 'secondary'"
+                    :outlined="!isLiked"
+                    :disabled="isMyQuiz"
+                    :title="isMyQuiz ? '내가 만든 퀴즈에는 좋아요를 누를 수 없습니다.' : ''"
+                    @click="handleLike"
+                  />
+                </div>
               </div>
 
               <!-- 작성자 영역: 클릭 시 팝오버 오픈 -->
@@ -252,5 +258,16 @@ onMounted(() => {
 
 .aspect-video {
   aspect-ratio: 16 / 9;
+}
+
+.view-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--color-heading);
+  font-size: 0.9rem;
 }
 </style>

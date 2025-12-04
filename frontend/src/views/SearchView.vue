@@ -3,8 +3,9 @@
     <div class="container mx-20 px-4">
       <div class="home-controls mb-6">
         <div class="flex gap-1">
-          <Button :label="'인기순'" :severity="sort === 'popular' ? undefined : 'secondary'" :outlined="sort !== 'popular'" @click="sort = 'popular'" />
-          <Button :label="'최신순'" :severity="sort === 'latest' ? undefined : 'secondary'" :outlined="sort !== 'latest'" @click="sort = 'latest'" />
+          <Button icon="pi pi-heart" :label="'인기'" :severity="sort === 'popular' ? undefined : 'secondary'" :outlined="sort !== 'popular'" @click="sort = 'popular'" />
+          <Button icon="pi pi-eye" :label="'조회'" :severity="sort === 'views' ? undefined : 'secondary'" :outlined="sort !== 'views'" @click="sort = 'views'" />
+          <Button icon="pi pi-clock" :label="'최신'" :severity="sort === 'latest' ? undefined : 'secondary'" :outlined="sort !== 'latest'" @click="sort = 'latest'" />
         </div>
         <span class="p-input-icon-left home-search">
           <i class="pi pi-search" />
@@ -27,9 +28,15 @@
           </div>
           <div class="quiz-meta">
             <h3 class="quiz-title">{{ quiz.title }}</h3>
-            <div class="quiz-stat">
-              <i class="pi pi-heart text-xs"></i>
-              <span>{{ quiz.likeCount || 0 }}</span>
+            <div class="quiz-stats">
+              <div class="quiz-stat">
+                <i class="pi pi-heart text-xs"></i>
+                <span>{{ quiz.likeCount || 0 }}</span>
+              </div>
+              <div class="quiz-stat view">
+                <i class="pi pi-eye text-xs"></i>
+                <span>{{ quiz.playCount || 0 }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -237,5 +244,15 @@ watch(sort, () => {
   background: rgba(137, 168, 124, 0.15);
   color: var(--color-heading);
   font-size: 0.85rem;
+}
+
+.quiz-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.quiz-stat.view {
+  background: rgba(59, 130, 246, 0.12);
 }
 </style>

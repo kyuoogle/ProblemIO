@@ -209,10 +209,14 @@ public class QuizServiceImpl implements QuizService {
      *   여부를 함께 반환
      */
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public QuizResponse getQuiz(Long quizId, Long viewerId) {
         Quiz quiz = quizMapper.findById(quizId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
+
+        // 조회 시 조회수 1 증가
+        quizMapper.incrementPlayCount(quizId);
+        quiz.setPlayCount(quiz.getPlayCount() + 1);
 
         UserResponse author = findAuthor(quiz.getUserId());
         List<QuestionResponse> questions = loadQuestions(quizId);
