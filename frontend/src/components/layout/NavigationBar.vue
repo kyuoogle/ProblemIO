@@ -2,7 +2,8 @@
   <Menubar :model="menuItems" class="border-bottom-1 surface-border app-header">
     <template #start>
       <router-link to="/" class="flex align-items-center gap-2 no-underline text-dark logo-link">
-        <img src="/problemio-logo.png" alt="Problem.io" class="logo-img" />
+        <img src="/problemio-logo-light.png" alt="Problem.io" class="logo-img logo-light" />
+        <img src="/problemio-logo.png" alt="Problem.io" class="logo-img logo-dark" />
       </router-link>
     </template>
 
@@ -120,7 +121,12 @@ const handleLogout = () => {
 }
 
 .app-header {
-  background: var(--color-background-soft);
+  background:
+    linear-gradient(var(--app-header-bg-overlay), var(--app-header-bg-overlay)),
+    var(--app-header-bg-image);
+  background-color: var(--color-background-soft);
+  background-size: cover;
+  background-position: center center;
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(10px);
 }
@@ -144,6 +150,18 @@ const handleLogout = () => {
   height: 44px;
   width: auto;
   object-fit: contain;
+}
+
+.logo-dark {
+  display: none;
+}
+
+:global([data-theme="dark"] .logo-light) {
+  display: none;
+}
+
+:global([data-theme="dark"] .logo-dark) {
+  display: block;
 }
 
 .logout-btn {

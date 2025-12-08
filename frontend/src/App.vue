@@ -36,6 +36,8 @@ const applyTheme = (mode: string) => {
   theme.value = value;
   document.documentElement.setAttribute("data-theme", value);
   localStorage.setItem("theme", value);
+  // 테마에 관계없이 배경 이미지를 사용 (다크 모드도 오버레이와 함께 적용)
+  document.body.classList.add("has-bg-image");
 };
 
 const toggleTheme = () => {

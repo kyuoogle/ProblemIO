@@ -26,6 +26,15 @@
   --color-text: var(--color-text-muted);
   --color-border-hover: rgba(0, 50, 150, 0.2);
 
+  /* 라이트 모드 전용 배경 이미지 설정 */
+  --app-bg-image: url("/bg-light.png");
+  --app-bg-image-dark: url("/bg-dark.png"); /* 다크 모드 전용 배경 이미지 */
+  --app-bg-overlay: rgba(248, 250, 252, 0.78);
+
+  /* 라이트 모드 전용 헤더 배경 이미지 설정 */
+  --app-header-bg-image: url("/bg-header-light.png");
+  --app-header-bg-overlay: rgba(255, 255, 255, 0.9);
+
   --section-gap: 160px;
 }
 
@@ -47,6 +56,14 @@
   --color-heading: var(--color-text-main);
   --color-text: var(--color-text-muted);
   --color-border-hover: rgba(255, 255, 255, 0.18);
+
+  /* 다크 모드 배경 오버레이 (이미지 대비용) */
+  --app-bg-overlay: rgba(13, 26, 58, 0.78);
+  --app-bg-image: var(--app-bg-image-dark);
+
+  /* 다크 모드에서는 헤더 이미지를 사용하지 않음 */
+  --app-header-bg-image: none;
+  --app-header-bg-overlay: rgba(20, 26, 51, 0.78);
 }
 
 *,
@@ -60,7 +77,7 @@
 body {
   min-height: 100vh;
   color: var(--color-heading);
-  background: var(--color-background);
+  background-color: var(--color-background);
   transition:
     color 0.5s,
     background-color 0.5s;
@@ -82,6 +99,17 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 라이트 모드 배경 이미지 적용 */
+body.has-bg-image {
+  background-image:
+    linear-gradient(var(--app-bg-overlay), var(--app-bg-overlay)),
+    var(--app-bg-image);
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 /* Typography */
