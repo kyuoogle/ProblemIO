@@ -1,13 +1,13 @@
 <template>
   <div class="search-container">
-    <div class="container mx-20 px-4">
+    <div class="container">
       <div class="home-search-row">
-        <div class="search-bar-wide">
+        <div class="search-bar-wide w-full">
           <span class="p-input-icon-right search-input-wrapper">
             <InputText
               v-model="searchKeyword"
               placeholder="검색어를 입력하세요."
-              class="search-input"
+              class="search-input w-full"
               @keyup.enter="handleSearch"
             />
             <i class="pi pi-search search-icon" @click="handleSearch" />
@@ -125,6 +125,22 @@ const handleSearch = () => {
   }
 };
 
+// 검색어 변경 시 라우팅을 자동으로 동기화: 비우면 메인, 입력하면 검색 결과로 이동
+watch(
+  searchKeyword,
+  (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      router.push({ name: "home" });
+      return;
+    }
+    if (route.name !== "search" || route.query.q !== trimmed) {
+      router.push({ name: "search", query: { q: trimmed } });
+    }
+  },
+  { flush: "post" }
+);
+
 watch(
   () => route.query.q,
   (newQuery) => {
@@ -152,8 +168,10 @@ watch(sort, () => {
 }
 
 .container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 0 12px;
 }
 
 .home-search-row {
@@ -168,7 +186,6 @@ watch(sort, () => {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 960px;
   gap: 0.75rem;
 }
 
@@ -191,7 +208,7 @@ watch(sort, () => {
 .search-input-wrapper .search-icon {
   cursor: pointer;
   position: absolute;
-  right: 10px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
 }
