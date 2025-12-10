@@ -4,22 +4,10 @@
       <!-- 긴 검색바 -->
       <div class="home-search-row">
         <div class="search-bar-wide">
-          <Button
-            class="search-filter-btn"
-            icon="pi pi-filter"
-            rounded
-            text
-            @click="toggleFilterPanel($event)">
-          </Button>
+          <Button class="search-filter-btn" icon="pi pi-filter" rounded text @click="toggleFilterPanel($event)"></Button>
           <OverlayPanel ref="filterPanel">
             <div class="search-filter-menu">
-              <div
-                v-for="opt in filterOptions"
-                :key="opt.value"
-                class="search-filter-item"
-                :class="{ 'is-active': searchSort === opt.value }"
-                @click="selectSearchSort(opt.value)"
-              >
+              <div v-for="opt in filterOptions" :key="opt.value" class="search-filter-item" :class="{ 'is-active': searchSort === opt.value }" @click="selectSearchSort(opt.value)">
                 <i v-if="searchSort === opt.value" class="pi pi-check" />
                 <span>{{ opt.label }}</span>
               </div>
@@ -27,12 +15,7 @@
           </OverlayPanel>
 
           <span class="p-input-icon-right search-input-wrapper">
-            <InputText
-              v-model="searchKeyword"
-              placeholder="검색어를 입력하세요."
-              class="search-input"
-              @keyup.enter="handleSearch"
-            />
+            <InputText v-model="searchKeyword" placeholder="검색어를 입력하세요." class="search-input" @keyup.enter="handleSearch" />
             <i class="pi pi-search search-icon" @click="handleSearch" />
           </span>
         </div>
@@ -41,9 +24,30 @@
       <!-- 기존 퀵 필터 -->
       <div class="home-controls mb-6">
         <div class="flex gap-1 filter-group">
-          <Button icon="pi pi-heart" :label="'인기'" :class="['filter-button', { 'is-active': sort === 'popular' }]" :severity="sort === 'popular' ? undefined : 'secondary'" :outlined="sort !== 'popular'" @click="sort = 'popular'" />
-          <Button icon="pi pi-eye" :label="'조회'" :class="['filter-button', { 'is-active': sort === 'views' }]" :severity="sort === 'views' ? undefined : 'secondary'" :outlined="sort !== 'views'" @click="sort = 'views'" />
-          <Button icon="pi pi-clock" :label="'최신'" :class="['filter-button', { 'is-active': sort === 'latest' }]" :severity="sort === 'latest' ? undefined : 'secondary'" :outlined="sort !== 'latest'" @click="sort = 'latest'" />
+          <Button
+            icon="pi pi-heart"
+            :label="'인기'"
+            :class="['filter-button', { 'is-active': sort === 'popular' }]"
+            :severity="sort === 'popular' ? undefined : 'secondary'"
+            :outlined="sort !== 'popular'"
+            @click="sort = 'popular'"
+          />
+          <Button
+            icon="pi pi-eye"
+            :label="'조회'"
+            :class="['filter-button', { 'is-active': sort === 'views' }]"
+            :severity="sort === 'views' ? undefined : 'secondary'"
+            :outlined="sort !== 'views'"
+            @click="sort = 'views'"
+          />
+          <Button
+            icon="pi pi-clock"
+            :label="'최신'"
+            :class="['filter-button', { 'is-active': sort === 'latest' }]"
+            :severity="sort === 'latest' ? undefined : 'secondary'"
+            :outlined="sort !== 'latest'"
+            @click="sort = 'latest'"
+          />
         </div>
       </div>
 
@@ -434,9 +438,7 @@ onMounted(() => {
 :global([data-theme="dark"] .quiz-card) {
   background: #161616;
   border: 1px solid #262626;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .quiz-card:hover {
@@ -447,9 +449,7 @@ onMounted(() => {
 
 :global([data-theme="dark"] .quiz-card:hover) {
   background: #1e1e1e;
-  box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.03);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .quiz-card:hover .quiz-thumbnail-img {

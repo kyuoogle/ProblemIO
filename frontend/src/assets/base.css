@@ -127,6 +127,7 @@ p, span, label, small {
 }
 
 /* PrimeVue buttons to primary teal */
+/* PrimeVue buttons to primary teal - MOVED TO MAIN.JS PRESET
 .p-button {
   background: var(--color-primary);
   border-color: var(--color-primary);
@@ -152,6 +153,7 @@ p, span, label, small {
   color: var(--color-heading);
   border-color: var(--color-border-hover);
 }
+*/
 
 /* Dark theme: cards/containers/text 강화 */
 [data-theme="dark"] .p-card,
