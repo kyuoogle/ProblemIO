@@ -8,7 +8,7 @@
           <OverlayPanel ref="filterPanel">
             <div class="search-filter-menu">
               <div v-for="opt in filterOptions" :key="opt.value" class="search-filter-item" :class="{ 'is-active': searchSort === opt.value }" @click="selectSearchSort(opt.value)">
-                <i v-if="searchSort === opt.value" class="pi pi-check" />
+                <i v-if="searchSort === opt.value" class="pi pi-check" ></i>
                 <span>{{ opt.label }}</span>
               </div>
             </div>
@@ -16,7 +16,7 @@
 
           <span class="p-input-icon-right search-input-wrapper">
             <InputText v-model="searchKeyword" placeholder="검색어를 입력하세요." class="search-input w-full" @keyup.enter="handleSearch" />
-            <i class="pi pi-search search-icon" @click="handleSearch" />
+            <i class="pi pi-search search-icon" @click="handleSearch" ></i>
           </span>
         </div>
       </div>
@@ -31,7 +31,7 @@
             :severity="sort === 'popular' ? undefined : 'secondary'"
             :outlined="sort !== 'popular'"
             @click="sort = 'popular'"
-          />
+          ></Button>
           <Button
             icon="pi pi-eye"
             :label="'조회'"
@@ -39,7 +39,7 @@
             :severity="sort === 'views' ? undefined : 'secondary'"
             :outlined="sort !== 'views'"
             @click="sort = 'views'"
-          />
+          ></Button>
           <Button
             icon="pi pi-clock"
             :label="'최신'"
@@ -47,7 +47,7 @@
             :severity="sort === 'latest' ? undefined : 'secondary'"
             :outlined="sort !== 'latest'"
             @click="sort = 'latest'"
-          />
+          ></Button>
         </div>
       </div>
 
@@ -248,7 +248,7 @@ onMounted(() => {
 .search-input-wrapper .search-icon {
   cursor: pointer;
   position: absolute;
-  right: 10px;
+  right: 30px;
   top: 50%;
   transform: translateY(-50%);
 }

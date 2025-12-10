@@ -3,6 +3,15 @@
     <div class="container">
       <div class="home-search-row">
         <div class="search-bar-wide w-full">
+          <Button class="search-filter-btn" icon="pi pi-filter" rounded text @click="toggleFilterPanel($event)"></Button>
+          <OverlayPanel ref="filterPanel">
+            <div class="search-filter-menu">
+              <div v-for="opt in filterOptions" :key="opt.value" class="search-filter-item" :class="{ 'is-active': sort === opt.value }" @click="selectSearchSort(opt.value)">
+                <i v-if="sort === opt.value" class="pi pi-check"></i>
+                <span>{{ opt.label }}</span>
+              </div>
+            </div>
+          </OverlayPanel>
           <span class="p-input-icon-right search-input-wrapper">
             <InputText
               v-model="searchKeyword"
@@ -10,16 +19,16 @@
               class="search-input w-full"
               @keyup.enter="handleSearch"
             />
-            <i class="pi pi-search search-icon" @click="handleSearch" />
+            <i class="pi pi-search search-icon" @click="handleSearch"></i>
           </span>
         </div>
       </div>
 
       <div class="home-controls mb-6">
         <div class="flex gap-1 filter-group">
-          <Button icon="pi pi-heart" :label="'인기'" :class="['filter-button', { 'is-active': sort === 'popular' }]" :severity="sort === 'popular' ? undefined : 'secondary'" :outlined="sort !== 'popular'" @click="sort = 'popular'" />
-          <Button icon="pi pi-eye" :label="'조회'" :class="['filter-button', { 'is-active': sort === 'views' }]" :severity="sort === 'views' ? undefined : 'secondary'" :outlined="sort !== 'views'" @click="sort = 'views'" />
-          <Button icon="pi pi-clock" :label="'최신'" :class="['filter-button', { 'is-active': sort === 'latest' }]" :severity="sort === 'latest' ? undefined : 'secondary'" :outlined="sort !== 'latest'" @click="sort = 'latest'" />
+          <Button icon="pi pi-heart" :label="'인기'" :class="['filter-button', { 'is-active': sort === 'popular' }]" :severity="sort === 'popular' ? undefined : 'secondary'" :outlined="sort !== 'popular'" @click="changeSort('popular')" />
+          <Button icon="pi pi-eye" :label="'조회'" :class="['filter-button', { 'is-active': sort === 'views' }]" :severity="sort === 'views' ? undefined : 'secondary'" :outlined="sort !== 'views'" @click="changeSort('views')" />
+          <Button icon="pi pi-clock" :label="'최신'" :class="['filter-button', { 'is-active': sort === 'latest' }]" :severity="sort === 'latest' ? undefined : 'secondary'" :outlined="sort !== 'latest'" @click="changeSort('latest')" />
         </div>
       </div>
 
@@ -67,6 +76,7 @@ import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { getQuizzes } from "@/api/quiz";
+import OverlayPanel from "primevue/overlaypanel";
 
 const route = useRoute();
 const router = useRouter();
@@ -75,11 +85,17 @@ const toast = useToast();
 const quizzes = ref([]);
 const loading = ref(false);
 const searchKeyword = ref("");
+const filterPanel = ref();
 const currentPage = ref(1);
 const pageSize = ref(12);
 const totalPages = ref(0);
 const totalElements = ref(0);
-const sort = ref("popular");
+const sort = ref<"popular" | "latest" | "views">("popular");
+const filterOptions: { label: string; value: "popular" | "latest" | "views" }[] = [
+  { label: "인기순", value: "popular" },
+  { label: "최신순", value: "latest" },
+  { label: "조회순", value: "views" },
+];
 
 const loadQuizzes = async () => {
   if (!searchKeyword.value) {
@@ -120,8 +136,27 @@ const onPageChange = (event: any) => {
 };
 
 const handleSearch = () => {
+  const trimmed = searchKeyword.value.trim();
+  if (trimmed) {
+    router.push({ name: "search", query: { q: trimmed, sort: sort.value } });
+  }
+};
+
+const toggleFilterPanel = (event: Event) => {
+  filterPanel.value?.toggle(event);
+};
+
+const selectSearchSort = (value: "popular" | "latest" | "views") => {
+  sort.value = value;
+  filterPanel.value?.hide();
+  handleSearch();
+};
+
+const changeSort = (value: "popular" | "latest" | "views") => {
+  if (sort.value === value) return;
+  sort.value = value;
   if (searchKeyword.value.trim()) {
-    router.push({ name: "search", query: { q: searchKeyword.value } });
+    router.push({ name: "search", query: { q: searchKeyword.value.trim(), sort: sort.value } });
   }
 };
 
@@ -145,12 +180,28 @@ watch(
   () => route.query.q,
   (newQuery) => {
     searchKeyword.value = (newQuery as string) || "";
+    const incomingSort = (route.query.sort as string) || "popular";
+    if (incomingSort === "popular" || incomingSort === "latest" || incomingSort === "views") {
+      sort.value = incomingSort;
+    } else {
+      sort.value = "popular";
+    }
     currentPage.value = 1;
     if (searchKeyword.value) {
       loadQuizzes();
     }
   },
   { immediate: true }
+);
+
+watch(
+  () => route.query.sort,
+  (newSort) => {
+    const incomingSort = (newSort as string) || "popular";
+    if (incomingSort === "popular" || incomingSort === "latest" || incomingSort === "views") {
+      sort.value = incomingSort;
+    }
+  }
 );
 
 watch(sort, () => {
@@ -189,6 +240,21 @@ watch(sort, () => {
   gap: 0.75rem;
 }
 
+.search-filter-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-main) !important;
+}
+
+:global([data-theme="dark"] .search-filter-btn) {
+  background: rgba(35, 45, 80, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: var(--color-heading) !important;
+}
+
 .search-input-wrapper {
   flex: 1;
   position: relative;
@@ -218,6 +284,32 @@ watch(sort, () => {
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: var(--color-heading);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+}
+
+.search-filter-menu {
+  min-width: 160px;
+  padding: 6px 0;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.search-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-heading);
+}
+
+.search-filter-item:hover {
+  background-color: var(--color-background-mute);
+}
+
+.search-filter-item.is-active {
+  font-weight: 600;
 }
 
 .home-controls {
