@@ -254,14 +254,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPopoverResponse getUserPopover(Long userId, Long viewerId) {
-        UserPopoverResponse res = userMapper.findUserPopover(userId, viewerId);
+        // 1. 매퍼에 넘길 ID 결정 (null이면 0L을 넘겨서 SQL에서 아무도 팔로우하지 않은 것처럼 처리)
+        Long searchViewerId = (viewerId == null) ? 0L : viewerId;
+
+        UserPopoverResponse res = userMapper.findUserPopover(userId, searchViewerId);
+
         if (res == null) {
-            // 프로젝트 전역 예외 형식에 맞춰서
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 나 자신인지 여부 세팅
-        res.setMe(userId.equals(viewerId));
+        // 2. 내 자신인지 여부 세팅 (viewerId가 null이면 무조건 false)
+        if (viewerId == null) {
+            res.setMe(false);
+        } else {
+            res.setMe(userId.equals(viewerId));
+        }
+
         return res;
     }
 }

@@ -1,7 +1,13 @@
 <template>
   <div class="comment-item">
     <div class="meta">
-      <div class="author">{{ comment.nickname || "익명" }}</div>
+      <div 
+        class="author"
+        :class="{ 'cursor-pointer hover:underline': !!comment.userId }"
+        @click="onAuthorClick"
+      >
+        {{ comment.nickname || "익명" }}
+      </div>
       <div class="date">{{ formatDate(comment.createdAt) }}</div>
     </div>
 
@@ -110,6 +116,10 @@
         아직 답글이 없습니다.
       </div>
     </div>
+
+    
+    <!-- 유저 팝오버 -->
+    <UserPopover ref="userPopoverRef" />
   </div>
 
   <!-- 게스트 비밀번호 확인 모달 -->
@@ -156,6 +166,7 @@ import { computed, ref } from "vue";
 import { toggleCommentLike, deleteComment, updateComment, fetchReplies } from "@/api/comment";
 import { useAuthStore } from "@/stores/auth";
 import CommentInput from "./CommentInput.vue";
+import UserPopover from "@/components/common/UserPopover.vue";
 
 defineOptions({ name: "CommentItem" });
 
@@ -391,13 +402,24 @@ function toggleReplyForm() {
   }
 }
 
+
 async function handleReplySubmitted() {
   showReplyForm.value = false;
   repliesLoaded.value = false;
   await loadReplies();
   emit("updated");
 }
+
+// 팝오버 ref
+const userPopoverRef = ref(null);
+
+// 유저 닉네임 클릭 핸들러
+const onAuthorClick = (event) => {
+  if (!props.comment.userId) return; // 게스트면 무시
+  userPopoverRef.value?.open(event, props.comment.userId);
+};
 </script>
+
 
 <style scoped>
 .comment-item {

@@ -34,14 +34,15 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Auth endpoints
+                        // 1. Auth endpoints (로그인, 회원가입 등)
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/reissue").permitAll()
+                        .requestMatchers("/api/auth/email/**").permitAll() // 이메일 인증 관련
 
-                        // Static/file access
+                        // 2. Static/file access (파일 업로드/다운로드)
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
 
-                        // Comments: 조회/작성/수정/삭제는 게스트 허용, 좋아요는 로그인 필요
+                        // 3. Comments (댓글: 조회/작성/수정/삭제는 허용, 좋아요는 인증 필요)
                         .requestMatchers(HttpMethod.GET, "/api/quizzes/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/*/replies").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/*/comments").permitAll()
@@ -49,25 +50,31 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/comments/*/likes").authenticated()
 
-                        // Public quiz and submission endpoints
+                        // 4. Public quiz and submission endpoints
+                        // (퀴즈 조회, 제출, 결과 조회는 누구나 가능)
                         .requestMatchers(HttpMethod.GET, "/api/quizzes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/*/submissions").permitAll()
+                        .requestMatchers("/api/submissions/**").permitAll()
+
+                        // (퀴즈 생성/수정/삭제는 인증된 유저만)
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/quizzes/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/quizzes/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/quizzes/**").authenticated()
-                        .requestMatchers("/api/submissions/**").permitAll()
 
-                        // User lookups available to guests
+                        // 5. User lookups (유저 정보 조회 관련)
+                        // [중요] '/me'는 구체적인 경로이므로 와일드카드(*)보다 위에 있어야 함
                         .requestMatchers("/api/users/checkNickname").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()
+
+                        // [추가됨] 팝오버 정보 조회 (게스트 허용)
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/popover").permitAll()
+
+                        // 타인 퀴즈 목록 및 프로필 조회 (게스트 허용)
                         .requestMatchers(HttpMethod.GET, "/api/users/*/quizzes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
 
-                        // Email verification
-                        .requestMatchers("/api/auth/email/**").permitAll()
-
-                        // Everything else requires auth
+                        // 6. 그 외 나머지 요청
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/follows/**").authenticated()
 

@@ -97,8 +97,12 @@ public class UserController {
             @PathVariable Long userId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long viewerId = userDetails.getUser().getId();  // 현재 로그인한 나
+        // 1. 로그인 여부에 따라 viewerId 결정 (비로그인이면 null)
+        Long viewerId = (userDetails != null) ? userDetails.getUser().getId() : null;
+
+        // 2. 서비스 호출
         UserPopoverResponse res = userService.getUserPopover(userId, viewerId);
+
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 
