@@ -165,12 +165,46 @@ p, span, label, small {
 [data-theme="dark"] .surface-section,
 [data-theme="dark"] .surface-overlay,
 [data-theme="dark"] .surface-border,
-[data-theme="dark"] .p-dialog,
-[data-theme="dark"] .p-toast {
+[data-theme="dark"] .p-dialog {
   background: var(--color-background-soft) !important;
   color: var(--color-heading) !important;
   border-color: var(--color-border) !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Toast Dark Mode Fix */
+[data-theme="dark"] .p-toast .p-toast-message {
+  background: var(--color-background-soft) !important;
+  color: var(--color-heading) !important;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .p-toast .p-toast-message .p-toast-message-icon,
+[data-theme="dark"] .p-toast .p-toast-message .p-toast-summary,
+[data-theme="dark"] .p-toast .p-toast-message .p-toast-detail {
+  color: var(--color-heading) !important;
+}
+
+/* Severity specific borders for Dark Mode */
+[data-theme="dark"] .p-toast .p-toast-message.p-toast-message-success {
+  border-left: 6px solid #22c55e;
+  background: rgba(34, 197, 94, 0.1) !important; /* Slight green tint */
+}
+
+[data-theme="dark"] .p-toast .p-toast-message.p-toast-message-info {
+  border-left: 6px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+[data-theme="dark"] .p-toast .p-toast-message.p-toast-message-warn {
+  border-left: 6px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+[data-theme="dark"] .p-toast .p-toast-message.p-toast-message-error {
+  border-left: 6px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1) !important;
 }
 
 [data-theme="dark"] .p-card .p-card-title,
