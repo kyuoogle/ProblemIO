@@ -18,13 +18,8 @@ public class EmailController {
     // GET 또는 POST /api/auth/email/send?email=abc@naver.com
     @PostMapping("/send")
     public ResponseEntity<?> sendEmail(@RequestParam String email) {
-        try {
-            emailService.sendVerificationCode(email);
-            return ResponseEntity.ok("인증 코드가 발송되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("메일 발송 실패");
-        }
+        emailService.sendVerificationCode(email);
+        return ResponseEntity.ok("인증 코드가 발송되었습니다.");
     }
 
     // 2. 인증번호 검증 요청

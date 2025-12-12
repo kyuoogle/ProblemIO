@@ -165,7 +165,10 @@ p, span, label, small {
 [data-theme="dark"] .surface-section,
 [data-theme="dark"] .surface-overlay,
 [data-theme="dark"] .surface-border,
-[data-theme="dark"] .p-dialog {
+[data-theme="dark"] .p-overlaypanel,
+[data-theme="dark"] .p-dialog,
+[data-theme="dark"] .p-popover,
+[data-theme="dark"] .p-popover-content {
   background: var(--color-background-soft) !important;
   color: var(--color-heading) !important;
   border-color: var(--color-border) !important;

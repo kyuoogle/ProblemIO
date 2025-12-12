@@ -98,6 +98,11 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        // 상태 메시지 유효성 검사 (최대 20자)
+        if (request.getStatusMessage() != null && request.getStatusMessage().length() > 20) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+
         // 3. DB 업데이트
         request.setId(userId);
         userMapper.updateProfile(request);

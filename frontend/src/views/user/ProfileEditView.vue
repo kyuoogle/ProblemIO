@@ -67,8 +67,8 @@
 
                 <!-- 상태 메시지 -->
                 <div class="flex flex-col gap-2">
-                  <label class="text-sm font-medium">상태 메시지</label>
-                  <Textarea v-model="profileForm.statusMessage" placeholder="나를 표현하는 한마디" rows="3" class="w-full" />
+                  <label class="text-sm font-medium">상태 메시지(20자 제한)</label>
+                  <Textarea v-model="profileForm.statusMessage" placeholder="나를 표현하는 한마디" rows="3" class="w-full" maxlength="20" />
                 </div>
               </div>
             </section>
@@ -134,11 +134,10 @@
                     :class="{'border-primary ring-2 ring-primary/20': profileForm.popoverDecoration === pop.key, 'border-transparent hover:border-gray-300': profileForm.popoverDecoration !== pop.key}"
                     @click="profileForm.popoverDecoration = pop.key"
                   >
-                    <img v-if="pop.image" :src="resolveImageUrl(pop.image)" class="w-full h-full object-cover rounded" />
-                    <div v-else-if="pop.style" class="w-full h-full rounded shadow-sm" :style="pop.style"></div>
-                    <div v-else class="w-full h-full bg-gray-50 rounded flex items-center justify-center border border-gray-100">
-                        <span class="text-xs text-gray-500">기본</span>
+                    <div v-if="pop.image" class="w-full h-full">
+                        <img :src="resolveImageUrl(pop.image)" class="w-full h-full object-cover rounded" />
                     </div>
+                    <div v-else class="w-full h-full rounded shadow-sm" :style="pop.style"></div>
                     <span class="absolute bottom-0 left-0 w-full text-[10px] text-center bg-gray-200/80 text-gray-900 truncate px-1 rounded-b">
                         {{ pop.name }}
                      </span>

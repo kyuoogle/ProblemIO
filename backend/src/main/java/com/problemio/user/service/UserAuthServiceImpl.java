@@ -37,6 +37,12 @@ public class UserAuthServiceImpl implements UserAuthService {
             throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
         }
 
+        // 금칙어 검사
+        String nickname = request.getNickname();
+        if (nickname.contains("admin") || nickname.contains("관리자") || nickname.contains("운영자")) {
+             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE); // 적절한 에러 코드로 대체 필요할 수 있음
+        }
+
         User user = new User();
         user.setEmail(request.getEmail());
         user.setNickname(request.getNickname());

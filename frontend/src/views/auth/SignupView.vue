@@ -95,6 +95,8 @@
                 <small v-else class="text-color-secondary">2-10자 사이로 입력해주세요.</small>
               </div>
 
+
+
               <!-- 비밀번호 입력 -->
               <div class="flex flex-col gap-2">
                 <label for="password" class="text-sm font-medium">비밀번호</label>
@@ -190,6 +192,7 @@ const loading = ref(false);
 
 // 정규식
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const bannedNicknames = ["admin", "관리자", "운영자"];
 
 // Computed Properties
 const isEmailValid = computed(() => emailRegex.test(formData.value.email));
@@ -244,6 +247,14 @@ const validateNickname = () => {
     errors.value.nickname = "닉네임은 2-10자 사이여야 합니다.";
     return false;
   }
+  // 금칙어 확인
+  for (const banned of bannedNicknames) {
+     if (nickname.includes(banned)) {
+        errors.value.nickname = `"${banned}" 단어는 사용할 수 없습니다.`;
+        return false;
+     }
+  }
+
   delete errors.value.nickname;
   return true;
 };
@@ -254,8 +265,8 @@ const validatePassword = () => {
     errors.value.password = "비밀번호를 입력해주세요.";
     return false;
   }
-  if (pwd.length < 8) {
-    errors.value.password = "비밀번호는 최소 8자 이상이어야 합니다.";
+  if (pwd.length < 8 || pwd.length > 20) {
+    errors.value.password = "비밀번호는 8자 이상 20자 이하여야 합니다.";
     return false;
   }
   if (!isPasswordStrong.value) {
@@ -279,6 +290,9 @@ const validateConfirmPassword = () => {
   return true;
 };
 
+
+
+
 const clearError = (field: string) => {
   delete errors.value[field];
 };
@@ -295,7 +309,12 @@ const handleSendVerificationCode = async () => {
     emailState.value.codeSent = true;
     toast.add({ severity: "success", summary: "성공", detail: "인증번호가 발송되었습니다.", life: 3000 });
   } catch (error: any) {
-    toast.add({ severity: "error", summary: "오류", detail: error.response?.data || "전송 실패", life: 3000 });
+    // 백엔드에서 중복 체크 등 에러 발생 시 처리
+    const errorMsg = error.response?.data?.message || error.response?.data || "메일 전송 실패";
+    if (errorMsg.includes("중복") || errorMsg.includes("Duplicated")) {
+        errors.value.email = "이미 가입된 이메일입니다.";
+    }
+    toast.add({ severity: "error", summary: "오류", detail: errorMsg, life: 3000 });
   } finally {
     emailState.value.sending = false;
   }

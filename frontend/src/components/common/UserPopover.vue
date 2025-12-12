@@ -150,7 +150,7 @@ const popoverStyle = computed(() => {
         return baseStyle;
     }
   }
-  return { overlayStyle: 'bg-white/90', textStyle: {}, buttonStyle: {} };
+  return { overlayStyle: '', textStyle: {}, buttonStyle: {} };
 });
 
 async function fetchProfile(userId) {
