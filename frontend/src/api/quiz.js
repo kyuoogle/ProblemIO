@@ -80,12 +80,10 @@ export const updateQuiz = async (quizId, data) => {
     thumbnailUrl: data.thumbnailUrl,
     isPublic: data.isPublic,
     questions: data.questions.map((q) => ({
-      id: q.id,
       order: q.questionOrder,
       imageUrl: q.imageUrl,
       description: q.description,
       answers: q.answers.map((a, idx) => ({
-        id: a.id,
         text: a.text ?? a, // 기존 데이터 구조에 따라 필요시 조정
         sortOrder: a.sortOrder ?? idx + 1,
       })),

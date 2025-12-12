@@ -56,13 +56,21 @@ export const unfollowUser = async (userId) => {
 
 // 내 팔로워 목록
 export const getMyFollowers = async () => {
-  const response = await apiClient.get("/users/me/followers");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (!user?.id) {
+    throw new Error("로그인이 필요합니다: 사용자 정보를 찾을 수 없습니다.");
+  }
+  const response = await apiClient.get(`/follows/${user.id}/followers`);
   return response.data.data;
 };
 
 // 내 팔로잉 목록
 export const getMyFollowings = async () => {
-  const response = await apiClient.get("/users/me/followings");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (!user?.id) {
+    throw new Error("로그인이 필요합니다: 사용자 정보를 찾을 수 없습니다.");
+  }
+  const response = await apiClient.get(`/follows/${user.id}/followings`);
   return response.data.data;
 };
 
@@ -82,8 +90,10 @@ export const getMyLikedQuizzes = async () => {
 };
 
 // 팔로잉 유저들의 퀴즈 목록
-export const getFollowingQuizzes = async (sort = "latest") => {
-  const response = await apiClient.get(`/users/me/quizzes/followings?sort=${sort}`);
+export const getFollowingQuizzes = async (page = 1, size = 20) => {
+  const response = await apiClient.get(`/users/me/quizzes/followings`, {
+    params: { page, size },
+  });
   return response.data.data.map((quiz) => ({
     ...quiz,
     thumbnailUrl: resolveImageUrl(quiz.thumbnailUrl),
@@ -110,4 +120,17 @@ export const checkNickname = async (nickname) => {
 export const getResources = async (type) => {
   const response = await apiClient.get(`/users/resources/${type}`);
   return response.data.data;
+};
+
+// 내가 만든 퀴즈 목록 (백엔드: /api/users/{id}/quizzes)
+export const getMyQuizzes = async () => {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (!user?.id) {
+    throw new Error("로그인이 필요합니다: 사용자 정보를 찾을 수 없습니다.");
+  }
+  const response = await apiClient.get(`/users/${user.id}/quizzes`);
+  return response.data.data.map((quiz) => ({
+    ...quiz,
+    thumbnailUrl: resolveImageUrl(quiz.thumbnailUrl),
+  }));
 };

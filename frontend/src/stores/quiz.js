@@ -59,7 +59,22 @@ export const useQuizStore = defineStore('quiz', () => {
 
   // 퀴즈 시작 시 초기화
   function startQuiz(quiz) {
-    currentQuiz.value = quiz
+    // 질문 순서를 플레이할 때만 랜덤하게 섞는다 (원본 퀴즈는 보존)
+    const shuffledQuestions = [...(quiz.questions || [])]
+    for (let i = shuffledQuestions.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]]
+    }
+    // 섞인 순서에 맞춰 questionOrder를 재부여
+    const randomizedQuiz = {
+      ...quiz,
+      questions: shuffledQuestions.map((q, idx) => ({
+        ...q,
+        questionOrder: idx + 1,
+      })),
+    }
+
+    currentQuiz.value = randomizedQuiz
     currentQuestionIndex.value = 0
     userAnswers.value = []
     quizResult.value = null
