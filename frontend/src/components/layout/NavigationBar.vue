@@ -78,7 +78,7 @@ const goToMyPage = () => router.push("/mypage");
 const handleLogout = () => {
   confirm.require({
     message: "로그아웃 하시겠습니까?",
-    header: "Logout",
+    header: "로그아웃",
     icon: "pi pi-sign-out",
     acceptClass: "p-button-danger",
     accept: () => {

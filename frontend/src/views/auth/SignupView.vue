@@ -19,7 +19,7 @@
             <form @submit.prevent="handleSignup" class="flex flex-col gap-4">
               <!-- 이메일 입력 및 인증 -->
               <div class="flex flex-col gap-2">
-                <label for="email" class="text-sm font-medium">Email (ID)</label>
+                <label for="email" class="text-sm font-medium">이메일 (ID)</label>
                 <div class="flex gap-2">
                   <InputText
                     id="email"
@@ -69,13 +69,13 @@
 
               <!-- 닉네임 입력 (중복 확인 포함) -->
               <div class="flex flex-col gap-2">
-                <label for="nickname" class="text-sm font-medium">Nickname</label>
+                <label for="nickname" class="text-sm font-medium">닉네임</label>
                 <div class="flex gap-2">
                   <InputText
                     id="nickname"
                     v-model="formData.nickname"
                     type="text"
-                    placeholder="라면러버"
+                    placeholder="닉네임을 입력해주세요"
                     :class="{ 'p-invalid': errors.nickname }"
                     class="flex-1"
                     @blur="validateNickname"
@@ -97,7 +97,7 @@
 
               <!-- 비밀번호 입력 -->
               <div class="flex flex-col gap-2">
-                <label for="password" class="text-sm font-medium">Password</label>
+                <label for="password" class="text-sm font-medium">비밀번호</label>
                 <Password
                   id="password"
                   v-model="formData.password"
@@ -115,7 +115,7 @@
 
               <!-- 비밀번호 확인 -->
               <div class="flex flex-col gap-2">
-                <label for="confirmPassword" class="text-sm font-medium">Confirm Password</label>
+                <label for="confirmPassword" class="text-sm font-medium">비밀번호 확인</label>
                 <Password
                   id="confirmPassword"
                   v-model="formData.confirmPassword"
@@ -136,8 +136,8 @@
             <Divider />
 
             <div class="text-center text-sm">
-              <span class="text-color-secondary">Already have an account?</span>
-              <router-link to="/auth/login" class="text-primary font-semibold no-underline">Sign in</router-link>
+              <span class="text-color-secondary">계정이 이미 있으신가요?</span>
+              <router-link to="/auth/login" class="text-primary font-semibold no-underline">로그인</router-link>
             </div>
           </div>
         </template>

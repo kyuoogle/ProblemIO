@@ -53,7 +53,7 @@ const handleLogin = async () => {
   loading.value = true;
   try {
     await authStore.loginUser(email.value, password.value);
-    toast.add({ severity: "success", summary: "Success", detail: "Logged in successfully", life: 3000 });
+    toast.add({ severity: "success", summary: "로그인", detail: "로그인 성공", life: 3000 });
 
     const redirect = (route.query.redirect as string) || "/";
     router.push(redirect);
@@ -77,7 +77,8 @@ const handleLogin = async () => {
 }
 
 :global([data-theme="dark"] .login-container) {
-  background: #000;
+  /* background: #000; */
+  background: transparent;
 }
 
 .auth-card {

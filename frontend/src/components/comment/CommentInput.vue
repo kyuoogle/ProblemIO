@@ -133,7 +133,7 @@ async function submit() {
 }
 
 .comment-card {
-  background: #fff; /* 항상 흰색 카드 */
+  background: var(--color-background-soft);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -158,15 +158,15 @@ async function submit() {
 :deep(.guest-row .p-inputtext),
 .guest-row .guest-password,
 .guest-row .flex-1 {
-  background: #fff !important; /* 라이트 모드 기본 */
-  border: 1px solid #e5e7eb !important;
-  color: #111827 !important;
+  background: var(--color-background-soft) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-heading) !important;
 }
 
 .comment-input-wrapper {
   position: relative;
-  background: #fff; /* 라이트 모드 기본 */
-  border: 1px solid #e5e7eb;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
 }
 
@@ -176,11 +176,11 @@ async function submit() {
   display: flex;
   align-items: center;
   padding: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 13px;
   line-height: 1.5;
   pointer-events: none; /* 입력을 가로막지 않음 */
-  background: #f2f4f7;
+  background: var(--color-background-mute);
   border-radius: 10px;
 }
 
@@ -192,8 +192,16 @@ async function submit() {
   padding: 12px;
   box-sizing: border-box;
   background: transparent !important; /* 카드 배경이 비치도록 */
-  color: #111827 !important;
+  color: var(--color-heading) !important;
   resize: vertical;
+
+  /* 스크롤바 숨김 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.comment-textarea::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .comment-textarea.prime {
@@ -206,71 +214,18 @@ async function submit() {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #111827 !important;
+  color: var(--color-heading) !important;
+  
+  /* 스크롤바 숨김 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* 다크 모드 대응 (여러 테마 클래스 대응) */
-:global(body.dark) .comment-card,
-:global(.dark) .comment-card,
-:global(.p-dark) .comment-card,
-:global(.p-theme-dark) .comment-card {
-  background: #1e1e1e;
+:deep(.comment-textarea.prime.p-inputtextarea::-webkit-scrollbar) {
+  display: none;
 }
 
-:global(body.dark) .comment-input-wrapper,
-:global(.dark) .comment-input-wrapper,
-:global(.p-dark) .comment-input-wrapper,
-:global(.p-theme-dark) .comment-input-wrapper {
-  background: #1e1e1e;
-  border-color: #3a3a3a;
-}
-
-:global(body.dark) .comment-warning,
-:global(.dark) .comment-warning,
-:global(.p-dark) .comment-warning,
-:global(.p-theme-dark) .comment-warning {
-  background: #2a2a2a;
-  color: #d1d5db;
-}
-
-:global(body.dark) .comment-textarea,
-:global(.dark) .comment-textarea,
-:global(.p-dark) .comment-textarea,
-:global(.p-theme-dark) .comment-textarea,
-:global(body.dark) .comment-textarea.prime,
-:global(.dark) .comment-textarea.prime,
-:global(.p-dark) .comment-textarea.prime,
-:global(.p-theme-dark) .comment-textarea.prime,
-:global(body.dark) .comment-textarea.prime.p-inputtextarea,
-:global(.dark) .comment-textarea.prime.p-inputtextarea,
-:global(.p-dark) .comment-textarea.prime.p-inputtextarea,
-:global(.p-theme-dark) .comment-textarea.prime.p-inputtextarea {
-  color: #e5e7eb !important;
-}
-
-:global(body.dark) .comment-submit-btn,
-:global(.dark) .comment-submit-btn,
-:global(.p-dark) .comment-submit-btn,
-:global(.p-theme-dark) .comment-submit-btn {
-  filter: brightness(0.95);
-}
-
-:global(body.dark) .guest-row .p-inputtext,
-:global(.dark) .guest-row .p-inputtext,
-:global(.p-dark) .guest-row .p-inputtext,
-:global(.p-theme-dark) .guest-row .p-inputtext,
-:global(body.dark) .guest-row .guest-password,
-:global(.dark) .guest-row .guest-password,
-:global(.p-dark) .guest-row .guest-password,
-:global(.p-theme-dark) .guest-row .guest-password,
-:global(body.dark) .guest-row .flex-1,
-:global(.dark) .guest-row .flex-1,
-:global(.p-dark) .guest-row .flex-1,
-:global(.p-theme-dark) .guest-row .flex-1 {
-  background: #1e1e1e !important;
-  border: 1px solid #3a3a3a !important;
-  color: #e5e7eb !important;
-}
+/* data-theme overrides removed as they are now handled by variables */
 
 .action-row {
   display: flex;

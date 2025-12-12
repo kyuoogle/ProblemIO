@@ -660,7 +660,8 @@ onMounted(() => {
 }
 
 :global([data-theme="dark"] .quiz-editor-page) {
-  background: #000;
+  /* background: #000; */
+  background: transparent;
 }
 
 .loading-wrapper {
