@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.apache.tika.Tika;
+
+import java.util.Arrays;
+import java.util.List;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +33,10 @@ public class FileUploadController {
     private static final String UPLOAD_DIR = "C:/public/upload";
     private static final String THUMBNAIL_DIR = "Thumbnail";
     private static final String QUESTIONS_DIR = "Questions";
+
+    private final Tika tika = new Tika();
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp");
+    private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif", "image/webp");
 
     /*
      * 단일 파일 업로드 요청을 처리하는 API
@@ -56,6 +64,9 @@ public class FileUploadController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.fail("FILE_UPLOAD_ERROR", "File is empty."));
         }
+
+        // 파일 유효성 검사 (확장자 + MIME Type)
+        validateFile(file);
 
         // 원본 파일명에서 확장자 포함 정제
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
@@ -115,5 +126,29 @@ public class FileUploadController {
             case "question", "questions" -> QUESTIONS_DIR;
             default -> "";
         };
+    }
+
+    private void validateFile(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        // 1. 확장자 화이트리스트 검사
+        String lowerCaseName = originalFilename.toLowerCase();
+        boolean validExtension = ALLOWED_EXTENSIONS.stream().anyMatch(lowerCaseName::endsWith);
+        if (!validExtension) {
+            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        // 2. MIME Type 검사 (Apache Tika)
+        try {
+            String mimeType = tika.detect(file.getInputStream());
+            if (!ALLOWED_MIME_TYPES.contains(mimeType)) {
+                throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
+            }
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 }
