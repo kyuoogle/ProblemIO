@@ -1,6 +1,9 @@
 package com.problemio.global.controller;
 
 import com.problemio.global.common.ApiResponse;
+import com.problemio.global.auth.CustomUserDetails;
+import com.problemio.global.exception.BusinessException;
+import com.problemio.global.exception.ErrorCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,8 +42,14 @@ public class FileUploadController {
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Map<String, String>>> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "category", required = false) String category
+            @RequestParam(value = "category", required = false) String category,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
+        // 로그인 사용자만 업로드 가능
+        if (userDetails == null) {
+            throw new BusinessException(ErrorCode.LOGIN_REQUIRED);
+        }
 
         // 업로드된 파일이 비어있는지 확인
         if (file.isEmpty()) {

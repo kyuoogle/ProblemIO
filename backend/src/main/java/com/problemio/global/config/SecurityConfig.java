@@ -38,9 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/reissue").permitAll()
                         .requestMatchers("/api/auth/email/**").permitAll() // 이메일 인증 관련
 
-                        // 2. Static/file access (파일 업로드/다운로드)
-                        .requestMatchers("/api/files/**").permitAll()
+                        // 2. Static/file access
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/files/**").authenticated()
 
                         // 3. Comments (댓글: 조회/작성/수정/삭제는 허용, 좋아요는 인증 필요)
                         .requestMatchers(HttpMethod.GET, "/api/quizzes/*/comments").permitAll()
