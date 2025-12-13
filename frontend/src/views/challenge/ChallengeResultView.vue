@@ -1,13 +1,13 @@
 <template>
   <div class="result-container">
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4">
       <div v-if="loading" class="text-center py-8">
         <i class="pi pi-spin pi-spinner text-4xl"></i>
       </div>
 
       <div v-else class="flex flex-col lg:flex-row justify-center gap-6 items-start relative">
         <!-- Main Result Card -->
-        <div class="w-full max-w-3xl flex flex-col gap-6 text-center">
+        <div class="w-full max-w-3xl flex flex-col gap-6 text-center py-8">
         <Card>
           <template #content>
             <div class="flex flex-col gap-6 items-center py-8">

@@ -77,6 +77,7 @@ public class UserAuthController {
     // 토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<ApiResponse<TokenResponse>> reissue(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        System.out.println("DEBUG: Reissue requested. RefreshToken: " + (refreshToken == null ? "NULL" : refreshToken.substring(0, Math.min(10, refreshToken.length())) + "..."));
         TokenResponse tokens = userAuthService.reissue(refreshToken);
 
         // refreshToken 재설정 (만료 임박 대비)

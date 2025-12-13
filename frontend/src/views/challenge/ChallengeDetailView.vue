@@ -1,6 +1,6 @@
 <template>
   <div class="challenge-detail-container">
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto px-4">
       <div v-if="loading" class="text-center py-8">
         <i class="pi pi-spin pi-spinner text-4xl"></i>
         <p>Loading...</p>
@@ -14,7 +14,7 @@
 
       <div v-else-if="challenge" class="flex flex-col lg:flex-row justify-center gap-6 items-start relative">
         <!-- Left Column: Challenge Info (Centered Fixed Width) -->
-        <div class="w-full max-w-3xl flex flex-col gap-6">
+        <div class="w-full max-w-3xl flex flex-col gap-6 py-6">
             <Card class="challenge-info-card shadow-lg border-0 rounded-2xl overflow-hidden">
                 <template #header>
                     <div class="aspect-video bg-surface-100 overflow-hidden thumbnail-frame relative">
