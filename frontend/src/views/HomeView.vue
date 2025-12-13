@@ -113,6 +113,10 @@
         <aside class="home-aside">
           <div class="ranking-panel">
             <LiveRankingWidget />
+            
+            <div class="mt-6">
+                <HomeChallengeWidget />
+            </div>
           </div>
         </aside>
       </div>
@@ -127,11 +131,14 @@ import { useToast } from "primevue/usetoast";
 import { getQuizzes } from "@/api/quiz";
 import OverlayPanel from "primevue/overlaypanel";
 import LiveRankingWidget from "@/components/LiveRankingWidget.vue";
+import HomeChallengeWidget from "@/components/challenge/HomeChallengeWidget.vue";
+import Paginator from "primevue/paginator";
 
 const router = useRouter();
 const toast = useToast();
 
 const quizzes = ref<any[]>([]);
+const loading = ref(false);
 const searchKeyword = ref("");
 
 type SortOption = "popular" | "latest" | "views";
@@ -145,7 +152,6 @@ const filterOptions: { label: string; value: SortOption }[] = [
 ];
 
 const filterPanel = ref<any>();
-const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(12);
 const totalPages = ref(0);
@@ -517,3 +523,5 @@ onMounted(() => {
   padding: 2rem;
 }
 </style>
+
+

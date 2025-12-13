@@ -59,6 +59,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/*/submissions").permitAll()
                         .requestMatchers("/api/submissions/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rankings/**").permitAll()
+                        
+                        // Challenges
+                        .requestMatchers(HttpMethod.GET, "/api/challenges", "/api/challenges/*").permitAll()
+                        .requestMatchers("/api/challenges/**").authenticated()
 
                         // (퀴즈 생성/수정/삭제는 인증된 유저만)
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/**").authenticated()
@@ -67,7 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/quizzes/**").authenticated()
 
                         // 5. User lookups (유저 정보 조회 관련)
-                        // [중요] '/me'는 구체적인 경로이므로 와일드카드(*)보다 위에 있어야 함
+                        // '/me'는 구체적인 경로이므로 와일드카드(*)보다 위에 있어야 함
                         .requestMatchers("/api/users/checkNickname").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()
 

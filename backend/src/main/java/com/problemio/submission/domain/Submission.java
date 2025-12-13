@@ -15,4 +15,6 @@ public class Submission {
     private int totalQuestions;
     private int correctCount;
     private LocalDateTime submittedAt;
+    private Long challengeId;
+    private Integer playTime;
 }

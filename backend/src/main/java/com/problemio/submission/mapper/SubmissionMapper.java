@@ -14,6 +14,11 @@ public interface SubmissionMapper {
 
     void updateCorrectCount(@Param("id") Long id, @Param("correctCount") int correctCount);
 
+    void updatePlayTime(@Param("id") Long id, @Param("playTime") int playTime);
+
+
+
+
     Optional<Submission> findById(@Param("id") Long id);
 
     List<Submission> findByQuizId(@Param("quizId") Long quizId);

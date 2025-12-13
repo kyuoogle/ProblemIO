@@ -69,6 +69,14 @@ public class SubmissionServiceImpl implements SubmissionService {
         } else if (!hadCorrect && correct) {
             correctCount += 1;
         }
+        
+        // Challenge: Calculate and update playTime (submittedAt = challenge start time)
+        if (submission.getSubmittedAt() != null) {
+            long diffSeconds = java.time.Duration.between(submission.getSubmittedAt(), LocalDateTime.now()).getSeconds();
+            submission.setPlayTime((int) diffSeconds);
+            submissionMapper.updatePlayTime(submission.getId(), (int) diffSeconds);
+        }
+
         submissionMapper.updateCorrectCount(submission.getId(), correctCount);
 
         int answeredCount = submissionDetailMapper.countBySubmissionId(submission.getId());
@@ -136,5 +144,22 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+    @Override
+    @Transactional
+    public Long createSubmission(Long quizId, Long userId, Long challengeId) {
+        int totalQuestions = questionMapper.findByQuizId(quizId).size();
+
+        Submission submission = new Submission();
+        submission.setQuizId(quizId);
+        submission.setUserId(userId);
+        submission.setChallengeId(challengeId);
+        submission.setTotalQuestions(totalQuestions);
+        submission.setCorrectCount(0);
+        submission.setSubmittedAt(LocalDateTime.now()); // Start time
+        submission.setPlayTime(0);
+
+        submissionMapper.insertSubmission(submission);
+        return submission.getId();
     }
 }
