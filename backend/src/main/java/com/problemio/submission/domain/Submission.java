@@ -16,5 +16,5 @@ public class Submission {
     private int correctCount;
     private LocalDateTime submittedAt;
     private Long challengeId;
-    private Integer playTime;
+    private Double playTime;
 }

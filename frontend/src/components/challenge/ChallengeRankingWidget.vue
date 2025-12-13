@@ -133,15 +133,12 @@ const lastUpdatedText = computed(() => formatDateTime(lastUpdated.value));
 
 const formatPlayTime = (ms) => {
     if (ms === null || ms === undefined) return "-";
-    // ms to seconds, format as 12.34s
-    // Wait, backend logic stores playTime as Integer? Or is it milliseconds? 
-    // Usually playTime from submission is often integer seconds or millis.
-    // Let's assume seconds if small, millis if large.
-    // Based on previous code, play_time was int within TimeLimit (30s). So likely seconds or ms.
-    // The DDL says Int. Time Attack is seconds. Correct Count logic uses 'playTime'.
-    // Let's assume it's seconds or equivalent unit from backend.
-    // If it's just a number, display as is for now or 's' suffix.
-    return `${ms}s`;
+    
+    // Check if it's a number
+    const val = Number(ms);
+    if (isNaN(val)) return "-";
+
+    return `${val.toFixed(3)}s`;
 }
 
 const avatarUrl = (row) => {

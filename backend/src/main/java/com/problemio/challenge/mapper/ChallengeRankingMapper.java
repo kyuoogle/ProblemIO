@@ -20,7 +20,7 @@ public interface ChallengeRankingMapper {
     int getLiveRanking(
         @Param("challengeId") Long challengeId, 
         @Param("correctCount") int correctCount, 
-        @Param("playTime") int playTime, 
+        @Param("playTime") Double playTime, 
         @Param("submittedAt") java.time.LocalDateTime submittedAt
     );
 

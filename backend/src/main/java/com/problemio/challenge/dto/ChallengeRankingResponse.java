@@ -20,7 +20,7 @@ public class ChallengeRankingResponse {
     private String profileImageUrl;
     private Integer ranking;
     private Double score;
-    private Integer playTime;
+    private Double playTime;
     private String challengeType; // TIME_ATTACK or SURVIVAL
     private LocalDateTime recordedAt;
 }

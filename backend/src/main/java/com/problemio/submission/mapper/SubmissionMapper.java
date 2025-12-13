@@ -14,7 +14,7 @@ public interface SubmissionMapper {
 
     void updateCorrectCount(@Param("id") Long id, @Param("correctCount") int correctCount);
 
-    void updatePlayTime(@Param("id") Long id, @Param("playTime") int playTime);
+    void updatePlayTime(@Param("id") Long id, @Param("playTime") Double playTime);
 
 
 

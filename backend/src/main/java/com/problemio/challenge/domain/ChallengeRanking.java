@@ -14,6 +14,6 @@ public class ChallengeRanking {
     private Long userId;
     private Integer ranking;
     private Double score;
-    private Integer playTime;
+    private Double playTime;
     private LocalDateTime createdAt;
 }

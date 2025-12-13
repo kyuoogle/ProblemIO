@@ -153,7 +153,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 return s2.getCorrectCount() - s1.getCorrectCount(); 
             }
             if (!s1.getPlayTime().equals(s2.getPlayTime())) {
-                return s1.getPlayTime() - s2.getPlayTime(); 
+                return Double.compare(s1.getPlayTime(), s2.getPlayTime());
             }
             return s1.getSubmittedAt().compareTo(s2.getSubmittedAt()); 
         });
@@ -230,7 +230,7 @@ public class ChallengeServiceImpl implements ChallengeService {
              myRanking = ChallengeRankingResponse.builder()
                 .ranking(0)
                 .score(0.0)
-                .playTime(0)
+                .playTime(0.0)
                 .nickname(userId == null ? "Guest" : "Me")
                 .challengeType(type)
                 .build();

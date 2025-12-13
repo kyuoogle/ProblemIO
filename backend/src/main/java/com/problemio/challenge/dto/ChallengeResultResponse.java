@@ -15,7 +15,7 @@ public class ChallengeResultResponse {
     private Integer correctCount;
     
     // Time Attack
-    private Integer playTime;   // 초 단위 (또는 ms)
+    private Double playTime;   // 초 단위 (또는 ms)
     private String formattedTime; // "00:00.000"
     private String challengeType; // TIME_ATTACK or SURVIVAL
 }
