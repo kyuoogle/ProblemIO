@@ -22,8 +22,11 @@ export const startChallenge = async (id) => {
 // 답안 제출 (로그인 필요)
 // request: { submissionId, questionId, answerText }
 export const submitAnswer = async (id, request) => {
-    const { data } = await axios.post(`/challenges/${id}/submit`, request)
-    return data
+    const response = await axios.post(`/challenges/${id}/submit`, request)
+    return { 
+        data: response.data, 
+        location: response.headers['location'] 
+    }
 }
 
 // 챌린지 결과 조회 (로그인 필요)

@@ -44,7 +44,9 @@ public class ChallengeController {
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid QuizSubmissionRequest request) {
-        return ResponseEntity.ok(challengeService.submitAnswer(userDetails.getUser().getId(), id, request));
+        QuizAnswerResponse response = challengeService.submitAnswer(userDetails.getUser().getId(), id, request);
+        java.net.URI location = java.net.URI.create("/api/challenges/" + id + "/result");
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}/result")

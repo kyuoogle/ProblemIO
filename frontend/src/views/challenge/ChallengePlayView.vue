@@ -186,7 +186,7 @@ const submitAnswer = async () => {
             answerText: currentAnswer.value.trim()
         }
         
-        const result = await submitAnswerAPI(challengeId, payload)
+        const { data: result } = await submitAnswerAPI(challengeId, payload)
         
         // Logic Branch
         if (challengeType.value === 'SURVIVAL') {
@@ -195,7 +195,7 @@ const submitAnswer = async () => {
                 clearInterval(timerInterval.value)
                 toast.add({ severity: 'error', summary: 'Game Over', detail: '오답입니다! 챌린지가 종료됩니다.', life: 2000 })
                 setTimeout(() => {
-                    router.push(`/challenges/${challengeId}/result`)
+                    router.replace(`/challenges/${challengeId}/result`)
                 }, 1000)
                 return
             }
@@ -211,7 +211,7 @@ const submitAnswer = async () => {
             clearInterval(timerInterval.value)
             toast.add({ severity: 'success', summary: 'Clear!', detail: '모든 문제를 풀었습니다!', life: 2000 })
             setTimeout(() => {
-                router.push(`/challenges/${challengeId}/result`)
+                router.replace(`/challenges/${challengeId}/result`)
             }, 1000)
         }
         
