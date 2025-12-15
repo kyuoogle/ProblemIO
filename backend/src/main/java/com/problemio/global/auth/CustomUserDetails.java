@@ -19,7 +19,11 @@ public class CustomUserDetails implements UserDetails {
     // 권한 반환
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole()));
+        String role = user.getRole();
+        if (role == null || role.isEmpty()) {
+            role = "ROLE_USER"; 
+        }
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override

@@ -26,9 +26,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
 import NavigationBar from '@/components/layout/NavigationBar.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 
+const authStore = useAuthStore();
 const theme = ref(localStorage.getItem("theme") || "light");
 
 const applyTheme = (mode: string) => {
@@ -50,6 +52,9 @@ const scrollToTop = () => {
 
 onMounted(() => {
   applyTheme(theme.value);
+  if (authStore.isAuthenticated) {
+      authStore.refreshUser();
+  }
 });
 </script>
 
