@@ -125,7 +125,7 @@
             <InputNumber v-model="challengeForm.timeLimit" class="w-full" placeholder="예: 60" />
           </div>
 
-          <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="field">
               <label class="field-label">시작 일시</label>
               <Calendar v-model="challengeForm.startAt" showTime hourFormat="24" class="w-full" showIcon />

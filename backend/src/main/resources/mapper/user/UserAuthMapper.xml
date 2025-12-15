@@ -31,10 +31,12 @@
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO users (email,
                            password_hash,
-                           nickname)
+                           nickname,
+                           role)
         VALUES (#{email},
                 #{passwordHash},
-                #{nickname})
+                #{nickname},
+                'ROLE_USER')
     </insert>
 
 
