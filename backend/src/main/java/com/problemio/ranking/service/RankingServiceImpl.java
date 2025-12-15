@@ -7,6 +7,7 @@ import com.problemio.ranking.mapper.RankingMapper;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,8 +49,9 @@ public class RankingServiceImpl implements RankingService {
                 end = today.atStartOfDay();
             }
             case WEEK -> {
-                start = today.minusDays(6).atStartOfDay();
-                end = today.plusDays(1).atStartOfDay();
+                LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+                start = weekStart.atStartOfDay();
+                end = weekStart.plusWeeks(1).atStartOfDay();
             }
             default -> throw new IllegalArgumentException("Unsupported period: " + period);
         }
