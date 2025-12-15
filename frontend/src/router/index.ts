@@ -14,6 +14,10 @@ const QuizEditView = () => import('@/views/quiz/QuizEditView.vue')
 const UserPageView = () => import('@/views/user/UserPageView.vue')
 const MyPageView = () => import('@/views/user/MyPageView.vue')
 const ProfileEditView = () => import('@/views/user/ProfileEditView.vue')
+const ChallengeListView = () => import('@/views/challenge/ChallengeListView.vue')
+const ChallengePlayView = () => import('@/views/challenge/ChallengePlayView.vue')
+const ChallengeResultView = () => import('@/views/challenge/ChallengeResultView.vue')
+const ChallengeDetailView = () => import('@/views/challenge/ChallengeDetailView.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +47,31 @@ const router = createRouter({
       name: 'search',
       component: SearchView,
       meta: { requiresAuth: false },
+    },
+    // Challenge Routes
+    {
+      path: '/challenges',
+      name: 'challenges',
+      component: ChallengeListView,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/challenges/:id',
+      name: 'challenge-detail',
+      component: ChallengeDetailView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/challenges/:id/play',
+      name: 'challenge-play',
+      component: ChallengePlayView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/challenges/:id/result',
+      name: 'challenge-result',
+      component: ChallengeResultView,
+      meta: { requiresAuth: true },
     },
     // Quiz Routes
     {

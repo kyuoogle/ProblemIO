@@ -96,9 +96,11 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Transactional
     public TokenResponse reissue(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
+            System.out.println("DEBUG: Reissue failed - Token is null/blank");
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
         if (!jwtTokenProvider.validateToken(refreshToken)) {
+            System.out.println("DEBUG: Reissue failed - Token validation failed");
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
         RefreshToken dbToken = refreshTokenMapper.findByTokenValue(refreshToken)

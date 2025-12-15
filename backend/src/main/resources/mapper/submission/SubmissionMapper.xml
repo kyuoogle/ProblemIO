@@ -11,16 +11,24 @@
         <result property="totalQuestions" column="total_questions"/>
         <result property="correctCount" column="correct_count"/>
         <result property="submittedAt" column="submitted_at"/>
+        <result property="challengeId" column="challenge_id"/>
+        <result property="playTime" column="play_time"/>
     </resultMap>
 
     <insert id="insertSubmission" parameterType="com.problemio.submission.domain.Submission" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO submissions (quiz_id, user_id, total_questions, correct_count, submitted_at)
-        VALUES (#{quizId}, #{userId}, #{totalQuestions}, #{correctCount}, NOW())
+        INSERT INTO submissions (quiz_id, user_id, total_questions, correct_count, submitted_at, challenge_id, play_time)
+        VALUES (#{quizId}, #{userId}, #{totalQuestions}, #{correctCount}, NOW(), #{challengeId}, #{playTime})
     </insert>
 
     <update id="updateCorrectCount">
         UPDATE submissions
         SET correct_count = #{correctCount}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePlayTime">
+        UPDATE submissions
+        SET play_time = #{playTime}
         WHERE id = #{id}
     </update>
 
@@ -32,6 +40,8 @@
         SELECT * FROM submissions WHERE quiz_id = #{quizId}
     </select>
 
+
+
     <select id="findByUserId" resultMap="SubmissionResultMap">
         SELECT * FROM submissions WHERE user_id = #{userId}
     </select>
@@ -39,6 +49,10 @@
     <delete id="deleteByQuizId">
         DELETE FROM submissions WHERE quiz_id = #{quizId}
     </delete>
+
+
+
+
 
     <select id="findIdsByUserId" resultType="long">
         SELECT id

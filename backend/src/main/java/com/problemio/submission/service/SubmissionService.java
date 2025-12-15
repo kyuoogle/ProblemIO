@@ -9,4 +9,6 @@ public interface SubmissionService {
     QuizAnswerResponse submitQuiz(Long quizId, Long userIdOrNull, QuizSubmissionRequest request);
 
     QuizSubmissionResponse getSubmissionResult(Long submissionId);
+
+    Long createSubmission(Long quizId, Long userId, Long challengeId);
 }
