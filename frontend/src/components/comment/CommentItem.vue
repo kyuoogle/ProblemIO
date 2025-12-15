@@ -133,9 +133,14 @@
   >
     <div class="flex flex-col gap-3">
       <p class="m-0 text-sm text-gray-600">
-        게스트로 작성된 댓글입니다. {{ modalMode === 'delete' ? '삭제' : '수정' }}하려면 비밀번호를 입력하세요.
+        {{ 
+          isAdmin 
+            ? '관리자 권한으로 댓글을 삭제하시겠습니까?' 
+            : `게스트로 작성된 댓글입니다. ${modalMode === 'delete' ? '삭제' : '수정'}하려면 비밀번호를 입력하세요.`
+        }}
       </p>
       <InputText
+        v-if="!isAdmin"
         v-model="password"
         type="password"
         placeholder="비밀번호"
@@ -265,7 +270,9 @@ async function remove() {
 
   // Admin bypass
   if (isAdmin.value) {
-     // Admin can delete immediately
+     modalMode.value = "delete";
+     showPasswordModal.value = true;
+     return;
   } else {
     // 작성자만 삭제 허용
     if (props.comment.userId && !props.comment.mine) {
@@ -297,7 +304,8 @@ async function confirmModal() {
     return;
   }
 
-  if (!password.value.trim()) {
+  // Admin does not need password
+  if (!isAdmin.value && !password.value.trim()) {
     error.value = "비밀번호를 입력하세요.";
     return;
   }
