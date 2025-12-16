@@ -219,6 +219,16 @@
           AND is_deleted = 0
     </update>
 
+    <update id="anonymizeByUserId">
+        UPDATE comments
+        SET user_id = NULL,
+            guest_nickname = '탈퇴한 회원',
+            guest_password_hash = NULL,
+            writer_ip = NULL,
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
     <delete id="deleteByUserId">
         DELETE FROM comments
         WHERE user_id = #{userId}

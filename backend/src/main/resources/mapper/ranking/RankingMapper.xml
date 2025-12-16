@@ -19,8 +19,8 @@
     <select id="findRankingInPeriod" resultMap="rankingRowMap">
         SELECT
             u.id AS user_id,
-            u.nickname,
-            u.profile_image_url,
+            CASE WHEN u.is_deleted = 1 THEN '탈퇴한 회원' ELSE u.nickname END AS nickname,
+            CASE WHEN u.is_deleted = 1 THEN NULL ELSE u.profile_image_url END AS profile_image_url,
             COUNT(DISTINCT s.quiz_id) AS solved_quiz_count,
             SUM(s.correct_count) AS total_correct,
             SUM(s.total_questions) AS total_questions,
@@ -30,10 +30,9 @@
         JOIN users u ON u.id = s.user_id
         WHERE
             s.user_id IS NOT NULL
-            AND u.is_deleted = 0
             AND s.submitted_at >= #{start}
             AND s.submitted_at &lt; #{end}
-        GROUP BY u.id, u.nickname, u.profile_image_url
+        GROUP BY u.id, u.nickname, u.profile_image_url, u.is_deleted
         HAVING solved_quiz_count > 0
         ORDER BY
             (COUNT(DISTINCT s.quiz_id) * (0.3 + 0.7 * ((SUM(s.correct_count) + 20 * 0.6) / (SUM(s.total_questions) + 20)))) DESC,

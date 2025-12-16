@@ -45,6 +45,8 @@ public interface CommentMapper {
 
     void softDeleteByQuizId(@Param("quizId") Long quizId);
 
+    void anonymizeByUserId(@Param("userId") Long userId);
+
     void deleteByUserId(@Param("userId") Long userId);
 
     class CommentReplyCount {

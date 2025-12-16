@@ -200,19 +200,13 @@ public class UserServiceImpl implements UserService {
             likedCommentIds.forEach(commentMapper::decreaseLikeCount);
         }
 
-        // 5) 내가 작성한 댓글 삭제 + 그 댓글 좋아요 정리
+        // 5) 내가 작성한 댓글 익명 처리 (작성자 정보 제거, 내용은 유지)
         List<Long> myCommentIds = commentMapper.findIdsByUserId(userId);
         if (!myCommentIds.isEmpty()) {
-            commentLikeMapper.deleteByCommentIds(myCommentIds);
-            commentMapper.deleteByUserId(userId);
+            commentMapper.anonymizeByUserId(userId);
         }
 
-        // 6) 내가 만든 제출 기록 제거 (상세 먼저)
-        List<Long> mySubmissionIds = submissionMapper.findIdsByUserId(userId);
-        if (!mySubmissionIds.isEmpty()) {
-            submissionDetailMapper.deleteBySubmissionIds(mySubmissionIds);
-            submissionMapper.deleteByUserId(userId);
-        }
+        // 6) 내가 만든 제출 기록은 남겨 두어 랭킹/통계에서 익명 사용자로 표기되도록 보존
 
         // 7) 내가 만든 퀴즈 삭제 (내 퀴즈에 달린 댓글/좋아요/제출도 QuizService에서 정리)
         List<Quiz> myQuizzes = quizMapper.findQuizzesByUserId(userId);
