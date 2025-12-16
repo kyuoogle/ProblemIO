@@ -24,5 +24,18 @@ public interface CustomItemMapper {
     boolean existsUserItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
     
     // Assign item
+    // Assign item
     void saveUserItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
+
+    void update(CustomItem item);
+
+    List<com.problemio.user.domain.User> findAssignedUsers(Long itemId);
+
+    void deleteUserItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
+
+    // 아이템 삭제
+    void deleteItem(Long id);
+
+    // 아이템에 연관된 모든 유저 할당 삭제
+    void deleteUserItemsByItemId(Long itemId);
 }

@@ -65,3 +65,9 @@ export const revokeUserItem = async (itemId, userId) => {
     const response = await instance.delete(`/admin/items/${itemId}/users/${userId}`)
     return response.data
 }
+
+// 아이템 삭제
+export const deleteCustomItem = async (itemId) => {
+    const response = await instance.delete(`/admin/items/${itemId}`)
+    return response.data
+}

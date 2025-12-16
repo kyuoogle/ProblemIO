@@ -285,15 +285,45 @@
                   <div class="font-bold text-lg" style="color:var(--color-heading)">{{ item.name }}</div>
                   <div class="text-sm mb-2" style="color:var(--text-color-secondary)">{{ item.itemType }}</div>
                   <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto h-24 mb-2" style="background:rgba(0,0,0,0.1); color:var(--color-text)">{{ JSON.stringify(item.config, null, 2) }}</pre>
-                  <div class="flex justify-between items-center mt-2">
-                      <span v-if="item.isDefault" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Default</span>
-                      <span v-else></span>
-                      <Button label="유저 할당" size="small" outlined icon="pi pi-user-plus" @click="openAssignDialog(item)" />
+                  <div class="flex flex-col gap-2 mt-2">
+                      <div class="flex justify-between gap-2">
+                           <Button label="유저 할당" size="small" outlined icon="pi pi-user-plus" @click="openAssignDialog(item)" class="flex-1 p-button-sm text-xs" />
+                           <Button label="유저 관리" size="small" outlined icon="pi pi-users" @click="openUserDialog(item)" class="flex-1 p-button-sm text-xs" />
+                      </div>
+                      
+                      <div class="flex justify-end gap-1">
+                          <Button  icon="pi pi-pencil" size="small" text severity="info" @click="startEdit(item)" />
+                          <Button  icon="pi pi-trash" size="small" text severity="danger" @click="confirmDelete(item)" />
+                      </div>
                   </div>
               </div>
           </div>
        </div>
     </div>
+
+    <!-- User Management Dialog -->
+    <Dialog v-model:visible="showUserDialog" header="할당된 유저 관리" :style="{ width: '40rem' }" :modal="true">
+        <div class="p-4">
+             <div v-if="loadingUsers" class="text-center">
+                 <i class="pi pi-spin pi-spinner text-2xl"></i>
+             </div>
+             <div v-else-if="assignedUsers.length === 0" class="text-center text-secondary py-4">
+                 할당된 유저가 없습니다.
+             </div>
+             <div v-else class="flex flex-col gap-2">
+                 <div v-for="user in assignedUsers" :key="user.id" class="flex justify-between items-center p-3 border rounded bg-gray-50">
+                     <div class="flex items-center gap-3">
+                         <img :src="resolveImageUrl(user.profileImageUrl) || '/placeholder.svg'" class="w-8 h-8 rounded-full object-cover"/>
+                         <div>
+                             <div class="font-bold">{{ user.nickname }}</div>
+                             <div class="text-xs text-gray-500">{{ user.email }}</div>
+                         </div>
+                     </div>
+                     <Button label="권한 취소" severity="danger" size="small" outlined @click="removeUser(user.id)" />
+                 </div>
+             </div>
+        </div>
+    </Dialog>
 
     <!-- User Assign Dialog -->
     <Dialog v-model:visible="showAssignDialog" header="유저에게 아이템 할당" :style="{ width: '30rem' }" :modal="true">
@@ -359,7 +389,11 @@ import {
     createCustomItem, 
     getCustomItems, 
     assignItemToUser,
-    uploadItemImage // Import upload function
+    uploadItemImage,
+    updateCustomItem,
+    getAssignedUsers,
+    revokeUserItem,
+    deleteCustomItem
 } from '@/api/admin';
 import { resolveImageUrl } from '@/lib/image';
 import ProfileBackground from '@/components/user/ProfileBackground.vue';
@@ -789,6 +823,18 @@ const assignItem = async () => {
          toast.add({ severity: 'error', summary: '오류', detail: '할당 실패 (이미 보유중이거나 유저 없음)', life: 3000 });
     } finally {
         assigning.value = false;
+    }
+};
+
+const confirmDelete = async (item) => {
+    if(!confirm(`'${item.name}' 아이템을 정말 삭제하시겠습니까?`)) return;
+    
+    try {
+        await deleteCustomItem(item.id);
+        toast.add({ severity: 'success', summary: '삭제 완료', detail: '아이템이 삭제되었습니다.' });
+        await loadCustomItems(); // Refresh List
+    } catch(e) {
+        toast.add({ severity: 'error', summary: '오류', detail: '삭제 실패' });
     }
 };
 

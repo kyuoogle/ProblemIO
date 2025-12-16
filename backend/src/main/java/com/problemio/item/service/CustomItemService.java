@@ -100,7 +100,9 @@ public class CustomItemService {
                 log.error("Error parsing item config for item " + item.getId(), e);
                 return null; 
             }
-        }).collect(Collectors.toList());
+        })
+        .filter(java.util.Objects::nonNull)
+        .collect(Collectors.toList());
     }
 
     @Transactional
@@ -136,6 +138,13 @@ public class CustomItemService {
                         .profileImageUrl(u.getProfileImageUrl())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteItem(Long itemId) {
+        // FK 제약조건으로 인해 할당된 유저 정보 먼저 삭제
+        customItemMapper.deleteUserItemsByItemId(itemId);
+        customItemMapper.deleteItem(itemId);
     }
 
     @Transactional

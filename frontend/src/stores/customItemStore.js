@@ -125,6 +125,9 @@ export const useCustomItemStore = defineStore('customItem', () => {
                  result[item.id] = {
                     id: item.id,
                     name: item.name,
+                    description: item.description,
+                    isDefault: item.isDefault,
+                    isOwned: item.isOwned,
                     ...config
                  }
             });

@@ -132,6 +132,13 @@ public class AdminController {
         customItemService.revokeUserItem(itemId, userId);
         return ResponseEntity.ok().build();
     }
+
+    // 아이템 삭제
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<Void> deleteCustomItem(@PathVariable Long itemId) {
+        customItemService.deleteItem(itemId);
+        return ResponseEntity.ok().build();
+    }
     @PostMapping("/items/upload")
     public ResponseEntity<String> uploadItemImage(@RequestParam("file") org.springframework.web.multipart.MultipartFile file, @RequestParam("type") String type) {
         if (file.isEmpty()) {

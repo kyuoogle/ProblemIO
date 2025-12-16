@@ -278,6 +278,9 @@
                         @click="selectItem(item)"
                         v-tooltip.bottom="item.description || item.name"
                       >
+                          <div v-if="item.isDefault" class="absolute top-1 left-1 bg-gray-600/80 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 font-bold">
+                              기본
+                          </div>
                          <!-- Item Thumbnail -->
                           <div class="flex-1 w-full flex items-center justify-center overflow-hidden">
                               <img v-if="item.image" :src="resolveImageUrl(item.image)" class="w-full h-full object-contain" />
