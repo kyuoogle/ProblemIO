@@ -35,3 +35,33 @@ export const assignItemToUser = async (itemId, userId) => {
     const response = await instance.post(`/admin/items/${itemId}/assign/${userId}`)
     return response.data
 }
+// 아이템 이미지 업로드
+export const uploadItemImage = async (file, type) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+    
+    // Content-Type is auto set by axios when FormData is used
+    const response = await instance.post('/admin/items/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data; // returns relative path string
+}
+
+// 아이템 수정
+export const updateCustomItem = async (itemId, itemData) => {
+    const response = await instance.put(`/admin/items/${itemId}`, itemData)
+    return response.data
+}
+
+// 할당된 유저 조회
+export const getAssignedUsers = async (itemId) => {
+    const response = await instance.get(`/admin/items/${itemId}/users`)
+    return response.data
+}
+
+// 유저 할당 취소
+export const revokeUserItem = async (itemId, userId) => {
+    const response = await instance.delete(`/admin/items/${itemId}/users/${userId}`)
+    return response.data
+}

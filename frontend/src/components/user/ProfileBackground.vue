@@ -20,12 +20,21 @@ const props = defineProps({
   previewThemeId: {
     type: [String, Number],
     default: null
+  },
+  // [New] 직접 설정 객체 주입 (Admin Preview용)
+  previewConfig: {
+    type: Object,
+    default: null
   }
 });
 
 const customItemStore = useCustomItemStore();
 
 const themeConfig = computed(() => {
+  // 1. 직접 Config가 주입되면 그것을 최우선으로 사용
+  if (props.previewConfig) return props.previewConfig;
+
+  // 2. ID 기반 조회
   const themeId = props.previewThemeId !== null ? props.previewThemeId : props.user?.profileTheme;
   if (!themeId) return null;
   return customItemStore.getItemConfig('THEME', themeId);

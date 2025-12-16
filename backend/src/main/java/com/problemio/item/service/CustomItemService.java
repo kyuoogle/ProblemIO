@@ -32,8 +32,9 @@ public class CustomItemService {
             String configJson = objectMapper.writeValueAsString(request.getConfig());
             
             CustomItem item = CustomItem.builder()
-                    .itemType(request.getItemType())
+                    .itemType(ItemType.valueOf(request.getItemType()))
                     .name(request.getName())
+                    .description(request.getDescription())
                     .config(configJson)
                     .isDefault(request.isDefault())
                     .createdAt(LocalDateTime.now())
@@ -80,18 +81,6 @@ public class CustomItemService {
         // Post-process config string back to Object if needed
         return items.stream().map(item -> {
             try {
-                // Determine if we need to parse config. 
-                // However, DTO has `Object config`. 
-                // If Mybatis returned it as String in the object, we might need to parse.
-                // But wait, `CustomItemResponse` field `config` is Object. 
-                // Mybatis will likely map the JSON string column to a String in Java if type handler isn't set.
-                // Actually, let's look at `Configuration` of MyBatis or just handle it here.
-                // If I mapped `config` in mapper XML to a column, it comes out as String.
-                // So I should modify CustomItemResponse to have String config OR parse it here.
-                // Let's assume it comes as String and we parse it.
-                
-                // Oops, I defined `Object config` in DTO. 
-                // If MyBatis maps String -> Object, it remains String.
                 Object parsedConfig = item.getConfig();
                 if (parsedConfig instanceof String) {
                     parsedConfig = objectMapper.readValue((String) parsedConfig, Object.class);
@@ -101,6 +90,7 @@ public class CustomItemService {
                         .id(item.getId())
                         .itemType(item.getItemType())
                         .name(item.getName())
+                        .description(item.getDescription())
                         .config(parsedConfig)
                         .isDefault(item.isDefault())
                         .createdAt(item.getCreatedAt())
@@ -108,8 +98,48 @@ public class CustomItemService {
                         .build();
             } catch (Exception e) {
                 log.error("Error parsing item config for item " + item.getId(), e);
-                return item; // Return as is if fail?
+                return null; 
             }
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateItem(Long itemId, CustomItemRequest request) {
+        CustomItem item = customItemMapper.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found"));
+        
+        try {
+            String configJson = objectMapper.writeValueAsString(request.getConfig());
+            
+             CustomItem updatedItem = CustomItem.builder()
+                    .id(item.getId())
+                    .itemType(ItemType.valueOf(request.getItemType())) 
+                    .name(request.getName())
+                    .description(request.getDescription())
+                    .config(configJson)
+                    .isDefault(request.isDefault())
+                    .createdAt(item.getCreatedAt()) 
+                    .build();
+
+            customItemMapper.update(updatedItem);           
+        } catch (JsonProcessingException e) {
+             throw new RuntimeException("Invalid config JSON");
+        }
+    }
+
+    public List<com.problemio.user.dto.UserResponse> getAssignedUsers(Long itemId) {
+        return customItemMapper.findAssignedUsers(itemId).stream()
+                .map(u -> com.problemio.user.dto.UserResponse.builder()
+                        .id(u.getId())
+                        .nickname(u.getNickname())
+                        .email(u.getEmail())
+                        .profileImageUrl(u.getProfileImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void revokeUserItem(Long itemId, Long userId) {
+        customItemMapper.deleteUserItem(userId, itemId);
     }
 }

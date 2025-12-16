@@ -74,6 +74,11 @@ const props = defineProps({
     previewDecorationId: {
         type: [String, Number],
         default: null
+    },
+    // [New] 직접 설정 객체 주입 (Admin Preview용)
+    previewConfig: {
+        type: Object,
+        default: null
     }
 });
 
@@ -82,12 +87,43 @@ defineEmits(['click-profile']);
 const customItemStore = useCustomItemStore();
 
 const popoverStyle = computed(() => {
-  // 미리보기 ID가 있으면 그것을 사용, 없으면 프로필의 설정을 사용
+  // 1. 직접 Config 우선
+  if (props.previewConfig) {
+      const deco = props.previewConfig;
+      // ... Logic same as below ...
+      // Refactor repetition or just copy logic for now
+      // Logic Duplication for Safety:
+        const varsStyle = deco.textColor ? {
+            '--text-color': `${deco.textColor} !important`,
+            '--text-color-secondary': `${deco.textColor} !important`
+        } : {};
+
+        const baseStyle = {
+            color: deco.textColor || 'inherit',
+            overlayStyle: deco.overlayStyle || '', 
+            textStyle: deco.textStyle || {},
+            buttonStyle: deco.buttonStyle || {},
+            ...varsStyle,
+            ...(deco.style || {})
+        };
+
+        if (deco.image) {
+            return {
+                backgroundImage: `url('${resolveImageUrl(deco.image)}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                ...baseStyle
+            }
+        }
+        return baseStyle;
+  }
+
+  // 2. ID Based
   const decoId = props.previewDecorationId !== null ? props.previewDecorationId : props.profile?.popoverDecoration;
   
   if (decoId) {
     const deco = customItemStore.getItemConfig('POPOVER', decoId);
-      if (deco) {
+    if (deco) {
         // [수정] !important를 붙여서 우선순위 강제
         const varsStyle = deco.textColor ? {
             '--text-color': `${deco.textColor} !important`,

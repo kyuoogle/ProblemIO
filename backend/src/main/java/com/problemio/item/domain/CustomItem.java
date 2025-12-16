@@ -15,6 +15,7 @@ public class CustomItem {
     private Long id;
     private ItemType itemType;
     private String name;
+    private String description;
     private String config; // Using String for JSON content in Domain, Mapper will handle it
     private boolean isDefault;
     private LocalDateTime createdAt;

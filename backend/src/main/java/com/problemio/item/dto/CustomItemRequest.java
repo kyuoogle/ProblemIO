@@ -9,8 +9,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class CustomItemRequest {
-    private ItemType itemType;
+    private String itemType;
     private String name;
+    private String description;
     private Object config; // JSON object from frontend
     private boolean isDefault;
 }

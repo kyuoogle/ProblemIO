@@ -273,9 +273,10 @@
                       <div 
                         v-for="item in availableItems" 
                         :key="item.id || item.key"
-                        class="cursor-pointer border-2 rounded-lg p-2 aspect-square flex flex-col items-center justify-center gap-2 hover:bg-surface-hover transition-all relative overflow-hidden"
+                        class="cursor-pointer border-2 rounded-lg p-2 aspect-square flex flex-col items-center justify-center gap-2 hover:bg-surface-hover transition-all relative overflow-hidden group"
                         :class="{'border-primary ring-2 ring-primary/20': isItemSelected(item)}"
                         @click="selectItem(item)"
+                        v-tooltip.bottom="item.description || item.name"
                       >
                          <!-- Item Thumbnail -->
                           <div class="flex-1 w-full flex items-center justify-center overflow-hidden">
@@ -283,6 +284,10 @@
                               <div v-else class="w-full h-full rounded bg-surface-200" :style="item.style"></div>
                           </div>
                           <span class="text-xs truncate w-full text-center">{{ item.name }}</span>
+                          
+                          <div v-if="item.description" class="absolute inset-x-0 bottom-0 bg-black/70 text-white text-[10px] p-1 opacity-0 group-hover:opacity-100 transition-opacity truncate text-center z-10">
+                              {{ item.description }}
+                          </div>
                           
                           <!-- Checkmark if selected -->
                           <div v-if="isItemSelected(item)" class="absolute top-1 right-1 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
@@ -516,7 +521,7 @@ const onFileCustomSelect = (event: any) => {
 // 변경사항 적용 (즉시 저장)
 const applyCustomization = async () => {
     try {
-        const updateData = {};
+        const updateData: any = {};
         
         // 타입에 따른 데이터 준비
         if (customType.value === 'AVATAR') {

@@ -5,8 +5,8 @@
 <mapper namespace="com.problemio.item.mapper.CustomItemMapper">
 
     <insert id="save" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO custom_items (item_type, name, config, is_default, created_at)
-        VALUES (#{itemType}, #{name}, #{config}, #{isDefault}, NOW())
+        INSERT INTO custom_items (item_type, name, description, config, is_default, created_at)
+        VALUES (#{itemType}, #{name}, #{description}, #{config}, #{isDefault}, NOW())
     </insert>
 
     <select id="findById" resultType="com.problemio.item.domain.CustomItem">
@@ -25,7 +25,9 @@
     <resultMap id="CustomItemResponseMap" type="com.problemio.item.dto.CustomItemResponse">
         <id property="id" column="id"/>
         <result property="itemType" column="item_type"/>
+        <result property="itemType" column="item_type"/>
         <result property="name" column="name"/>
+        <result property="description" column="description"/>
         <result property="config" column="config"/>
         <result property="isDefault" column="is_default"/>
         <result property="createdAt" column="created_at"/>
@@ -37,6 +39,7 @@
             ci.id,
             ci.item_type,
             ci.name,
+            ci.description,
             ci.config,
             ci.is_default,
             ci.created_at,
@@ -63,5 +66,28 @@
         INSERT INTO user_items (user_id, item_id, acquired_at)
         VALUES (#{userId}, #{itemId}, NOW())
     </insert>
+
+    <update id="update">
+        UPDATE custom_items
+        SET 
+            name = #{name},
+            description = #{description},
+            config = #{config},
+            is_default = #{isDefault}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findAssignedUsers" resultType="com.problemio.user.domain.User">
+        SELECT u.* 
+        FROM users u
+        JOIN user_items ui ON u.id = ui.user_id
+        WHERE ui.item_id = #{itemId}
+        AND u.is_deleted = 0
+    </select>
+
+    <delete id="deleteUserItem">
+        DELETE FROM user_items
+        WHERE user_id = #{userId} AND item_id = #{itemId}
+    </delete>
 
 </mapper>

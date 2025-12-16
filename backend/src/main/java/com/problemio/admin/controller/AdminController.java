@@ -18,6 +18,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -111,5 +114,69 @@ public class AdminController {
     public ResponseEntity<Void> assignItemToUser(@PathVariable Long itemId, @PathVariable Long userId) {
         customItemService.assignItemToUser(itemId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/items/{itemId}")
+    public ResponseEntity<Void> updateCustomItem(@PathVariable Long itemId, @RequestBody com.problemio.item.dto.CustomItemRequest request) {
+        customItemService.updateItem(itemId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/items/{itemId}/users")
+    public ResponseEntity<List<com.problemio.user.dto.UserResponse>> getAssignedUsers(@PathVariable Long itemId) {
+        return ResponseEntity.ok(customItemService.getAssignedUsers(itemId));
+    }
+
+    @DeleteMapping("/items/{itemId}/users/{userId}")
+    public ResponseEntity<Void> revokeUserItem(@PathVariable Long itemId, @PathVariable Long userId) {
+        customItemService.revokeUserItem(itemId, userId);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/items/upload")
+    public ResponseEntity<String> uploadItemImage(@RequestParam("file") org.springframework.web.multipart.MultipartFile file, @RequestParam("type") String type) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        try {
+            // Determine directory based on type
+            String subDir = "theme";
+            if ("POPOVER".equalsIgnoreCase(type)) subDir = "popover";
+            else if ("AVATAR".equalsIgnoreCase(type)) subDir = "avatar";
+            
+            // Use backend managed directory as mapped in WebMvcConfig
+            // Mapped to C:/public/{subDir}/
+            Path uploadDir = Paths.get("C:/public/" + subDir);
+            
+            // Log for debugging
+            System.out.println("Uploading to: " + uploadDir.toAbsolutePath());
+            
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            // Save file
+            String originalFilename = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+            
+            // Generate filename: Timestamp + Original Name (to ensure uniqueness but keep readability)
+            // Example: 1700000000000_myimage.jpg
+            String filename = System.currentTimeMillis() + "_" + originalFilename;
+            
+            // Security check: ensure no directory traversal
+            if (filename.contains("..")) {
+                 throw new RuntimeException("Invalid filename: " + filename);
+            }
+
+            Path filePath = uploadDir.resolve(filename);
+            
+            Files.copy(file.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            
+            // Return relative path for use in config (e.g., /theme/123123_bg.jpg)
+            return ResponseEntity.ok("/" + subDir + "/" + filename);
+
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Failed to upload file: " + e.getMessage());
+        }
     }
 }
