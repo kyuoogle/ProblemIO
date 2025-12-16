@@ -11,6 +11,9 @@
         <button :class="['tab-button', { active: activeTab === 'challenges' }]" @click="activeTab = 'challenges'">
           챌린지 관리
         </button>
+        <button :class="['tab-button', { active: activeTab === 'custom-items' }]" @click="activeTab = 'custom-items'">
+          커스텀 관리
+        </button>
       </div>
 
       <!-- Quiz Management Tab -->
@@ -139,7 +142,61 @@
           <Button label="챌린지 생성" class="w-full" icon="pi pi-check" :loading="submitting" @click="submitChallenge" />
         </div>
       </div>
+
+       <!-- Custom Items Tab -->
+       <div v-show="activeTab === 'custom-items'" class="tab-content">
+          <div class="challenge-form-card mb-6">
+              <h2 class="form-title">커스텀 아이템 생성</h2>
+              <div class="grid grid-cols-2 gap-4">
+                  <div class="field">
+                      <label class="field-label">아이템 유형</label>
+                      <Dropdown v-model="newItem.itemType" :options="['AVATAR', 'POPOVER', 'THEME']" placeholder="유형 선택" class="w-full" />
+                  </div>
+                  <div class="field">
+                      <label class="field-label">이름</label>
+                      <InputText v-model="newItem.name" class="w-full" placeholder="Cybercity" />
+                  </div>
+                  <div class="field col-span-2" style="grid-column: span 2;">
+                      <label class="field-label">설정 (JSON)</label>
+                      <Textarea v-model="newItem.configStr" rows="5" class="w-full font-mono" placeholder='{ "style": { "backgroundColor": "#000" } }' />
+                  </div>
+                  <div class="field flex items-center">
+                       <Checkbox v-model="newItem.isDefault" :binary="true" inputId="isDefault" />
+                       <label for="isDefault" class="ml-2" style="color:var(--color-text)">기본 지급 여부</label>
+                  </div>
+              </div>
+              <Button label="아이템 생성" icon="pi pi-plus" @click="createItem" :loading="creatingItem" class="mt-4 w-full" />
+          </div>
+
+          <h2 class="text-xl font-bold mb-4" style="color:var(--color-heading)">아이템 목록</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div v-for="item in customItems" :key="item.id" class="p-4 border rounded-lg bg-surface-card relative group" style="background:var(--color-background-soft); border-color:var(--color-border)">
+                  <div class="font-bold text-lg" style="color:var(--color-heading)">{{ item.name }}</div>
+                  <div class="text-sm mb-2" style="color:var(--text-color-secondary)">{{ item.itemType }}</div>
+                  <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto h-24 mb-2" style="background:rgba(0,0,0,0.1); color:var(--color-text)">{{ JSON.stringify(item.config, null, 2) }}</pre>
+                  <div class="flex justify-between items-center mt-2">
+                      <span v-if="item.isDefault" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Default</span>
+                      <span v-else></span>
+                      <Button label="유저 할당" size="small" outlined icon="pi pi-user-plus" @click="openAssignDialog(item)" />
+                  </div>
+              </div>
+          </div>
+       </div>
     </div>
+
+    <!-- User Assign Dialog -->
+    <Dialog v-model:visible="showAssignDialog" header="유저에게 아이템 할당" :style="{ width: '30rem' }" :modal="true">
+        <div class="p-4">
+            <div class="mb-4">
+                <p class="text-color">대상 아이템: <b>{{ selectedItemToAssign?.name }}</b></p>
+            </div>
+            <div class="field mb-4">
+                <label class="field-label">유저 ID (임시)</label>
+                <InputNumber v-model="assignUserId" class="w-full" placeholder="User ID" />
+            </div>
+            <Button label="할당하기" icon="pi pi-check" class="w-full" @click="assignItem" :loading="assigning" />
+        </div>
+    </Dialog>
 
     <!-- Quiz Picker Dialog -->
     <Dialog v-model:visible="showQuizPicker" header="퀴즈 선택" :style="{ width: '50rem' }" :modal="true" :draggable="false">
@@ -183,14 +240,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
-import { getAdminQuizzes, toggleQuizVisibility, createChallenge } from '@/api/admin';
+import { ref, onMounted, reactive, watch } from 'vue';
+import { 
+    getAdminQuizzes, 
+    toggleQuizVisibility, 
+    createChallenge, 
+    createCustomItem, 
+    getCustomItems, 
+    assignItemToUser 
+} from '@/api/admin';
 import { resolveImageUrl } from '@/lib/image';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
 import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
+import Dropdown from 'primevue/dropdown';
 import Calendar from 'primevue/calendar';
 import Paginator from 'primevue/paginator';
 import Dialog from 'primevue/dialog';
@@ -339,6 +405,86 @@ const submitChallenge = async () => {
   }
 };
 
+
+// --- Custom Item Logic ---
+const customItems = ref([]);
+const newItem = reactive({
+    itemType: 'AVATAR',
+    name: '',
+    configStr: '',
+    isDefault: false
+});
+const creatingItem = ref(false);
+const showAssignDialog = ref(false);
+const selectedItemToAssign = ref(null);
+const assignUserId = ref(null);
+const assigning = ref(false);
+
+const loadCustomItems = async () => {
+    try {
+        const data = await getCustomItems();
+        customItems.value = data;
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+const createItem = async () => {
+     if(!newItem.configStr) return;
+    try {
+        creatingItem.value = true;
+        let configObj = {};
+        try {
+            configObj = JSON.parse(newItem.configStr);
+        } catch(e) {
+            toast.add({ severity: 'error', summary: 'JSON 오류', detail: '유효한 JSON 형식이 아닙니다.', life: 3000 });
+            return;
+        }
+
+        await createCustomItem({
+            itemType: newItem.itemType,
+            name: newItem.name,
+            config: configObj,
+            isDefault: newItem.isDefault
+        });
+        toast.add({ severity: 'success', summary: '성공', detail: '아이템 생성 완료', life: 3000 });
+        newItem.name = '';
+        newItem.configStr = '';
+        newItem.isDefault = false;
+        loadCustomItems();
+    } catch (e) {
+        toast.add({ severity: 'error', summary: '오류', detail: '생성 실패', life: 3000 });
+    } finally {
+        creatingItem.value = false;
+    }
+};
+
+const openAssignDialog = (item) => {
+    selectedItemToAssign.value = item;
+    assignUserId.value = null;
+    showAssignDialog.value = true;
+};
+
+const assignItem = async () => {
+    if(!assignUserId.value) return;
+    try {
+        assigning.value = true;
+        await assignItemToUser(selectedItemToAssign.value.id, assignUserId.value);
+        toast.add({ severity: 'success', summary: '성공', detail: '할당 완료', life: 3000 });
+        showAssignDialog.value = false;
+    } catch(e) {
+         toast.add({ severity: 'error', summary: '오류', detail: '할당 실패 (이미 보유중이거나 유저 없음)', life: 3000 });
+    } finally {
+        assigning.value = false;
+    }
+};
+
+// Watch tab to load items
+watch(activeTab, (val) => {
+    if(val === 'custom-items') {
+        loadCustomItems();
+    }
+});
 
 onMounted(() => {
   loadQuizzes();
@@ -558,6 +704,10 @@ onMounted(() => {
 }
 
 .field-label-text {
+    color: var(--color-text);
+}
+
+.text-color {
     color: var(--color-text);
 }
 

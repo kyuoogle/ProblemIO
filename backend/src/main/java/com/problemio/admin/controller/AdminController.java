@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -88,5 +89,27 @@ public class AdminController {
     public ResponseEntity<Void> createChallenge(@Valid @RequestBody ChallengeCreateRequest request) {
         adminService.createChallenge(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // --- Custom Item Management ---
+
+    @Autowired
+    private com.problemio.item.service.CustomItemService customItemService;
+
+    @PostMapping("/items")
+    public ResponseEntity<Void> createCustomItem(@RequestBody com.problemio.item.dto.CustomItemRequest request) {
+        customItemService.createItem(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<List<com.problemio.item.domain.CustomItem>> getAllCustomItems() {
+        return ResponseEntity.ok(customItemService.getAllItems());
+    }
+
+    @PostMapping("/items/{itemId}/assign/{userId}")
+    public ResponseEntity<Void> assignItemToUser(@PathVariable Long itemId, @PathVariable Long userId) {
+        customItemService.assignItemToUser(itemId, userId);
+        return ResponseEntity.ok().build();
     }
 }

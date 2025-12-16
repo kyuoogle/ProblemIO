@@ -8,8 +8,8 @@
 
       <div v-else-if="user" class="flex flex-col gap-6">
         <!-- Profile Header -->
-        <Card :style="containerStyle">
-          <template #content>
+        <!-- Profile Header -->
+        <ProfileBackground :user="user" class="shadow-4 profile-card-content p-6">
             <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
               <UserAvatar :user="user" class="w-32 h-32" />
               <div class="flex-1 w-full text-center md:text-left">
@@ -17,7 +17,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-start">
                   <div>
                     <h1 class="text-3xl font-bold mb-2">{{ user.nickname }}</h1>
-                    <p v-if="user.statusMessage" class="text-lg text-color-secondary mb-4">
+                    <p v-if="user.statusMessage" class="text-lg opacity-80 mb-4">
                       {{ user.statusMessage }}
                     </p>
                   </div>
@@ -38,21 +38,20 @@
                 <div class="flex justify-center md:justify-start gap-8 mt-2">
                   <div class="stat-box">
                     <p class="text-2xl font-bold m-0">{{ user.quizCount || 0 }}</p>
-                    <p class="text-sm text-color-secondary m-0">Quizzes</p>
+                    <p class="text-sm opacity-80 m-0">Quizzes</p>
                   </div>
                   <div class="stat-box">
                     <p class="text-2xl font-bold m-0">{{ user.followerCount || 0 }}</p>
-                    <p class="text-sm text-color-secondary m-0">Followers</p>
+                    <p class="text-sm opacity-80 m-0">Followers</p>
                   </div>
                   <div class="stat-box">
                     <p class="text-2xl font-bold m-0">{{ user.followingCount || 0 }}</p>
-                    <p class="text-sm text-color-secondary m-0">Following</p>
+                    <p class="text-sm opacity-80 m-0">Following</p>
                   </div>
                 </div>
               </div>
             </div>
-          </template>
-        </Card>
+        </ProfileBackground>
 
         <!-- User's Quizzes -->
         <div>
@@ -100,7 +99,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
 import { getUserProfile, followUser, unfollowUser, getUserQuizzes } from "@/api/user";
 import UserAvatar from '@/components/common/UserAvatar.vue'
-import { PROFILE_THEMES } from '@/constants/themeConfig';
+import ProfileBackground from '@/components/user/ProfileBackground.vue';
 import { resolveImageUrl } from "@/lib/image";
 
 const route = useRoute();
@@ -193,32 +192,7 @@ onMounted(() => {
   loadUserQuizzes();
 });
 
-const containerStyle = computed(() => {
-  if (user.value?.profileTheme) {
-      const theme = PROFILE_THEMES[user.value.profileTheme];
-      if (theme) {
-          if (theme.image) {
-               return {
-                  backgroundImage: `url('${resolveImageUrl(theme.image)}')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundAttachment: 'fixed',
-                  color: theme.textColor, 
-                  '--text-color': theme.textColor,
-                  '--text-color-secondary': theme.textColor,
-                  ...theme.style
-               };
-          }
-           return {
-             ...theme.style,
-             color: theme.textColor,
-             '--text-color': theme.textColor,
-             '--text-color-secondary': theme.textColor,
-           } || {};
-      }
-  }
-  return {};
-});
+
 </script>
 
 <style scoped>

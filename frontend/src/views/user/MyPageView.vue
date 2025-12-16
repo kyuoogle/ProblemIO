@@ -3,14 +3,11 @@
   <div class="mypage-container">
     <div class="container mx-auto px-4">
       <!-- 프로필 헤더 -->
-             <Card class="mb-8 profile-card-content" :style="containerStyle">
-        <template #content>
-          <!-- [수정] 텍스트 색상을 확실하게 적용하기 위해 내부 div에 color 스타일 바인딩 -->
-          <div 
-             class="flex flex-col md:flex-row gap-6 items-center md:items-start"
-             :style="{ color: containerStyle.color }" 
-          >
-                <UserAvatar class="w-32 h-32" />
+      <!-- 프로필 헤더 -->
+      <ProfileBackground :user="me" class="mb-8 p-6 shadow-4 profile-card-content">
+          <!-- [수정] 텍스트 색상을 확실하게 적용하기 위해 내부 div에 color 스타일 바인딩 -> Component handles it now -->
+          <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
+            <UserAvatar class="w-32 h-32" />
             <div class="flex-1 text-center md:text-left">
               <!-- 닉네임 / 상태메시지 + 우측 상단 설정 버튼 -->
               <div class="flex justify-between items-start">
@@ -64,8 +61,7 @@
 </div>
             </div>
           </div>
-        </template>
-      </Card>
+      </ProfileBackground>
 
       <!-- Navbar 스타일의 탭 네비게이션 -->
       <div class="tab-navbar">
@@ -197,7 +193,7 @@ import { useAuthStore } from "@/stores/auth";
 import { getFollowingQuizzes, getMyLikedQuizzes } from "@/api/user";
 import { getMyQuizzes, deleteQuiz } from "@/api/quiz";
 import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
-import { PROFILE_THEMES } from '@/constants/themeConfig'; 
+import ProfileBackground from '@/components/user/ProfileBackground.vue';
 import { resolveImageUrl } from "@/lib/image"; 
 
 const router = useRouter();
@@ -336,36 +332,7 @@ onMounted(() => {
   loadAllData();
 });
 
-const containerStyle = computed(() => {
-  if (me.value?.profileTheme) {
-      const theme = PROFILE_THEMES[me.value.profileTheme];
-      if (theme) {
-          const textColor = theme.textColor ? `${theme.textColor} !important` : undefined;
-          const varsStyle = textColor ? {
-              '--text-color': textColor,
-              '--text-color-secondary': textColor,
-              '--color-heading': textColor,
-              '--color-text': textColor
-          } : {};
 
-          if (theme.image) {
-               return {
-                  background: `url('${resolveImageUrl(theme.image)}') center / cover no-repeat fixed !important`,
-                  // backgroundImage causes issues with base.css !important background override
-                  color: theme.textColor, 
-                  ...varsStyle,
-                  ...theme.style
-               };
-          }
-           return {
-             ...theme.style,
-             ...varsStyle,
-             color: theme.textColor || 'inherit', 
-           } || {};
-      }
-  }
-  return {};
-});
 </script>
 
 
