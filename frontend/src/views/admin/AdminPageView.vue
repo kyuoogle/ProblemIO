@@ -11,6 +11,9 @@
         <button :class="['tab-button', { active: activeTab === 'challenges' }]" @click="activeTab = 'challenges'">
           챌린지 관리
         </button>
+        <button :class="['tab-button', { active: activeTab === 'custom-items' }]" @click="activeTab = 'custom-items'">
+          커스텀 관리
+        </button>
       </div>
 
       <!-- Quiz Management Tab -->
@@ -139,7 +142,202 @@
           <Button label="챌린지 생성" class="w-full" icon="pi pi-check" :loading="submitting" @click="submitChallenge" />
         </div>
       </div>
+
+       <!-- Custom Items Tab -->
+       <div v-show="activeTab === 'custom-items'" class="tab-content">
+          <div class="challenge-form-card mb-6">
+              <h2 class="form-title">커스텀 아이템 생성</h2>
+              <div class="grid grid-cols-2 gap-4">
+                  <div class="field">
+                      <label class="field-label">아이템 유형</label>
+                      <Dropdown v-model="newItem.itemType" :options="['THEME', 'POPOVER']" placeholder="유형 선택" class="w-full" />
+                  </div>
+                  <div class="field">
+                      <label class="field-label">이름</label>
+                      <InputText v-model="newItem.name" class="w-full" placeholder="Cybercity" />
+                  </div>
+                   <div class="field col-span-2" style="grid-column: span 2;">
+                      <label class="field-label">설명 (사용자에게 표시)</label>
+                      <InputText v-model="newItem.description" class="w-full" placeholder="1회 챌린지 우승 기념 테마" />
+                  </div>
+                  
+                   <div class="field col-span-2" style="grid-column: span 2;">
+                      <label class="field-label">이미지 업로드 (선택)</label>
+                      
+                      <div 
+                        class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors gap-3 group"
+                        style="border-color: var(--color-border); background: var(--color-background-soft);"
+                        @click="triggerFileUpload"
+                      >
+                            <div class="w-12 h-12 rounded-full bg-surface-200 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                <i v-if="!uploadedImageUrl" class="pi pi-cloud-upload text-xl text-gray-500 group-hover:text-primary"></i>
+                                <i v-else class="pi pi-check text-xl text-green-500"></i>
+                            </div>
+                            
+                            <div class="text-center">
+                                <p class="font-bold text-sm m-0 mb-1" style="color:var(--color-heading)">
+                                    {{ uploadedImageUrl ? '이미지 변경하기' : '클릭하여 업로드' }}
+                                </p>
+                                <p class="text-xs text-secondary m-0">
+                                    지원 형식: PNG, JPG, GIF (권장 크기: 500x500)
+                                </p>
+                            </div>
+
+                            <input 
+                                type="file" 
+                                ref="fileInput" 
+                                @change="onFileSelect" 
+                                accept="image/*" 
+                                class="hidden" 
+                                style="display: none" 
+                            />
+                            
+                            <div v-if="uploadedImageUrl" class="mt-2 bg-primary/10 text-primary px-3 py-1 rounded text-xs font-mono">
+                                {{ uploadedImageUrl }}
+                            </div>
+                      </div>
+                  </div>
+
+                      <div class="field col-span-2" style="grid-column: span 2;">
+                          <div class="flex justify-between items-center mb-2">
+                              <label class="field-label m-0">설정 (JSON)</label>
+                              <Button label="미리보기 적용" icon="pi pi-refresh" size="small" outlined @click="applyPreview" />
+                          </div>
+                          
+                          <div class="flex gap-4">
+                            <Textarea v-model="newItem.configStr" rows="5" class="w-1/2 font-mono" placeholder='{ "image": "...", "style": { "color": "#fff" } }' />
+                            
+                            <!-- Preview Box -->
+                            <div class="w-1/2 border rounded p-2 bg-gray-50 flex items-center justify-center overflow-hidden relative" style="min-height: 200px;">
+                            <!-- Theme Preview -->
+                            <div v-if="newItem.itemType === 'THEME'" class="w-full h-full flex items-center justify-center p-4 bg-gray-100">
+                                <!-- Mimic a standard profile card width/ratio -->
+                                <div class="w-full max-w-sm aspect-[4/2] shadow-lg rounded-xl overflow-hidden relative bg-white">
+                                    <ProfileBackground 
+                                        :user="{ nickname: 'Preview', statusMessage: 'Test Status', profileTheme: 'preview' }" 
+                                        :previewConfig="currentPreviewConfig"
+                                        class="w-full h-full flex flex-col p-6 justify-between"
+                                    >
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-16 h-16 rounded-full bg-gray-200 border-2 border-white shadow-sm flex-shrink-0"></div>
+                                            <div class="min-w-0">
+                                                <div class="font-bold text-xl text-white drop-shadow-md">User Name</div>
+                                                <div class="text-sm text-white/90 drop-shadow-sm truncate">Status Message</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-6 text-sm text-white/90 drop-shadow-md font-medium">
+                                            <div><strong>120</strong> 팔로워</div>
+                                            <div><strong>45</strong> 팔로잉</div>
+                                        </div>
+                                    </ProfileBackground>
+                                </div>
+                            </div>
+                            <!-- Popover Preview -->
+                             <div v-if="newItem.itemType === 'POPOVER'" class="flex items-center justify-center h-full p-4 bg-gray-100">
+                                <UserPopoverCard 
+                                    :profile="{ nickname: 'Preview', statusMessage: 'Test Status' }"
+                                     :previewConfig="currentPreviewConfig"
+                                     class="shadow-xl scale-95"
+                                />
+                            </div>
+                            </div>
+                          </div>
+                          <small class="block mt-1 text-gray-400">
+                              * '미리보기 적용' 버튼을 눌러야 오른쪽 화면이 갱신됩니다.
+                          </small>
+                      </div>
+                  
+                  <div class="field col-span-2" style="grid-column: span 2;">
+                       <div 
+                         class="flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:bg-surface-50"
+                         :class="newItem.isDefault ? 'border-primary bg-primary/5' : 'border-surface-200'"
+                         @click="newItem.isDefault = !newItem.isDefault"
+                       >
+                            <div class="flex items-center gap-3">
+                                <div 
+                                    class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                                    :style="newItem.isDefault ? 'background-color: var(--color-primary); color: white;' : 'background-color: var(--surface-200); color: var(--text-color-secondary);'"
+                                >
+                                    <i class="pi" :class="newItem.isDefault ? 'pi-check' : 'pi-gift'"></i>
+                                </div>
+                                <div>
+                                    <label class="font-bold text-sm cursor-pointer select-none block" style="color:var(--color-heading)">
+                                        기본 지급 아이템
+                                    </label>
+                                    <span class="text-xs text-secondary block">
+                                        {{ newItem.isDefault ? '모든 신규 사용자에게 자동으로 지급됩니다.' : '사용자가 획득해야 하는 아이템입니다.' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <Checkbox v-model="newItem.isDefault" :binary="true" inputId="isDefault" class="pointer-events-none" />
+                       </div>
+                  </div>
+              </div>
+               <div class="flex gap-2 mt-4">
+                  <Button v-if="isEditMode" label="취소" icon="pi pi-times" severity="secondary" @click="cancelEdit" class="flex-1"/>
+                  <Button :label="isEditMode ? '아이템 수정' : '아이템 생성'" :icon="isEditMode ? 'pi pi-save' : 'pi pi-plus'" @click="isEditMode ? updateItem() : createItem()" :loading="creatingItem" class="flex-1" />
+              </div>
+          </div>
+
+          <h2 class="text-xl font-bold mb-4" style="color:var(--color-heading)">아이템 목록</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div v-for="item in customItems" :key="item.id" class="p-4 border rounded-lg bg-surface-card relative group" style="background:var(--color-background-soft); border-color:var(--color-border)">
+                  <div class="font-bold text-lg" style="color:var(--color-heading)">{{ item.name }}</div>
+                  <div class="text-sm mb-2" style="color:var(--text-color-secondary)">{{ item.itemType }}</div>
+                  <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto h-24 mb-2" style="background:rgba(0,0,0,0.1); color:var(--color-text)">{{ JSON.stringify(item.config, null, 2) }}</pre>
+                  <div class="flex flex-col gap-2 mt-2">
+                      <div class="flex justify-between gap-2">
+                           <Button label="유저 할당" size="small" outlined icon="pi pi-user-plus" @click="openAssignDialog(item)" class="flex-1 p-button-sm text-xs" />
+                           <Button label="유저 관리" size="small" outlined icon="pi pi-users" @click="openUserDialog(item)" class="flex-1 p-button-sm text-xs" />
+                      </div>
+                      
+                      <div class="flex justify-end gap-1">
+                          <Button  icon="pi pi-pencil" size="small" text severity="info" @click="startEdit(item)" />
+                          <Button  icon="pi pi-trash" size="small" text severity="danger" @click="confirmDelete(item)" />
+                      </div>
+                  </div>
+              </div>
+          </div>
+       </div>
     </div>
+
+    <!-- User Management Dialog -->
+    <Dialog v-model:visible="showUserDialog" header="할당된 유저 관리" :style="{ width: '40rem' }" :modal="true">
+        <div class="p-4">
+             <div v-if="loadingUsers" class="text-center">
+                 <i class="pi pi-spin pi-spinner text-2xl"></i>
+             </div>
+             <div v-else-if="assignedUsers.length === 0" class="text-center text-secondary py-4">
+                 할당된 유저가 없습니다.
+             </div>
+             <div v-else class="flex flex-col gap-2">
+                 <div v-for="user in assignedUsers" :key="user.id" class="flex justify-between items-center p-3 border rounded bg-gray-50">
+                     <div class="flex items-center gap-3">
+                         <img :src="resolveImageUrl(user.profileImageUrl) || '/placeholder.svg'" class="w-8 h-8 rounded-full object-cover"/>
+                         <div>
+                             <div class="font-bold">{{ user.nickname }}</div>
+                             <div class="text-xs text-gray-500">{{ user.email }}</div>
+                         </div>
+                     </div>
+                     <Button label="권한 취소" severity="danger" size="small" outlined @click="removeUser(user.id)" />
+                 </div>
+             </div>
+        </div>
+    </Dialog>
+
+    <!-- User Assign Dialog -->
+    <Dialog v-model:visible="showAssignDialog" header="유저에게 아이템 할당" :style="{ width: '30rem' }" :modal="true">
+        <div class="p-4">
+            <div class="mb-4">
+                <p class="text-color">대상 아이템: <b>{{ selectedItemToAssign?.name }}</b></p>
+            </div>
+            <div class="field mb-4">
+                <label class="field-label">유저 ID (임시)</label>
+                <InputNumber v-model="assignUserId" class="w-full" placeholder="User ID" />
+            </div>
+            <Button label="할당하기" icon="pi pi-check" class="w-full" @click="assignItem" :loading="assigning" />
+        </div>
+    </Dialog>
 
     <!-- Quiz Picker Dialog -->
     <Dialog v-model:visible="showQuizPicker" header="퀴즈 선택" :style="{ width: '50rem' }" :modal="true" :draggable="false">
@@ -183,14 +381,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
-import { getAdminQuizzes, toggleQuizVisibility, createChallenge } from '@/api/admin';
+import { ref, onMounted, reactive, watch, computed } from 'vue';
+import { 
+    getAdminQuizzes, 
+    toggleQuizVisibility, 
+    createChallenge, 
+    createCustomItem, 
+    getCustomItems, 
+    assignItemToUser,
+    uploadItemImage,
+    updateCustomItem,
+    getAssignedUsers,
+    revokeUserItem,
+    deleteCustomItem
+} from '@/api/admin';
 import { resolveImageUrl } from '@/lib/image';
+import ProfileBackground from '@/components/user/ProfileBackground.vue';
+import UserPopoverCard from '@/components/common/UserPopoverCard.vue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
 import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
+import Dropdown from 'primevue/dropdown';
 import Calendar from 'primevue/calendar';
 import Paginator from 'primevue/paginator';
 import Dialog from 'primevue/dialog';
@@ -339,6 +553,297 @@ const submitChallenge = async () => {
   }
 };
 
+
+// --- Custom Item Logic ---
+const customItems = ref([]);
+const newItem = reactive({
+    itemType: 'THEME',
+    name: '',
+    description: '', // Add description
+    configStr: '',
+    isDefault: false
+});
+const defaultConfigs = {
+  THEME: {
+    style: {
+      color: "#ffffff",
+      textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
+    },
+    textColor: "#ffffff"
+  },
+  POPOVER: {
+    style: {
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+    },
+    textColor: "#000000",
+    overlayStyle: "bg-white/90 backdrop-blur-sm"
+  }
+};
+
+// Auto-fill config JSON when type changes
+watch(() => newItem.itemType, (newType) => {
+    // Only set if empty to avoid overwriting user's custom edits
+    if (!newItem.configStr) {
+        newItem.configStr = JSON.stringify(defaultConfigs[newType] || {}, null, 2);
+    }
+}, { immediate: true });
+
+const creatingItem = ref(false);
+const showAssignDialog = ref(false);
+const selectedItemToAssign = ref(null);
+const assignUserId = ref(null);
+const assigning = ref(false);
+const uploadedImageUrl = ref('');
+const fileInput = ref(null);
+
+const triggerFileUpload = () => {
+    fileInput.value.click();
+};
+
+const loadCustomItems = async () => {
+    try {
+        const data = await getCustomItems();
+        customItems.value = data;
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+const currentPreviewConfig = ref({ image: null });
+
+// Apply Preview Logic
+const applyPreview = () => {
+    try {
+        const config = newItem.configStr ? JSON.parse(newItem.configStr) : {};
+        
+        // Inject uploaded image into config if present and not already manually set (or just force overwrite/merge?)
+        // Let's merge: if uploaded exists, it takes precedence for the 'image' field for preview convenience
+        if (uploadedImageUrl.value) {
+            config.image = uploadedImageUrl.value;
+        }
+        
+        currentPreviewConfig.value = config;
+        
+        // Also update the JSON text box to reflect the image path if it wasn't there?
+        // Maybe better to keep them separate, but usually user wants to see the path in JSON.
+        // Let's NOT auto-update JSON text on preview to avoid overwriting user edits, 
+        // but we DID auto-update it on upload completion. 
+        
+    } catch (e) {
+        toast.add({ severity: 'error', summary: 'JSON 오류', detail: '설정 JSON 형식이 올바르지 않습니다.', life: 3000 });
+        currentPreviewConfig.value = { image: null };
+    }
+};
+
+// Handle File Upload
+const onFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        creatingItem.value = true; // Use loading state
+        const path = await uploadItemImage(file, newItem.itemType);
+        uploadedImageUrl.value = path;
+        
+        // Auto-inject into JSON config
+        let config = {};
+        try {
+            config = newItem.configStr ? JSON.parse(newItem.configStr) : {};
+        } catch(e) { /* ignore */ }
+        
+        config.image = path; // Set image path
+        newItem.configStr = JSON.stringify(config, null, 2);
+        
+        // Trigger preview update
+        applyPreview();
+        
+        toast.add({ severity: 'info', summary: '업로드 완료', detail: '이미지 경로가 설정에 추가되었습니다.', life: 3000 });
+    } catch (e) {
+        toast.add({ severity: 'error', summary: '업로드 실패', detail: '이미지 업로드 중 오류가 발생했습니다.', life: 3000 });
+    } finally {
+        creatingItem.value = false;
+    }
+};
+
+const createItem = async () => {
+     if(!newItem.configStr) return;
+    try {
+        creatingItem.value = true;
+        let configObj = {};
+        try {
+            configObj = JSON.parse(newItem.configStr);
+        } catch(e) {
+            toast.add({ severity: 'error', summary: 'JSON 오류', detail: '유효한 JSON 형식이 아닙니다.', life: 3000 });
+            return;
+        }
+
+        await createCustomItem({
+            itemType: newItem.itemType,
+            name: newItem.name,
+            description: newItem.description,
+            config: configObj,
+            isDefault: newItem.isDefault
+        });
+        
+        toast.add({ severity: 'success', summary: '생성 완료', detail: '새로운 아이템이 생성되었습니다.', life: 3000 });
+        
+        // Reset and reload
+        isEditMode.value = false;
+        newItem.itemType = 'THEME';
+        newItem.name = '';
+        newItem.description = '';
+        newItem.configStr = '';
+        newItem.isDefault = false;
+        uploadedImageUrl.value = '';
+        currentPreviewConfig.value = { image: null };
+        
+        await loadCustomItems();
+        
+    } catch (e) {
+        console.error(e);
+        toast.add({ severity: 'error', summary: '생성 실패', detail: '아이템 생성 중 오류가 발생했습니다.', life: 3000 });
+    } finally {
+        creatingItem.value = false;
+    }
+};
+
+// --- Edit & User Management Logic ---
+const isEditMode = ref(false);
+const editingItemId = ref(null);
+const assignedUsers = ref([]);
+const showUserDialog = ref(false);
+const loadingUsers = ref(false);
+
+const startEdit = (item) => {
+    isEditMode.value = true;
+    editingItemId.value = item.id;
+    newItem.itemType = item.itemType;
+    newItem.name = item.name;
+    newItem.description = item.description;
+    newItem.isDefault = item.isDefault; 
+    
+    // Config comes as Object from API (mapped in Mapper/Service) or String?
+    // In getAllItems mapper result, config is String (JSON).
+    newItem.configStr = item.config; 
+    
+    // Determine image for preview if possible
+    try {
+        const conf = JSON.parse(item.config);
+        if (conf.image) uploadedImageUrl.value = conf.image;
+    } catch(e) {/* ignore */}
+    
+    applyPreview();
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const cancelEdit = () => {
+    isEditMode.value = false;
+    editingItemId.value = null;
+    newItem.name = '';
+    newItem.description = '';
+    newItem.configStr = '';
+    newItem.isDefault = false;
+    uploadedImageUrl.value = '';
+    currentPreviewConfig.value = { image: null };
+};
+
+const updateItem = async () => {
+     if(!newItem.configStr) return;
+    try {
+        creatingItem.value = true;
+        let configObj = {};
+        try {
+            configObj = JSON.parse(newItem.configStr);
+        } catch(e) {
+            toast.add({ severity: 'error', summary: 'JSON 오류', detail: '유효한 JSON 형식이 아닙니다.', life: 3000 });
+            return;
+        }
+
+        await updateCustomItem(editingItemId.value, { 
+            itemType: newItem.itemType,
+            name: newItem.name,
+            description: newItem.description,
+            config: configObj,
+            isDefault: newItem.isDefault
+        });
+        
+        toast.add({ severity: 'success', summary: '수정 완료', detail: '아이템이 수정되었습니다.', life: 3000 });
+        
+        cancelEdit(); // Reset
+        await loadCustomItems();
+        
+    } catch (e) {
+        toast.add({ severity: 'error', summary: '수정 실패', detail: '아이템 수정 중 오류가 발생했습니다.', life: 3000 });
+    } finally {
+        creatingItem.value = false;
+    }
+};
+
+const openUserDialog = async (item) => {
+    selectedItemToAssign.value = item;
+    showUserDialog.value = true;
+    loadingUsers.value = true;
+    try {
+        assignedUsers.value = await getAssignedUsers(item.id);
+    } catch(e) {
+        toast.add({ severity: 'error', summary: '오류', detail: '유저 목록을 불러오지 못했습니다.' });
+    } finally {
+        loadingUsers.value = false;
+    }
+};
+
+const removeUser = async (userId) => {
+    try {
+        await revokeUserItem(selectedItemToAssign.value.id, userId);
+        toast.add({ severity: 'success', summary: '해제 완료', detail: '유저 아이템 할당이 해제되었습니다.' });
+        // Refresh list
+        assignedUsers.value = assignedUsers.value.filter(u => u.id !== userId);
+    } catch(e) {
+         toast.add({ severity: 'error', summary: '오류', detail: '할당 해제 실패' });
+    }
+};
+
+const openAssignDialog = (item) => {
+    selectedItemToAssign.value = item;
+    assignUserId.value = null;
+    showAssignDialog.value = true;
+};
+
+const assignItem = async () => {
+    if(!assignUserId.value) return;
+    try {
+        assigning.value = true;
+        await assignItemToUser(selectedItemToAssign.value.id, assignUserId.value);
+        toast.add({ severity: 'success', summary: '성공', detail: '할당 완료', life: 3000 });
+        showAssignDialog.value = false;
+    } catch(e) {
+         toast.add({ severity: 'error', summary: '오류', detail: '할당 실패 (이미 보유중이거나 유저 없음)', life: 3000 });
+    } finally {
+        assigning.value = false;
+    }
+};
+
+const confirmDelete = async (item) => {
+    if(!confirm(`'${item.name}' 아이템을 정말 삭제하시겠습니까?`)) return;
+    
+    try {
+        await deleteCustomItem(item.id);
+        toast.add({ severity: 'success', summary: '삭제 완료', detail: '아이템이 삭제되었습니다.' });
+        await loadCustomItems(); // Refresh List
+    } catch(e) {
+        toast.add({ severity: 'error', summary: '오류', detail: '삭제 실패' });
+    }
+};
+
+// Watch tab to load items
+watch(activeTab, (val) => {
+    if(val === 'custom-items') {
+        loadCustomItems();
+    }
+});
 
 onMounted(() => {
   loadQuizzes();
@@ -558,6 +1063,10 @@ onMounted(() => {
 }
 
 .field-label-text {
+    color: var(--color-text);
+}
+
+.text-color {
     color: var(--color-text);
 }
 

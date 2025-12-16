@@ -81,6 +81,10 @@ public class SecurityConfig {
                         // [추가됨] 팝오버 정보 조회 (게스트 허용)
                         .requestMatchers(HttpMethod.GET, "/api/users/*/popover").permitAll()
 
+                        // 커스텀 아이템 정보 조회 (누구나 가능)
+                        .requestMatchers(HttpMethod.GET, "/api/items/definitions").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/items/my").authenticated()
+
                         // 타인 퀴즈 목록 및 프로필 조회 (게스트 허용)
                         .requestMatchers(HttpMethod.GET, "/api/users/*/quizzes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()

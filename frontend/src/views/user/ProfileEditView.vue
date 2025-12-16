@@ -15,28 +15,17 @@
               <h2 class="text-xl font-bold border-l-4 border-primary pl-3">내 정보 수정</h2>
               
               <div class="flex flex-col gap-2 items-center my-8">
-                <div class="relative inline-block">
+                <div class="relative inline-block group cursor-pointer" @click="openAvatarEditor">
                    <UserAvatar 
                    :user="previewUser"
-                   class="font-bold surface-200" 
-                   style="width: 300px; height: 300px; font-size: 100px"/>
-
-                  <div class="absolute bottom-4 right-4">
-                    <FileUpload
-                      mode="basic"
-                      name="file"
-                      accept="image/*"
-                      :maxFileSize="5000000"
-                      @select="onFileSelect"
-                      :auto="false"
-                      chooseIcon="pi pi-camera"
-                      chooseLabel=" "
-                      class="custom-upload p-button-rounded p-button-lg shadow-4"
-                      style="width: 4rem; height: 4rem"
-                    />
-                  </div>
+                   class="font-bold surface-200 transition-transform group-hover:scale-105" 
+                   style="width: 200px; height: 200px; font-size: 80px"/>
+                   
+                   <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <i class="pi pi-pencil text-white text-3xl"></i>
+                   </div>
                 </div>
-                <small class="text-gray-500 mt-2">파란 버튼을 눌러 이미지를 변경하세요</small>
+                <small class="text-gray-500 mt-2">아바타를 클릭하여 꾸밀 수 있습니다</small>
               </div>
 
               <div class="grid gap-4">
@@ -70,90 +59,56 @@
                   <label class="text-sm font-medium">상태 메시지(20자 제한)</label>
                   <Textarea v-model="profileForm.statusMessage" placeholder="나를 표현하는 한마디" rows="3" class="w-full" maxlength="20" />
                 </div>
+                <!-- 저장 버튼 이동 -->
+                <div class="flex justify-end pt-2">
+                   <Button label="저장하기" icon="pi pi-check" :loading="savingProfile" @click="handleSaveProfile" class="w-full md:w-auto px-6" />
+                </div>
               </div>
             </section>
 
             <Divider />
 
-            <!-- SECTION 2: 꾸미기 -->
+            <!-- SECTION 2: 꾸미기 설정 버튼들 (모달 트리거) -->
             <section class="flex flex-col gap-6">
               <h2 class="text-xl font-bold border-l-4 border-primary pl-3">꾸미기</h2>
               
-              <!-- 배경 테마 -->
-              <div class="flex flex-col gap-3">
-                <label class="text-sm font-medium">프로필 배경 테마</label>
-                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  <div 
-                    v-for="theme in themes" 
-                    :key="theme.key"
-                    class="cursor-pointer border-2 rounded-lg p-1 min-w-[100px] h-[70px] relative transition-all hover:shadow-lg"
-                    :class="{'border-primary ring-2 ring-primary/20': profileForm.profileTheme === theme.key, 'border-transparent hover:border-gray-300': profileForm.profileTheme !== theme.key}"
-                    @click="profileForm.profileTheme = theme.key"
-                  >
-                    <div v-if="theme.image" class="w-full h-full">
-                        <img :src="resolveImageUrl(theme.image)" class="w-full h-full object-cover rounded" />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <!-- 배경 테마 설정 -->
+                 <div class="border rounded-xl p-4 flex items-center justify-between hover:bg-surface-hover cursor-pointer transition-colors" @click="openThemeEditor">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-lg bg-surface-200 flex items-center justify-center border">
+                           <i class="pi pi-palette text-xl"></i>
+                        </div>
+                        <div>
+                           <h3 class="font-bold m-0 text-sm">프로필 배경 테마</h3>
+                           <p class="text-xs text-muted m-0 mt-1">현재: {{ currentThemeName }}</p>
+                        </div>
                     </div>
-                    <div v-else class="w-full h-full rounded shadow-sm" :class="theme.class" :style="theme.style"></div>
-                    <span class="absolute bottom-0 left-0 w-full text-[10px] text-center bg-gray-200/80 text-gray-900 truncate px-1 rounded-b">
-                        {{ theme.name }}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                    <Button icon="pi pi-chevron-right" text rounded />
+                 </div>
 
-              <!-- 아바타 프레임 -->
-              <div class="flex flex-col gap-3">
-                <label class="text-sm font-medium">아바타 프레임</label>
-                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  <div 
-                    v-for="deco in avatars" 
-                    :key="deco.key"
-                    class="cursor-pointer border-2 rounded-full p-1 min-w-[70px] h-[70px] relative transition-all hover:scale-105"
-                    :class="{'border-primary ring-2 ring-primary/20': profileForm.avatarDecoration === deco.key, 'border-transparent hover:border-gray-300': profileForm.avatarDecoration !== deco.key}"
-                    @click="profileForm.avatarDecoration = deco.key"
-                  >
-                     <div class="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
-                       <i class="pi pi-user text-gray-300 text-xl"></i>
-                     </div>
-                     <img v-if="deco.image" :src="resolveImageUrl(deco.image)" class="absolute inset-0 w-full h-full object-contain" />
-                     <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[10px] bg-gray-200/80 text-gray-900 rounded-full px-2 py-0.5 whitespace-nowrap z-10">
-                        {{ deco.name }}
-                     </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 팝오버 꾸미기 -->
-              <div class="flex flex-col gap-3">
-                <label class="text-sm font-medium">팝오버 테마</label>
-                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  <div 
-                    v-for="pop in popovers" 
-                    :key="pop.key"
-                    class="cursor-pointer border-2 rounded-lg p-1 min-w-[100px] h-[70px] relative transition-all hover:shadow-lg"
-                    :class="{'border-primary ring-2 ring-primary/20': profileForm.popoverDecoration === pop.key, 'border-transparent hover:border-gray-300': profileForm.popoverDecoration !== pop.key}"
-                    @click="profileForm.popoverDecoration = pop.key"
-                  >
-                    <div v-if="pop.image" class="w-full h-full">
-                        <img :src="resolveImageUrl(pop.image)" class="w-full h-full object-cover rounded" />
+                 <!-- 팝오버 설정 -->
+                 <div class="border rounded-xl p-4 flex items-center justify-between hover:bg-surface-hover cursor-pointer transition-colors" @click="openPopoverEditor">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-lg bg-surface-200 flex items-center justify-center border">
+                           <i class="pi pi-comment text-xl"></i>
+                        </div>
+                        <div>
+                           <h3 class="font-bold m-0 text-sm">팝오버 디자인</h3>
+                           <p class="text-xs text-muted m-0 mt-1">현재: {{ currentPopoverName }}</p>
+                        </div>
                     </div>
-                    <div v-else class="w-full h-full rounded shadow-sm" :style="pop.style"></div>
-                    <span class="absolute bottom-0 left-0 w-full text-[10px] text-center bg-gray-200/80 text-gray-900 truncate px-1 rounded-b">
-                        {{ pop.name }}
-                     </span>
-                  </div>
-                </div>
+                    <Button icon="pi pi-chevron-right" text rounded />
+                 </div>
               </div>
             </section>
 
-            <!-- 저장 버튼 -->
-            <div class="flex justify-end pt-4">
-               <Button label="저장하기" icon="pi pi-check" :loading="savingProfile" @click="handleSaveProfile" class="w-full md:w-auto px-6" />
-            </div>
+
 
             <Divider />
 
-            <!-- SECTION 3: 비밀번호 변경 -->
+            <!-- SECTION 3: 비밀번호/탈퇴 -->
+             <!-- ... existing password/delete sections ... -->
             <section class="flex items-center justify-between p-4 rounded-lg action-card">
               <div class="flex flex-col">
                 <h3 class="text-lg font-bold">비밀번호 변경</h3>
@@ -162,7 +117,6 @@
               <Button label="변경하기" icon="pi pi-key" severity="help" outlined @click="showPasswordDialog = true" />
             </section>
 
-            <!-- SECTION 4: 회원탈퇴 -->
             <section class="flex items-center justify-between p-4 rounded-lg danger-card mt-2">
               <div class="flex flex-col">
                 <h3 class="text-lg font-bold">회원 탈퇴</h3>
@@ -175,8 +129,8 @@
         </template>
       </Card>
       
-      <!-- 비밀번호 변경 모달 -->
-      <Dialog v-model:visible="showPasswordDialog" modal header="비밀번호 변경" :style="{ width: '90vw', maxWidth: '400px' }">
+      <!-- 비밀번호 변경 모달 & 탈퇴 모달 (Existing) -->
+       <Dialog v-model:visible="showPasswordDialog" modal header="비밀번호 변경" :style="{ width: '90vw', maxWidth: '400px' }">
         <div class="flex flex-col gap-4 pt-2">
           <div class="flex flex-col gap-2">
             <label class="text-sm font-medium">현재 비밀번호</label>
@@ -207,8 +161,7 @@
           <Button label="변경하기" icon="pi pi-check" :loading="changingPassword" @click="handleChangePassword" />
         </template>
       </Dialog>
-
-      <!-- 회원 탈퇴 모달 -->
+ 
       <Dialog v-model:visible="showDeleteDialog" modal header="회원 탈퇴" :style="{ width: '90vw', maxWidth: '400px' }">
         <div class="flex flex-col gap-4 pt-2">
           <div class="bg-red-50 p-3 rounded text-red-700 text-sm">
@@ -226,29 +179,170 @@
         </template>
       </Dialog>
 
+
+      <!-- Customization Modal (Generic for Avatar/Theme/Popover) -->
+      <Dialog v-model:visible="showCustomDialog" :header="customDialogTitle" :modal="true" :style="{ width: '90vw', maxWidth: '600px' }" :draggable="false">
+          <div class="flex flex-col gap-6">
+              <!-- Preview Area -->
+              <div class="preview-area bg-surface-ground p-6 rounded-xl border flex items-center justify-center relative overflow-hidden" :style="previewContainerStyle">
+                   <!-- Avatar Preview -->
+                   <div v-if="customType === 'AVATAR'" class="text-center">
+                       <UserAvatar 
+                         :user="tempPreviewUser"
+                         size="xlarge"
+                         style="width: 150px; height: 150px; font-size: 50px"
+                       />
+                       <div class="mt-4">
+                            <FileUpload
+                                mode="basic"
+                                name="file"
+                                accept="image/*"
+                                :maxFileSize="5000000"
+                                @select="onFileCustomSelect"
+                                :auto="false"
+                                chooseIcon="pi pi-camera"
+                                chooseLabel="이미지 변경"
+                                class="p-button-outlined p-button-secondary p-button-sm p-button-rounded"
+                            />
+                       </div>
+                   </div>
+
+                   <!-- Theme Preview -->
+                   <ProfileBackground 
+                      v-if="customType === 'THEME'" 
+                      :user="tempPreviewUser"
+                      :previewThemeId="tempSelection"
+                      class="w-full border shadow-sm p-4 h-60"
+                    >
+                       <!-- Simulate Profile Header Content inside Theme -->
+                       <!-- Scale down content to fit while maintaining layout -->
+                       <!-- Scale content to fill the container perfectly -->
+                       <!-- We want the content to render as if on a larger screen (approx 700px) and scale down to fit the modal (approx 500px) -->
+                       <!-- 700px * 0.7 ~= 490px. -->
+                       <div class="origin-top-left transform scale-[0.6] w-[166%] h-[166%] flex items-center justify-center pointer-events-none">
+                           <div class="flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left w-full px-8"> 
+                                <UserAvatar :user="tempPreviewUser" class="w-32 h-32 flex-shrink-0" />
+                                <div class="flex-1 min-w-0">
+                                    <h1 class="text-3xl font-bold mb-2 truncate">{{ tempPreviewUser.nickname }}</h1>
+                                    <p v-if="tempPreviewUser.statusMessage" class="opacity-80 text-lg mb-4 break-words line-clamp-2">
+                                        {{ tempPreviewUser.statusMessage }}
+                                    </p>
+                                    <div class="flex gap-6 text-sm justify-center md:justify-start">
+                                        <div class="text-center">
+                                            <p class="font-bold text-xl">0</p>
+                                            <p class="text-xs opacity-70">만든 퀴즈</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="font-bold text-xl">{{ tempPreviewUser.followerCount }}</p>
+                                            <p class="text-xs opacity-70">팔로워</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="font-bold text-xl">{{ tempPreviewUser.followingCount }}</p>
+                                            <p class="text-xs opacity-70">팔로잉</p>
+                                        </div>
+                                    </div>
+                                </div>
+                           </div>
+                       </div>
+                       
+                       <span class="absolute top-2 right-2 bg-white/80 px-2 py-0.5 rounded text-xs font-bold shadow-sm text-black z-20">
+                           <i class="pi pi-eye mr-1"></i>미리보기
+                       </span>
+                   </ProfileBackground>
+
+                   <!-- Popover Preview -->
+                   <div v-if="customType === 'POPOVER'" class="text-center p-4">
+                       <UserPopoverCard 
+                           :profile="tempPreviewUser"
+                           :previewDecorationId="tempSelection"
+                       >
+                            <template #action-button>
+                                <Button icon="pi pi-user-plus" size="small" outlined class="!text-xs !px-3" />
+                            </template>
+                            <template #bottom-button>
+                                <Button class="w-full mt-4 !text-sm" severity="secondary" outlined label="프로필 보기" />
+                            </template>
+                       </UserPopoverCard>
+                   </div>
+              </div>
+
+              <!-- Item Selector using Carousel/Grid -->
+              <div>
+                  <h3 class="text-lg font-bold mb-3">보유한 아이템</h3>
+                  <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      <div 
+                        v-for="item in availableItems" 
+                        :key="item.id || item.key"
+                        class="cursor-pointer border-2 rounded-lg p-2 aspect-square flex flex-col items-center justify-center gap-2 hover:bg-surface-hover transition-all relative overflow-hidden group"
+                        :class="{'border-primary ring-2 ring-primary/20': isItemSelected(item)}"
+                        @click="selectItem(item)"
+                        v-tooltip.bottom="item.description || item.name"
+                      >
+                          <div v-if="item.isDefault" class="absolute top-1 left-1 bg-gray-600/80 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 font-bold">
+                              기본
+                          </div>
+                         <!-- Item Thumbnail -->
+                          <div class="flex-1 w-full flex items-center justify-center overflow-hidden">
+                              <img v-if="item.image" :src="resolveImageUrl(item.image)" class="w-full h-full object-contain" />
+                              <div v-else class="w-full h-full rounded bg-surface-200" :style="item.style"></div>
+                          </div>
+                          <span class="text-xs truncate w-full text-center">{{ item.name }}</span>
+                          
+                          <div v-if="item.description" class="absolute inset-x-0 bottom-0 bg-black/70 text-white text-[10px] p-1 opacity-0 group-hover:opacity-100 transition-opacity truncate text-center z-10">
+                              {{ item.description }}
+                          </div>
+                          
+                          <!-- Checkmark if selected -->
+                          <div v-if="isItemSelected(item)" class="absolute top-1 right-1 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                              <i class="pi pi-check" style="font-size: 0.6rem"></i>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <template #footer>
+              <Button label="취소" text @click="showCustomDialog = false" />
+              <Button label="적용하기" icon="pi pi-check" @click="applyCustomization" />
+          </template>
+      </Dialog>
+
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
+import { useCustomItemStore } from "@/stores/customItemStore"; // Import Store
 import { updateMyProfile, changePassword, deleteAccount, getMe, checkNickname } from "@/api/user";
 import UserAvatar from '@/components/common/UserAvatar.vue'
+import ProfileBackground from '@/components/user/ProfileBackground.vue'
+import UserPopoverCard from '@/components/common/UserPopoverCard.vue'
 import { resolveImageUrl } from "@/lib/image";
-import { PROFILE_THEMES } from "@/constants/themeConfig";
-import { AVATAR_DECORATIONS } from "@/constants/avatarConfig";
-import { POPOVER_DECORATIONS } from "@/constants/popoverConfig"; 
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
+import Divider from 'primevue/divider';
+import Card from 'primevue/card';
+import Dialog from 'primevue/dialog';
+import Password from 'primevue/password';
+import FileUpload from 'primevue/fileupload';
 
 const router = useRouter();
 const toast = useToast();
 const authStore = useAuthStore();
+const customItemStore = useCustomItemStore();
 
 // UI Control
 const showPasswordDialog = ref(false);
 const showDeleteDialog = ref(false);
+
+// Customization Dialog State
+const showCustomDialog = ref(false);
+const customType = ref<'AVATAR' | 'THEME' | 'POPOVER'>('AVATAR');
 
 const profileForm = ref({
   nickname: "",
@@ -258,9 +352,10 @@ const profileForm = ref({
   popoverDecoration: null,
 });
 
-const themes = ref([]);
-const avatars = ref([]);
-const popovers = ref([]);
+// Temp state for modal
+const tempSelection = ref<string | number | null>(null);
+const tempFile = ref<File | null>(null);
+const tempPreviewUrl = ref<string>("");
 
 //  원래 닉네임 보관용 (변경 여부 판단)
 const originalNickname = ref("");
@@ -289,16 +384,6 @@ const savingProfile = ref(false);
 const changingPassword = ref(false);
 const deletingAccount = ref(false);
 
-// 실시간 미리보기를 위한 computed 속성
-const previewUser = computed(() => {
-    return {
-        ...authStore.user,
-        ...profileForm.value,
-        // 새로 선택한 프로필 이미지가 있다면 (previewUrl이 있다면) 그것을 우선 사용, 아니면 기존 이미지
-        profileImageUrl: previewUrl.value || authStore.user?.profileImageUrl
-    };
-});
-
 const loadProfile = async () => {
   try {
     const user = await getMe();
@@ -308,28 +393,11 @@ const loadProfile = async () => {
     profileForm.value.avatarDecoration = user.avatarDecoration || null;
     profileForm.value.popoverDecoration = user.popoverDecoration || null;
 
-    //  원래 닉네임 저장 및 상태 초기화
     originalNickname.value = user.nickname || "";
     nicknameState.value.isChecked = true;
     nicknameState.value.error = "";
 
-    // 리소스 로드 (Config 파일 사용)
-    themes.value = Object.keys(PROFILE_THEMES).map(key => ({
-      key,
-      ...PROFILE_THEMES[key]
-    }));
-    
-    avatars.value = Object.keys(AVATAR_DECORATIONS).map(key => ({
-      key,
-      ...AVATAR_DECORATIONS[key]
-    }));
-
-    popovers.value = Object.keys(POPOVER_DECORATIONS).map(key => ({
-      key,
-      ...POPOVER_DECORATIONS[key]
-    }));
-
-    // 서버 이미지 주소 설정
+    // Server Image
     if (user.profileImageUrl) {
       previewUrl.value = resolveImageUrl(user.profileImageUrl);
     } else {
@@ -340,6 +408,192 @@ const loadProfile = async () => {
   }
 };
 
+// --- Customization Logic ---
+onMounted(async () => {
+    await Promise.all([
+        loadProfile(),
+        customItemStore.fetchUserItems(),
+        customItemStore.fetchItemDefinitions() // Ensure definitions are loaded
+    ]);
+});
+
+// Computed available items based on type
+const availableItems = computed(() => {
+    if (customType.value === 'AVATAR') return Object.values(customItemStore.avatarItems);
+    if (customType.value === 'THEME') return Object.values(customItemStore.themeItems);
+    if (customType.value === 'POPOVER') return Object.values(customItemStore.popoverItems);
+    return [];
+});
+
+const customDialogTitle = computed(() => {
+    if (customType.value === 'AVATAR') return '아바타 꾸미기';
+    if (customType.value === 'THEME') return '프로필 테마 설정';
+    return '팝오버 디자인 설정';
+});
+
+// Helper to get current item names for the button labels
+const currentThemeName = computed(() => {
+    if (!profileForm.value.profileTheme) return '기본';
+    const item = customItemStore.themeItems[profileForm.value.profileTheme];
+    return item ? item.name : 'Unknown';
+});
+const currentPopoverName = computed(() => {
+    if (!profileForm.value.popoverDecoration) return '기본';
+    const item = customItemStore.popoverItems[profileForm.value.popoverDecoration];
+    return item ? item.name : 'Unknown';
+});
+
+// Open Editors
+const openAvatarEditor = () => {
+    customType.value = 'AVATAR';
+    tempSelection.value = profileForm.value.avatarDecoration;
+    // Keep current preview image if exists
+    tempPreviewUrl.value = previewUrl.value; 
+    tempFile.value = selectedFile.value; // Sync if user selected file in main form before opening modal? 
+    // Actually simplicity: separate.
+    showCustomDialog.value = true;
+};
+
+const openThemeEditor = () => {
+    customType.value = 'THEME';
+    tempSelection.value = profileForm.value.profileTheme;
+    showCustomDialog.value = true;
+};
+
+const openPopoverEditor = () => {
+    customType.value = 'POPOVER';
+    tempSelection.value = profileForm.value.popoverDecoration;
+    showCustomDialog.value = true;
+};
+
+// 모달 내 선택 처리
+const selectItem = (item: any) => {
+    // ID 또는 Key로 저장. 
+    // 정적 아이템의 경우 ID가 Key와 같을 수 있음.
+    tempSelection.value = item.id || item.key;
+};
+
+const isItemSelected = (item: any) => {
+    const current = tempSelection.value;
+    const target = item.id || item.key;
+    
+    // 루프 이슈 디버깅 - 단순화
+    // console.log('Debug Item:', item, 'Target:', target, 'Current:', current);
+    
+    // 타입(문자열 vs 숫자) 불일치 방지를 위한 느슨한 비교
+    const match = current == target || String(current) === String(target);
+    return match;
+};
+
+// 모달용 미리보기 데이터 계산
+const tempPreviewUser = computed(() => {
+    // PopoverCard는 followerCount 등이 포함된 'profile' 객체가 필요함.
+    // AuthUser에 모든 필드가 없을 수 있으므로(getMe), 모의(mock) 데이터를 사용.
+    return {
+        ...authStore.user,
+        followerCount: authStore.user?.followerCount || 10, // 미리보기용 모의 데이터
+        followingCount: authStore.user?.followingCount || 5, // 미리보기용 모의 데이터
+        nickname: profileForm.value.nickname,
+        statusMessage: profileForm.value.statusMessage,
+        profileImageUrl: tempPreviewUrl.value || authStore.user?.profileImageUrl,
+        // 미리보기용 오버라이드
+        avatarDecoration: customType.value === 'AVATAR' ? tempSelection.value : profileForm.value.avatarDecoration,
+        profileTheme: customType.value === 'THEME' ? tempSelection.value : profileForm.value.profileTheme,
+        popoverDecoration: customType.value === 'POPOVER' ? tempSelection.value : profileForm.value.popoverDecoration
+    };
+});
+
+
+
+const previewContainerStyle = computed(() => {
+    // If Theme preview, apply theme background to container?
+    // No, keep preview area neutral, just show component.
+    return {};
+});
+
+// File Upload in Modal (Avatar)
+const onFileCustomSelect = (event: any) => {
+  const file = event.files[0];
+  if (file) {
+    tempFile.value = file;
+    tempPreviewUrl.value = URL.createObjectURL(file);
+  }
+};
+
+// Apply Changes from Modal
+// 변경사항 적용 (즉시 저장)
+const applyCustomization = async () => {
+    try {
+        const updateData: any = {};
+        
+        // 타입에 따른 데이터 준비
+        if (customType.value === 'AVATAR') {
+             // 아바타 꾸미기
+             if (tempSelection.value !== profileForm.value.avatarDecoration) {
+                 updateData.avatarDecoration = tempSelection.value;
+             }
+             
+             // 아바타 이미지 (파일) - 모달에서 새 파일이 업로드된 경우
+             if (tempFile.value) {
+                 // 즉시 파일 업로드
+                 const formData = new FormData();
+                 formData.append("file", tempFile.value);
+                 // 데이터와 함께 파일을 전송해야 할 수도 있음.
+                 // 현재 문자열 필드들도 함께 전송한다고 가정.
+                 const currentData = {
+                     ...profileForm.value,
+                     avatarDecoration: tempSelection.value
+                 };
+                 formData.append("data", new Blob([JSON.stringify(currentData)], { type: "application/json" }));
+                 
+                 await updateMyProfile(formData);
+                 toast.add({ severity: "success", summary: "성공", detail: "아바타가 변경되었습니다.", life: 3000 });
+                 
+                 // 로컬 상태 동기화
+                 selectedFile.value = null; 
+                 previewUrl.value = tempPreviewUrl.value;
+                 profileForm.value.avatarDecoration = tempSelection.value;
+                 await authStore.refreshUser();
+                 showCustomDialog.value = false;
+                 return;
+             }
+             
+             profileForm.value.avatarDecoration = tempSelection.value;
+             updateData.avatarDecoration = tempSelection.value;
+
+        } else if (customType.value === 'THEME') {
+            profileForm.value.profileTheme = tempSelection.value;
+            updateData.profileTheme = tempSelection.value;
+            
+        } else if (customType.value === 'POPOVER') {
+            profileForm.value.popoverDecoration = tempSelection.value;
+            updateData.popoverDecoration = tempSelection.value;
+        }
+
+        // 아이템 업데이트 API 요청 (위의 파일 업로드 블록에서 처리되지 않은 경우)
+        // 변경된 필드만 포함하여 업데이트 (또는 백엔드 요구사항에 따라 전체 객체 전송)
+        const payload = {
+            ...profileForm.value, // 기존 필드 유지
+            ...updateData
+        };
+        
+        const formData = new FormData();
+        formData.append("data", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+        
+        await updateMyProfile(formData);
+        await authStore.refreshUser(); // 전역 유저 상태 갱신
+        
+        toast.add({ severity: "success", summary: "적용 완료", detail: "아이템이 적용되었습니다.", life: 3000 });
+        showCustomDialog.value = false;
+
+    } catch (error: any) {
+        console.error(error);
+        toast.add({ severity: "error", summary: "실패", detail: "적용에 실패했습니다.", life: 3000 });
+    }
+};
+
+// --- Existing Logic ---
+
 const onFileSelect = (event: any) => {
   const file = event.files[0];
   if (file) {
@@ -348,39 +602,30 @@ const onFileSelect = (event: any) => {
   }
 };
 
-//  닉네임 입력 핸들러
 const handleNicknameChange = () => {
   nicknameState.value.error = "";
-
-  // 원래 닉네임과 같으면 중복확인 필요 없음
   if (profileForm.value.nickname === originalNickname.value) {
     nicknameState.value.isChecked = true;
   } else {
-    // 닉네임이 변경되었으면 중복확인 상태 false
     nicknameState.value.isChecked = false;
   }
 };
 
-//  닉네임 중복 확인 핸들러
 const handleCheckNickname = async () => {
   const nickname = profileForm.value.nickname;
-
   if (!nickname || nickname.length < 2) {
     nicknameState.value.error = "닉네임은 2자 이상이어야 합니다.";
     return;
   }
-
   nicknameState.value.isChecking = true;
   nicknameState.value.error = "";
 
   try {
     await checkNickname(nickname);
-    // 에러가 안 나면 성공
     nicknameState.value.isChecked = true;
     toast.add({ severity: "success", summary: "확인 완료", detail: "사용 가능한 닉네임입니다.", life: 3000 });
   } catch (error: any) {
     nicknameState.value.isChecked = false;
-    // 백엔드 에러 메시지 표시
     const msg = error.response?.data?.message || "이미 사용 중인 닉네임입니다.";
     nicknameState.value.error = msg;
     toast.add({ severity: "error", summary: "중복", detail: msg, life: 3000 });
@@ -390,7 +635,6 @@ const handleCheckNickname = async () => {
 };
 
 const handleSaveProfile = async () => {
-  // [추가] 저장 전 닉네임 검증 확인
   if (!nicknameState.value.isChecked) {
     toast.add({ severity: "warn", summary: "확인 필요", detail: "닉네임 중복 확인을 해주세요.", life: 3000 });
     return;
@@ -411,9 +655,8 @@ const handleSaveProfile = async () => {
     }
 
     await updateMyProfile(formData);
-    await authStore.refreshUser(); // 변경된 정보(특히 닉네임, 프사) 갱신
+    await authStore.refreshUser(); 
 
-    //  저장 성공 후 현재 상태를 '원본'으로 갱신
     originalNickname.value = profileForm.value.nickname;
     nicknameState.value.isChecked = true;
 
@@ -428,50 +671,22 @@ const handleSaveProfile = async () => {
 
 const handleChangePassword = async () => {
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    toast.add({
-      severity: "warn",
-      summary: "Warning",
-      detail: "비밀번호가 일치하지 않습니다.",
-      life: 3000,
-    });
+    toast.add({ severity: "warn", summary: "Warning", detail: "비밀번호가 일치하지 않습니다.", life: 3000 });
     return;
   }
-
   if (passwordForm.value.newPassword.length < 8) {
-    toast.add({
-      severity: "warn",
-      summary: "Warning",
-      detail: "비밀번호는 최소 8자 이상이어야 합니다.",
-      life: 3000,
-    });
+    toast.add({ severity: "warn", summary: "Warning", detail: "비밀번호는 최소 8자 이상이어야 합니다.", life: 3000 });
     return;
   }
 
   changingPassword.value = true;
   try {
     await changePassword(passwordForm.value.currentPassword, passwordForm.value.newPassword);
-    
-    // 성공 시 폼 초기화 및 닫기
-    passwordForm.value = {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    };
+    passwordForm.value = { currentPassword: "", newPassword: "", confirmPassword: "" };
     showPasswordDialog.value = false;
-    
-    toast.add({
-      severity: "success",
-      summary: "Success",
-      detail: "비밀번호가 변경되었습니다.",
-      life: 3000,
-    });
+    toast.add({ severity: "success", summary: "Success", detail: "비밀번호가 변경되었습니다.", life: 3000 });
   } catch (error: any) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: error.response?.data?.message || "비밀번호 변경에 실패했습니다.",
-      life: 3000,
-    });
+    toast.add({ severity: "error", summary: "Error", detail: error.response?.data?.message || "비밀번호 변경에 실패했습니다.", life: 3000 });
   } finally {
     changingPassword.value = false;
   }
@@ -485,31 +700,27 @@ const handleDeleteAccount = async () => {
 
     deletingAccount.value = true;
     try {
-    await deleteAccount(deletePassword.value);
-    toast.add({
-        severity: "success",
-        summary: "Success",
-        detail: "계정이 삭제되었습니다.",
-        life: 3000,
-    });
-    authStore.logoutUser();
-    showDeleteDialog.value = false;
-    router.push("/");
+        await deleteAccount(deletePassword.value);
+        toast.add({ severity: "success", summary: "Success", detail: "계정이 삭제되었습니다.", life: 3000 });
+        authStore.logoutUser();
+        showDeleteDialog.value = false;
+        router.push("/");
     } catch (error: any) {
-    toast.add({
-        severity: "error",
-        summary: "Error",
-        detail: error.response?.data?.message || "계정 삭제에 실패했습니다.",
-        life: 3000,
-    });
+        toast.add({ severity: "error", summary: "Error", detail: error.response?.data?.message || "계정 삭제에 실패했습니다.", life: 3000 });
     } finally {
         deletingAccount.value = false;
     }
 };
 
-onMounted(() => {
-  loadProfile();
+// Top-level value for templates
+const previewUser = computed(() => {
+    return {
+        ...authStore.user,
+        ...profileForm.value,
+        profileImageUrl: previewUrl.value || authStore.user?.profileImageUrl
+    };
 });
+
 </script>
 
 <style scoped>
@@ -522,6 +733,13 @@ onMounted(() => {
   display: none;
 }
 
+/* Modal specific */
+.preview-area {
+    min-height: 200px;
+    background-color: var(--surface-100);
+}
+
+/* ... existing styles ... */
 :deep(.custom-upload input[type="file"]) {
   opacity: 0 !important;
   width: 0 !important;
@@ -531,7 +749,6 @@ onMounted(() => {
   overflow: hidden !important;
 }
 
-/* 카메라 버튼 스타일 (둥글게, 중앙 정렬) */
 :deep(.p-fileupload-choose) {
   border-radius: 50%;
   padding: 0 !important;
@@ -540,12 +757,10 @@ onMounted(() => {
   justify-content: center;
 }
 
-/* Fallback: hide any plain span or label siblings that display the filename/text */
 :deep(.p-fileupload) span {
   display: none !important;
 }
 
-/* 스크롤바 숨기기 (가로 스크롤 깔끔하게) */
 .scrollbar-hide {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
