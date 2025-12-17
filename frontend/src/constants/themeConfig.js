@@ -30,7 +30,7 @@ export const PROFILE_THEMES = {
   },
   cybercity: {
     name: 'Cybercity',
-    image: '/theme/cybercity.jpg',
+    image: 'public/theme/cybercity.jpg',
     textColor: '#ffffff',
     style: {
       textShadow: '0 0 5px #00eaff, 0 0 10px #00eaff',

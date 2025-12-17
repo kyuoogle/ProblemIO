@@ -39,6 +39,18 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  # AWS S3 설정
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      region:
+        static: ${AWS_REGION}
+      s3:
+        bucket: ${S3_BUCKET_NAME}
+        url: ${S3_BUCKET_URL}
+
 # MyBatis 설정
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml

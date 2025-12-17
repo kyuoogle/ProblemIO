@@ -5,6 +5,7 @@ import com.problemio.comment.mapper.CommentMapper;
 import com.problemio.follow.mapper.FollowMapper;
 import com.problemio.global.exception.BusinessException;
 import com.problemio.global.exception.ErrorCode;
+import com.problemio.global.service.S3Service;
 import com.problemio.quiz.domain.Quiz;
 import com.problemio.quiz.dto.QuizSummaryDto;
 import com.problemio.quiz.mapper.QuizLikeMapper;
@@ -25,8 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,9 +33,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    // 파일 저장 경로 상수 정의
-    private static final String ROOT_PATH = "C:/public/upload/";
-    private static final String PROFILE_SUB_DIR = "profile/";
+    private final S3Service s3Service;
+
+    // S3 경로 상수
+    private static final String PROFILE_DIR = "public/upload/profile";
 
     private final UserMapper userMapper;
     private final UserAuthMapper userAuthMapper;
@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserProfile(Long userId, Long viewerId) {
-        // 비로그인 사용자(viewerId == null)라면 0L로 처리
         long vId = (viewerId == null) ? 0L : viewerId;
         UserResponse user = userMapper.findUserProfile(userId, vId);
 
@@ -69,92 +68,44 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    // 프로필 업데이트
     @Override
     @Transactional
     public UserResponse updateProfile(Long userId, UserResponse request, MultipartFile file) {
-        // 1. 기존 유저 정보 조회 (삭제할 옛날 파일 경로를 알기 위해)
         UserResponse oldUser = getUserById(userId);
         String oldFilePath = oldUser.getProfileImageUrl();
 
-        // 2. 새 이미지가 들어왔다면 파일 저장 처리
         if (file != null && !file.isEmpty()) {
-            try {
-                // 기존 파일 삭제 로직
-                deleteOldProfileImage(oldFilePath);
+            
+            // 기존 파일 삭제 (Service에 위임)
+            s3Service.delete(oldFilePath);
 
-                //  새 파일 저장 로직
-                String savedPath = saveProfileImage(file);
-
-                //  DTO에 새 경로 주입
-                request.setProfileImageUrl(savedPath);
-            } catch (IOException e) {
-                throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
+            // 새 파일 저장 (Service에 위임)
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.lastIndexOf('.') > -1) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
             }
+            String s3Key = PROFILE_DIR + "/" + UUID.randomUUID() + extension;
+            
+            String savedPath = s3Service.upload(file, s3Key);
+            request.setProfileImageUrl(savedPath);
+            
         } else {
-            // 파일이 없으면 기존 이미지 경로 유지
             if (request.getProfileImageUrl() == null) {
                 request.setProfileImageUrl(oldFilePath);
             }
         }
 
-        // 상태 메시지 유효성 검사 (최대 20자)
         if (request.getStatusMessage() != null && request.getStatusMessage().length() > 20) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
-        // 3. DB 업데이트
         request.setId(userId);
         userMapper.updateProfile(request);
 
         return getUserById(userId);
     }
 
-    // 파일 저장 로직
-    private String saveProfileImage(MultipartFile file) throws IOException {
-        // 1. 저장할 디렉토리 경로 생성
-        String saveDirectoryPath = ROOT_PATH + PROFILE_SUB_DIR;
-        File folder = new File(saveDirectoryPath);
-
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        // 2. 유니크한 파일명 생성
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename != null && originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : ".jpg";
-
-        String savedFilename = UUID.randomUUID().toString() + extension;
-
-        // 3. 실제 파일 저장
-        File destination = new File(saveDirectoryPath + savedFilename);
-        file.transferTo(destination);
-
-        // 4. DB에 저장할 접근 URL 반환
-        return "/uploads/" + PROFILE_SUB_DIR + savedFilename;
-    }
-
-    // 기존 파일 삭제 Helper
-    private void deleteOldProfileImage(String dbFilePath) {
-        if (dbFilePath != null && !dbFilePath.isEmpty()) {
-            // "/uploads/"를 제거하고 ROOT_PATH("C:/upload/")를 붙임
-            String localPath = dbFilePath.replace("/uploads/", ROOT_PATH);
-
-            File oldFile = new File(localPath);
-
-            if (oldFile.exists()) {
-                if (oldFile.delete()) {
-                    System.out.println(">>> [File Delete] 기존 프로필 삭제 성공: " + localPath);
-                } else {
-                    System.out.println(">>> [File Delete] 삭제 실패 (파일 점유됨 등): " + localPath);
-                }
-            }
-        }
-    }
-
-    // 비밀번호 변경
     @Override
     @Transactional
     public void changePassword(Long userId, String oldPassword, String newPassword) {
@@ -169,7 +120,6 @@ public class UserServiceImpl implements UserService {
         userMapper.updatePassword(userId, encodedPassword);
     }
 
-    // 소프트 삭제
     @Override
     @Transactional
     public void deleteAccount(Long userId, String password) {
@@ -180,44 +130,33 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.INVALID_LOGIN);
         }
 
-        // 1) 인증 토큰 정리
         refreshTokenMapper.deleteByUserId(userId);
-
-        // 2) 팔로우 관계 제거
         followMapper.deleteByUserId(userId);
 
-        // 3) 내가 눌렀던 퀴즈 좋아요 삭제 + 카운트 보정
         List<Long> likedQuizIds = quizLikeMapper.findQuizIdsByUserId(userId);
         if (!likedQuizIds.isEmpty()) {
             quizLikeMapper.deleteByUserId(userId);
             likedQuizIds.forEach(quizMapper::decrementLikeCount);
         }
 
-        // 4) 내가 눌렀던 댓글 좋아요 삭제 + 카운트 보정
         List<Long> likedCommentIds = commentLikeMapper.findLikedCommentIdsByUser(userId);
         if (!likedCommentIds.isEmpty()) {
             commentLikeMapper.deleteByUserId(userId);
             likedCommentIds.forEach(commentMapper::decreaseLikeCount);
         }
 
-        // 5) 내가 작성한 댓글 익명 처리 (작성자 정보 제거, 내용은 유지)
         List<Long> myCommentIds = commentMapper.findIdsByUserId(userId);
         if (!myCommentIds.isEmpty()) {
             commentMapper.anonymizeByUserId(userId);
         }
 
-        // 6) 내가 만든 제출 기록은 남겨 두어 랭킹/통계에서 익명 사용자로 표기되도록 보존
-
-        // 7) 내가 만든 퀴즈 삭제 (내 퀴즈에 달린 댓글/좋아요/제출도 QuizService에서 정리)
         List<Quiz> myQuizzes = quizMapper.findQuizzesByUserId(userId);
         for (Quiz quiz : myQuizzes) {
             quizService.deleteQuiz(userId, quiz.getId());
         }
 
-        // 8) 개인정보/식별자 비우기 후 소프트 삭제 (닉네임/이메일 중복 방지)
         String tombstone = "deleted_" + UUID.randomUUID();
         userMapper.anonymizeCredentials(userId, tombstone + "@deleted.local", tombstone);
-        // 9) 최종 사용자 소프트 삭제
         userMapper.deleteUser(userId);
     }
 
@@ -233,48 +172,38 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    //  닉네임 중복 확인 구현
     @Override
     @Transactional(readOnly = true)
     public void checkNicknameDuplicate(String nickname) {
         if (userMapper.existsByNickname(nickname) > 0) {
-            // 중복된 경우 예외를 던져 컨트롤러가 에러 응답을 하게 함
             throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
-            // ErrorCode.DUPLICATE_NICKNAME이 없다면 DUPLICATE_VALUE 등을 사용하거나 새로 추가하세요.
         }
     }
 
     @Override
     public List<QuizSummaryDto> getMyQuizzes(Long userId) {
-        // return userMapper.findMyQuizzes(userId);
         return List.of();
     }
 
     @Override
     public List<QuizSummaryDto> getMyLikedQuizzes(Long userId) {
-        // return userMapper.findMyLikedQuizzes(userId);
         return List.of();
     }
 
     @Override
     public List<QuizSummaryDto> getFollowingQuizzes(Long userId) {
-        // return userMapper.findFollowingQuizzes(userId);
         return List.of();
     }
 
-
     @Override
     public UserPopoverResponse getUserPopover(Long userId, Long viewerId) {
-        // 1. 매퍼에 넘길 ID 결정 (null이면 0L을 넘겨서 SQL에서 아무도 팔로우하지 않은 것처럼 처리)
         Long searchViewerId = (viewerId == null) ? 0L : viewerId;
-
         UserPopoverResponse res = userMapper.findUserPopover(userId, searchViewerId);
 
         if (res == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 2. 내 자신인지 여부 세팅 (viewerId가 null이면 무조건 false)
         if (viewerId == null) {
             res.setMe(false);
         } else {

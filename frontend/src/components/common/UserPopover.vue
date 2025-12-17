@@ -58,24 +58,12 @@ const profile = reactive({
 });
 
 const avatarUrl = computed(() => {
-  if (!profile.profileImageUrl) return null;
-
-  // 이미 절대 경로라면 그대로 사용
-  if (profile.profileImageUrl.startsWith("http")) {
-    return profile.profileImageUrl;
-  }
-
-  // 서버에서 "/uploads/..." 처럼 내려온다고 가정
-  return `http://localhost:8080${profile.profileImageUrl}`;
+  return resolveImageUrl(profile.profileImageUrl);
 });
 
-// 업로드 경로 보정: DB에 파일명만 있으면 /upload/profile/ 붙여줌
+// 업로드 경로 보정: DB에 파일명만 있으면 /upload/profile/ 붙여줌 (이 로직도 사실상 백엔드가 다 처리해야 함)
 const avatarSrc = computed(() => {
-  const url = profile.profileImageUrl;
-  if (!url) return "";
-  if (url.startsWith("http") || url.startsWith("/")) return url;
-  if (url.startsWith("http") || url.startsWith("/")) return url;
-  return `/upload/profile/${url}`;
+   return resolveImageUrl(profile.profileImageUrl);
 });
 
 const customItemStore = useCustomItemStore();

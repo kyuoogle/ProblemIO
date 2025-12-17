@@ -1,5 +1,7 @@
 package com.problemio.user.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.problemio.global.config.S3UrlSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +15,14 @@ public class UserResponse {
     private Long id;
     private String email; // username
     private String nickname;
+    
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String profileImageUrl;
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String profileTheme;
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String avatarDecoration;
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String popoverDecoration;
     private String statusMessage;
     private Boolean isDeleted;

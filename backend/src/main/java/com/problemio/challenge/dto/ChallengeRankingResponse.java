@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.problemio.global.config.S3UrlSerializer;
 
 @Getter
 @Setter
@@ -17,6 +19,9 @@ public class ChallengeRankingResponse {
     private Long challengeId;
     private Long userId;
     private String nickname;
+
+
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String profileImageUrl;
     private Integer ranking;
     private Double score;

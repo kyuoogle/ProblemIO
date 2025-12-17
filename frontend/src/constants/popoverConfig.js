@@ -31,7 +31,7 @@ export const POPOVER_DECORATIONS = {
   },
   cybercity: {
     name: 'Cybercity',
-    image: '/popover/cybercity.jpg',
+    image: 'public/popover/cybercity.jpg',
     textColor: '#ffffff',
     textStyle: {
       textShadow: '0 0 5px #00eaff, 0 0 10px #00eaff',

@@ -2,6 +2,8 @@ package com.problemio.comment.dto;
 
 import lombok.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.problemio.global.config.S3UrlSerializer;
 
 @Getter
 @Setter
@@ -18,6 +20,9 @@ public class CommentResponse {
     // 작성자 정보 (회원/게스트 통합 응답)
     private Long userId;            // 회원이면 값, 게스트면 null
     private String nickname;        // 회원: users.nickname, 게스트: guest_nickname
+
+
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String profileImageUrl; // 회원만 존재, 게스트는 null
 
     private String content;
