@@ -150,15 +150,6 @@ const popoverStyle = computed(() => {
         }
         return baseStyle;
     }
-    // Fallback: 서버에서 URL이나 파일 경로가 넘어온 경우 그대로 배경으로 사용
-    return {
-        backgroundImage: `url('${resolveImageUrl(decoId)}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        overlayStyle: '',
-        textStyle: {},
-        buttonStyle: {}
-    };
   }
   return { overlayStyle: '', textStyle: {}, buttonStyle: {} };
 });

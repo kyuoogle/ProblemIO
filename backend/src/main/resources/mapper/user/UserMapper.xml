@@ -22,13 +22,10 @@
 
     <!-- 유저 팝오버용 결과 매핑 -->
     <resultMap id="UserPopoverMap" type="com.problemio.user.dto.UserPopoverResponse">
-        <id property="id" column="id"/>
+        <id property="Id" column="id"/>
         <result property="nickname" column="nickname"/>
         <result property="profileImageUrl" column="profile_image_url"/>
         <result property="statusMessage" column="status_message"/>
-        <result property="profileTheme" column="profile_theme"/>
-        <result property="avatarDecoration" column="avatar_decoration"/>
-        <result property="popoverDecoration" column="popover_decoration"/>
 
         <result property="followerCount" column="follower_count"/>
         <result property="followingCount" column="following_count"/>

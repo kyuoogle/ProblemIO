@@ -65,9 +65,6 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
-        user.setProfileTheme(normalizeDecorationValue(user.getProfileTheme()));
-        user.setAvatarDecoration(normalizeDecorationValue(user.getAvatarDecoration()));
-        user.setPopoverDecoration(normalizeDecorationValue(user.getPopoverDecoration()));
         return user;
     }
 
@@ -102,11 +99,6 @@ public class UserServiceImpl implements UserService {
         if (request.getStatusMessage() != null && request.getStatusMessage().length() > 20) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-
-        // decoration/theme 값이 URL로 넘어오면 ID만 남기도록 정규화
-        request.setProfileTheme(normalizeDecorationValue(request.getProfileTheme()));
-        request.setAvatarDecoration(normalizeDecorationValue(request.getAvatarDecoration()));
-        request.setPopoverDecoration(normalizeDecorationValue(request.getPopoverDecoration()));
 
         request.setId(userId);
         userMapper.updateProfile(request);
@@ -212,10 +204,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        res.setProfileTheme(normalizeDecorationValue(res.getProfileTheme()));
-        res.setAvatarDecoration(normalizeDecorationValue(res.getAvatarDecoration()));
-        res.setPopoverDecoration(normalizeDecorationValue(res.getPopoverDecoration()));
-
         if (viewerId == null) {
             res.setMe(false);
         } else {
@@ -223,22 +211,5 @@ public class UserServiceImpl implements UserService {
         }
 
         return res;
-    }
-
-    /**
-     * 프로필 테마/아바타/팝오버 값이 URL로 전달되면 파일명(확장자 제거)만 남기도록 정규화한다.
-     * 이미 ID 형태면 그대로 반환.
-     */
-    private String normalizeDecorationValue(String value) {
-        if (value == null || value.isBlank()) {
-            return value;
-        }
-        String trimmed = value.trim();
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-            String lastSegment = trimmed.substring(trimmed.lastIndexOf('/') + 1);
-            int dotIdx = lastSegment.lastIndexOf('.');
-            return (dotIdx > 0) ? lastSegment.substring(0, dotIdx) : lastSegment;
-        }
-        return trimmed;
     }
 }

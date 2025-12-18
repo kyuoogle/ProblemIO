@@ -18,8 +18,11 @@ public class UserResponse {
     
     @JsonSerialize(using = S3UrlSerializer.class)
     private String profileImageUrl;
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String profileTheme;
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String avatarDecoration;
+    @JsonSerialize(using = S3UrlSerializer.class)
     private String popoverDecoration;
     private String statusMessage;
     private Boolean isDeleted;
