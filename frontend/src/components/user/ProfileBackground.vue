@@ -45,11 +45,10 @@ const backgroundStyle = computed(() => {
   if (!theme) return {}; // 기본 .p-card 스타일 사용
 
   if (theme.image) {
+    // Shorthand background to override any default card background colors.
+    const bg = `url('${resolveImageUrl(theme.image)}') center / cover no-repeat !important`;
     return {
-      backgroundImage: `url('${resolveImageUrl(theme.image)}')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
+      background: bg,
       ...theme.style
     };
   }
