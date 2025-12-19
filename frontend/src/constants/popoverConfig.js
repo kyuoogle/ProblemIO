@@ -1,3 +1,12 @@
+const S3_PUBLIC_BASE = (import.meta.env.VITE_S3_BASE_URL || '').replace(/\/+$/, '');
+
+const withS3Public = (path) => {
+  if (!path) return path;
+  if (!S3_PUBLIC_BASE) return path;
+  const clean = path.startsWith('/') ? path.slice(1) : path;
+  return `${S3_PUBLIC_BASE}/${clean}`;
+};
+
 export const POPOVER_DECORATIONS = {
   default: {
     name: 'Default',
@@ -31,7 +40,7 @@ export const POPOVER_DECORATIONS = {
   },
   cybercity: {
     name: 'Cybercity',
-    image: 'public/popover/cybercity.jpg',
+    image: withS3Public('public/popover/cybercity.jpg'),
     textColor: '#ffffff',
     textStyle: {
       textShadow: '0 0 5px #00eaff, 0 0 10px #00eaff',
