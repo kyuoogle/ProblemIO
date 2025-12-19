@@ -455,4 +455,47 @@ public class QuizServiceImpl implements QuizService {
         int offset = (page - 1) * size;
         return quizMapper.findLikedQuizzesByUser(userId, offset, size);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> getQuizQuestions(Long quizId, Long viewerId, Integer limit) {
+        Quiz quiz = quizMapper.findById(quizId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
+
+        // 비공개 퀴즈 접근 제어: 제작자만 접근 가능
+        if (!quiz.isPublic() && (viewerId == null || !quiz.getUserId().equals(viewerId))) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        int safeLimit = normalizeLimit(limit);
+        List<Question> questions = questionMapper.findRandomByQuizId(quizId, safeLimit);
+
+        final int[] orderSeq = {1};
+        return questions.stream()
+                .map(q -> QuestionResponse.builder()
+                        .id(q.getId())
+                        .order(orderSeq[0]++)
+                        .description(q.getDescription())
+                        .imageUrl(q.getImageUrl())
+                        .answers(loadAnswers(q.getId()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private int normalizeLimit(Integer limit) {
+        if (limit == null) return 50;
+        int[] allowed = {10, 20, 30, 50};
+        for (int val : allowed) {
+            if (val == limit) return val;
+        }
+        // 가장 가까운 상한으로 보정
+        int closest = allowed[allowed.length - 1];
+        for (int val : allowed) {
+            if (limit <= val) {
+                closest = val;
+                break;
+            }
+        }
+        return closest;
+    }
 }

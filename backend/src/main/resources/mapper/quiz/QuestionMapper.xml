@@ -42,4 +42,11 @@
     <select id="findByQuizId" resultMap="QuestionResultMap">
         SELECT * FROM questions WHERE quiz_id = #{quizId} ORDER BY question_order ASC
     </select>
+
+    <select id="findRandomByQuizId" resultMap="QuestionResultMap">
+        SELECT * FROM questions
+        WHERE quiz_id = #{quizId}
+        ORDER BY RAND()
+        LIMIT #{limit}
+    </select>
 </mapper>

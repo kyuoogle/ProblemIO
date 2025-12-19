@@ -258,6 +258,7 @@ const submitAnswer = async () => {
       submissionId: quizStore.submissionId,
       questionId: currentQuestion.value.id,
       answerText: trimmedAnswer,
+      totalQuestions: quizStore.currentQuiz?.questions?.length || undefined,
     }
 
     const result = await submitQuizAPI(Number(route.params.id), payload)

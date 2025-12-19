@@ -48,7 +48,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         List<QuestionAnswer> answers = questionAnswerMapper.findByQuestionId(request.getQuestionId());
         boolean correct = isAnswerCorrect(request.getAnswerText(), answers);
 
-        Submission submission = resolveSubmission(quizId, userIdOrNull, request.getSubmissionId());
+        Submission submission = resolveSubmission(quizId, userIdOrNull, request.getSubmissionId(), request.getTotalQuestions());
 
         // 기존 제출이 있으면 삭제 후 새로 저장하여 정답 개수 재계산
         boolean hadCorrect = submissionDetailMapper.findBySubmissionIdAndQuestionId(submission.getId(), question.getId())
@@ -112,9 +112,11 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .build();
     }
 
-    private Submission resolveSubmission(Long quizId, Long userIdOrNull, Long submissionId) {
+    private Submission resolveSubmission(Long quizId, Long userIdOrNull, Long submissionId, Integer requestedTotal) {
         if (submissionId == null) {
-            int totalQuestions = questionMapper.findByQuizId(quizId).size();
+            int totalQuestions = requestedTotal != null
+                    ? requestedTotal
+                    : questionMapper.findByQuizId(quizId).size();
 
             Submission submission = new Submission();
             submission.setQuizId(quizId);

@@ -36,7 +36,11 @@
         GROUP BY u.id, u.nickname, u.profile_image_url
         HAVING solved_quiz_count > 0
         ORDER BY
-            (COUNT(DISTINCT s.quiz_id) * (0.3 + 0.7 * ((SUM(s.correct_count) + 20 * 0.6) / (SUM(s.total_questions) + 20)))) DESC,
+            (
+              COUNT(DISTINCT s.quiz_id)
+              * (0.3 + 0.7 * ((SUM(s.correct_count) + 20 * 0.6) / (SUM(s.total_questions) + 20)))
+              * LEAST(1.0, ( (SUM(s.total_questions) / NULLIF(COUNT(DISTINCT s.quiz_id),0)) / 50.0 ))
+            ) DESC,
             last_submitted_at DESC
         LIMIT #{limit}
     </select>

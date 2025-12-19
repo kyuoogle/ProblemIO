@@ -52,6 +52,14 @@ export const getQuiz = async (quizId) => {
   return resolveQuizImages(response.data.data)
 }
 
+// 퀴즈 시작용 문제 목록 (랜덤, 제한 개수)
+export const getQuizQuestions = async (quizId, limit) => {
+  const params = {}
+  if (limit) params.limit = limit
+  const response = await apiClient.get(`${BASE_URL}/${quizId}/questions`, { params })
+  return response.data.data
+}
+
 // 퀴즈 생성
 export const createQuiz = async (data) => {
   const response = await apiClient.post(BASE_URL, {

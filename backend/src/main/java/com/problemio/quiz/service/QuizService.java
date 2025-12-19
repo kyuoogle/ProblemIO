@@ -28,4 +28,6 @@ public interface QuizService {
     List<QuizSummaryDto> getQuizzesOfFollowings(Long userId, int page, int size);
 
     List<QuizSummaryDto> getLikedQuizzes(Long userId, int page, int size);
+
+    List<QuestionResponse> getQuizQuestions(Long quizId, Long viewerId, Integer limit);
 }

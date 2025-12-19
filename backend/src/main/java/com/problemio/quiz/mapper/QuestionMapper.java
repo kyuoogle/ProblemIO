@@ -20,5 +20,7 @@ public interface QuestionMapper {
 
     List<Question> findByQuizId(@Param("quizId") Long quizId);
 
+    List<Question> findRandomByQuizId(@Param("quizId") Long quizId, @Param("limit") int limit);
+
     void deleteByQuizId(@Param("quizId") Long quizId);
 }

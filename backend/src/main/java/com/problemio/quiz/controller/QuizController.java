@@ -5,6 +5,7 @@ import com.problemio.global.common.ApiResponse;
 import com.problemio.global.exception.BusinessException;
 import com.problemio.global.exception.ErrorCode;
 import com.problemio.quiz.dto.QuizCreateRequest;
+import com.problemio.quiz.dto.QuestionResponse;
 import com.problemio.quiz.dto.QuizResponse;
 import com.problemio.quiz.dto.QuizSummaryDto;
 import com.problemio.quiz.dto.QuizUpdateRequest;
@@ -193,6 +194,21 @@ public class QuizController {
         quizService.unlikeQuiz(requireLogin(userDetails), quizId);
         return ResponseEntity.ok(
                 ApiResponse.success(Map.of("liked", false))
+        );
+    }
+
+    /**
+     * 퀴즈 시작용 문제 조회 (무작위 순서 + 제한 개수)
+     */
+    @GetMapping("/{quizId}/questions")
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getQuizQuestions(
+            @PathVariable Long quizId,
+            @RequestParam(required = false) Integer limit,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long viewerId = userDetails != null ? userDetails.getUser().getId() : null;
+        return ResponseEntity.ok(
+                ApiResponse.success(quizService.getQuizQuestions(quizId, viewerId, limit))
         );
     }
 

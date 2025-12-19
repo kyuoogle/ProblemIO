@@ -24,4 +24,9 @@ public class QuizSubmissionRequest {
      */
     @NotNull
     private String answerText;
+
+    /**
+     * 이번 세션에서 풀기로 한 총 문항 수 (프론트에서 선택한 문제 수를 전달)
+     */
+    private Integer totalQuestions;
 }

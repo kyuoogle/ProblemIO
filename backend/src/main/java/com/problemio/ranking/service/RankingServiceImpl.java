@@ -21,6 +21,7 @@ public class RankingServiceImpl implements RankingService {
     private static final double ACCURACY_WEIGHT = 0.7; // weight for accuracy
     private static final double PRIOR_QUESTIONS = 20.0;
     private static final double PRIOR_ACCURACY = 0.6;
+    private static final double FULL_QUESTION_COUNT = 50.0; // 선택지 최대값 (10/20/30/50)
 
     public RankingServiceImpl(RankingMapper rankingMapper) {
         this.rankingMapper = rankingMapper;
@@ -66,7 +67,16 @@ public class RankingServiceImpl implements RankingService {
 
     private int calcScore(RankingRowDto r) {
         double smoothedAccuracy = calcSmoothedAccuracy(r.getTotalCorrect(), r.getTotalQuestions());
-        double score = r.getSolvedQuizCount() * (ACCURACY_BASE + ACCURACY_WEIGHT * smoothedAccuracy) * 10;
+        double avgQuestionsPerQuiz = (r.getSolvedQuizCount() > 0)
+                ? ((double) r.getTotalQuestions() / r.getSolvedQuizCount())
+                : 0.0;
+        // 문제 수 보정: 50개 풀 때 1.0, 10개 풀 때 0.2
+        double questionAdjust = Math.min(1.0, avgQuestionsPerQuiz / FULL_QUESTION_COUNT);
+
+        double score = r.getSolvedQuizCount()
+                * (ACCURACY_BASE + ACCURACY_WEIGHT * smoothedAccuracy)
+                * questionAdjust
+                * 10;
         return (int) Math.round(score);
     }
 

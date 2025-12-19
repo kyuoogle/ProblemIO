@@ -58,9 +58,12 @@ export const useQuizStore = defineStore('quiz', () => {
   }
 
   // 퀴즈 시작 시 초기화
-  function startQuiz(quiz) {
+  function startQuiz(quiz, questionList) {
+    const sourceQuestions = questionList && questionList.length > 0
+      ? questionList
+      : (quiz.questions || [])
     // 질문 순서를 플레이할 때만 랜덤하게 섞는다 (원본 퀴즈는 보존)
-    const shuffledQuestions = [...(quiz.questions || [])]
+    const shuffledQuestions = [...sourceQuestions]
     for (let i = shuffledQuestions.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]]

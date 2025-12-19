@@ -60,8 +60,17 @@
                 </div>
               </div>
 
-              <div class="flex gap-3">
-                <Button label="Start Quiz" icon="pi pi-play" size="large" class="flex-1" @click="startQuiz"></Button>
+              <div class="start-button-grid">
+                <Button
+                  v-for="option in questionOptions"
+                  :key="option"
+                  :label="`${option}개 풀기`"
+                  icon="pi pi-play"
+                  size="large"
+                  class="start-button"
+                  :loading="startLoadingOption === option"
+                  @click="startQuizWithLimit(option)"
+                />
               </div>
             </div>
           </template>
@@ -94,7 +103,7 @@ import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
 import { useQuizStore } from "@/stores/quiz";
-import { getQuiz, likeQuiz, unlikeQuiz } from "@/api/quiz";
+import { getQuiz, getQuizQuestions, likeQuiz, unlikeQuiz } from "@/api/quiz";
 import { followUser, unfollowUser } from "@/api/user";
 import UserPopover from "@/components/common/UserPopover.vue";
 import UserAvatar from '@/components/common/UserAvatar.vue' // 유저 아바타 불러오기 
@@ -112,6 +121,8 @@ const loading = ref(false);
 const isLiked = ref(false);
 const isFollowed = ref(false);
 const quizId = computed(() => Number(route.params.id));
+const questionOptions = [10, 20, 30, 50];
+const startLoadingOption = ref<number | null>(null);
 
 // 팝오버 ref
 const userPopoverRef = ref<any | null>(null);
@@ -236,10 +247,22 @@ const handleFollow = async () => {
   }
 };
 
-const startQuiz = () => {
-  if (quiz.value) {
-    quizStore.startQuiz(quiz.value);
+const startQuizWithLimit = async (count: number) => {
+  if (!quiz.value || startLoadingOption.value !== null) return;
+  startLoadingOption.value = count;
+  try {
+    const questions = await getQuizQuestions(quizId.value, count);
+    quizStore.startQuiz(quiz.value, questions);
     router.push(`/quiz/${route.params.id}/play`);
+  } catch (error: any) {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: error?.message || "퀴즈 시작에 실패했습니다.",
+      life: 3000,
+    });
+  } finally {
+    startLoadingOption.value = null;
   }
 };
 
@@ -292,6 +315,14 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+.start-button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+.start-button {
+  width: 100%;
 }
 .view-chip {
   display: inline-flex;
