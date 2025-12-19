@@ -36,6 +36,16 @@ export const useCustomItemStore = defineStore('customItem', () => {
                     }
                 }
                 
+                // Overwrite 'Cybercity' config with local constant to ensure animation updates apply immediately
+                // regardless of stale DB data.
+                if (item.name === 'Cybercity') {
+                   if (item.itemType === 'POPOVER' && POPOVER_DECORATIONS.cybercity) {
+                       config = { ...config, ...POPOVER_DECORATIONS.cybercity };
+                   } else if (item.itemType === 'THEME' && PROFILE_THEMES.cybercity) {
+                       config = { ...config, ...PROFILE_THEMES.cybercity };
+                   }
+                }
+                
                 defs[item.id] = {
                     id: item.id,
                     name: item.name,
@@ -139,7 +149,7 @@ export const useCustomItemStore = defineStore('customItem', () => {
     const getItemConfig = (type, key) => {
         // 정의(동적)를 먼저 확인하고, 정적 기본값을 확인
         // 하지만 definition은 ID로 평탄화되어 있음.
-        // 정적 기본값은 'pastel_pink' 같은 키를 사용.
+        // 정적 기본값은 'cybercity' 같은 키를 사용.
         
         // 키가 정의에 있다면 (숫자 또는 DB ID와 일치하는 문자열)
         if (itemDefinitions.value[key]) return itemDefinitions.value[key];

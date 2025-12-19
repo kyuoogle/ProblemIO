@@ -96,7 +96,7 @@ const handleLogin = async () => {
 }
 
 .auth-card:hover {
-  transform: translateY(-3px);
+  /* transform: translateY(-3px); Removed per user request */
   border-color: var(--color-border-hover);
   box-shadow: 0 20px 42px rgba(0, 0, 0, 0.18);
 }

@@ -405,9 +405,12 @@ onMounted(async () => {
 
 // Computed available items based on type
 const availableItems = computed(() => {
-    if (customType.value === 'THEME') return Object.values(customItemStore.themeItems);
-    if (customType.value === 'POPOVER') return Object.values(customItemStore.popoverItems);
-    return [];
+    let items = [];
+    if (customType.value === 'THEME') items = Object.values(customItemStore.themeItems);
+    else if (customType.value === 'POPOVER') items = Object.values(customItemStore.popoverItems);
+    
+    // [Filtering] User Request: Only show Cybercity & Default
+    return items.filter(item => item.name === 'Cybercity' || item.name === 'Default');
 });
 
 const customDialogTitle = computed(() => {

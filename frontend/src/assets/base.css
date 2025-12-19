@@ -313,3 +313,27 @@ p, span, label, small {
   background: var(--color-accent);
   border-color: var(--color-accent);
 }
+
+/* 애니메이션 키프레임 정의 */
+@keyframes neon-pulse {
+  0% {
+    text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff;
+  }
+  50% {
+    text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff, 0 0 30px #00eaff;
+  }
+  100% {
+    text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff;
+  }
+}
+
+/* float-effect removed */
+
+@keyframes border-flow {
+  0% { border-color: #00eaff; box-shadow: 0 0 5px #00eaff; }
+  33% { border-color: #ff00ff; box-shadow: 0 0 5px #ff00ff; }
+  66% { border-color: #ffff00; box-shadow: 0 0 5px #ffff00; }
+  100% { border-color: #00eaff; box-shadow: 0 0 5px #00eaff; }
+}
+
+/* Pastel Animations Removed */
