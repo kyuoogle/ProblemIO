@@ -108,6 +108,7 @@
                   placeholder="••••••••"
                   :class="{ 'p-invalid': errors.password }"
                   class="w-full"
+                  inputClass="w-full"
                   @blur="validatePassword"
                   @input="clearError('password')"
                 />
@@ -125,6 +126,7 @@
                   placeholder="••••••••"
                   :class="{ 'p-invalid': errors.confirmPassword }"
                   class="w-full"
+                  inputClass="w-full"
                   @blur="validateConfirmPassword"
                   @input="clearError('confirmPassword')"
                 />

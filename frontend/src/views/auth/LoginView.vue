@@ -18,7 +18,7 @@
               </div>
               <div class="flex flex-col gap-2">
                 <label for="password" class="text-sm font-medium">Password</label>
-                <Password id="password" v-model="password" toggleMask placeholder="••••••••" required class="w-full" />
+                <Password id="password" v-model="password" toggleMask placeholder="••••••••" required class="w-full" inputClass="w-full" />
               </div>
               <Button type="submit" label="로그인" :loading="loading" class="w-full" size="large" />
             </form>
