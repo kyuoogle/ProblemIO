@@ -75,6 +75,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateProfile(Long userId, UserResponse request, MultipartFile file) {
         UserResponse oldUser = getUserById(userId);
+        
+        // 금칙어 검사 (회원가입 로직과 동일)
+        String nickname = request.getNickname();
+        if (nickname != null && (nickname.contains("admin") || nickname.contains("관리자") || nickname.contains("운영자"))) {
+             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+
         String oldFilePath = oldUser.getProfileImageUrl();
 
         if (file != null && !file.isEmpty()) {
