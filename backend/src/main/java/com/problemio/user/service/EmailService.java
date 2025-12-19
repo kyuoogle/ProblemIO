@@ -21,6 +21,9 @@ public class EmailService {
 
     // DB 대신 메모리에 저장 (Key: 이메일, Value: 인증정보)
     private final Map<String, VerificationInfo> memoryStore = new ConcurrentHashMap<>();
+    
+    // 인증 완료된 이메일 저장 (Key: 이메일, Value: 만료시간)
+    private final Map<String, Long> verifiedEmails = new ConcurrentHashMap<>();
 
     // 내부 클래스: 인증번호와 만료시간을 담는 객체
     private static class VerificationInfo {
@@ -65,9 +68,21 @@ public class EmailService {
             return false;
         }
 
-        // 검증 성공 시 메모리에서 삭제 (재사용 방지)
+        // 검증 성공 시 메모리에서 삭제 (재사용 방지) 후 인증 완료 목록에 추가 (10분 유효)
         memoryStore.remove(email);
+        verifiedEmails.put(email, System.currentTimeMillis() + (10 * 60 * 1000));
         return true;
+    }
+
+    // 3. 이메일 인증 여부 확인
+    public boolean isEmailVerified(String email) {
+        Long expireTime = verifiedEmails.get(email);
+        return expireTime != null && expireTime > System.currentTimeMillis();
+    }
+
+    // 4. 인증 사용 완료 처리 (가입 완료 시 호출)
+    public void consumeVerification(String email) {
+        verifiedEmails.remove(email);
     }
 
     // 1시간마다 만료된 데이터 청소 (메모리 누수 방지)
@@ -75,5 +90,6 @@ public class EmailService {
     public void clearExpiredData() {
         long now = System.currentTimeMillis();
         memoryStore.entrySet().removeIf(entry -> entry.getValue().expireTime < now);
+        verifiedEmails.entrySet().removeIf(entry -> entry.getValue() < now);
     }
 }

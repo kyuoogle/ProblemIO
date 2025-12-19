@@ -26,6 +26,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final RefreshTokenMapper refreshTokenMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -35,6 +36,11 @@ public class UserAuthServiceImpl implements UserAuthService {
         }
         if (userAuthMapper.findByNickname(request.getNickname()).isPresent()) {
             throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
+        }
+
+        // 이메일 인증 여부 확인 (백엔드 강제)
+        if (!emailService.isEmailVerified(request.getEmail())) {
+            throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         // 금칙어 검사
@@ -49,6 +55,9 @@ public class UserAuthServiceImpl implements UserAuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         userAuthMapper.insertUser(user);
+
+        // 인증 정보 사용 처리 (재사용 방지)
+        emailService.consumeVerification(request.getEmail());
 
         return UserResponse.builder()
                 .id(user.getId())

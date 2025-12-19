@@ -9,6 +9,7 @@ public enum ErrorCode {
 
     USER_NOT_FOUND("U001", "사용자를 찾을 수 없습니다."),
     EMAIL_DUPLICATED("U002", "이미 가입된 이메일입니다."),
+    EMAIL_NOT_VERIFIED("U005", "이메일 인증이 필요합니다."),
     NICKNAME_DUPLICATED("U003", "이미 사용 중인 닉네임입니다."),
     INVALID_LOGIN("U004", "이메일 또는 비밀번호가 올바르지 않습니다."),
     QUIZ_NOT_FOUND("Q001", "퀴즈를 찾을 수 없습니다."),
