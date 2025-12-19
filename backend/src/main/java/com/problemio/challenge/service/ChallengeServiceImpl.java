@@ -147,8 +147,39 @@ public class ChallengeServiceImpl implements ChallengeService {
             return;
         }
 
-        // 2. Sort: Correct DESC -> PlayTime ASC -> SubmittedAt ASC
-        submissions.sort((s1, s2) -> {
+        // 2. Filter Best Submission per User
+        // Use a Map to keep the best one: Key=UserId
+        java.util.Map<Long, Submission> bestSubmissionsMap = new java.util.HashMap<>();
+        
+        for (Submission s : submissions) {
+            if (!bestSubmissionsMap.containsKey(s.getUserId())) {
+                bestSubmissionsMap.put(s.getUserId(), s);
+            } else {
+                Submission existing = bestSubmissionsMap.get(s.getUserId());
+                // Compare: Correct DESC, PlayTime ASC, SubmittedAt ASC
+                boolean isBetter = false;
+                if (s.getCorrectCount() > existing.getCorrectCount()) {
+                    isBetter = true;
+                } else if (s.getCorrectCount() == existing.getCorrectCount()) {
+                    if (s.getPlayTime() < existing.getPlayTime()) {
+                        isBetter = true;
+                    } else if (s.getPlayTime().equals(existing.getPlayTime())) {
+                        if (s.getSubmittedAt().isBefore(existing.getSubmittedAt())) {
+                            isBetter = true;
+                        }
+                    }
+                }
+                
+                if (isBetter) {
+                    bestSubmissionsMap.put(s.getUserId(), s);
+                }
+            }
+        }
+        
+        List<Submission> bestSubmissions = new java.util.ArrayList<>(bestSubmissionsMap.values());
+
+        // 3. Sort Best Submissions
+        bestSubmissions.sort((s1, s2) -> {
             if (s1.getCorrectCount() != s2.getCorrectCount()) {
                 return s2.getCorrectCount() - s1.getCorrectCount(); 
             }
@@ -179,55 +210,38 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional // removed readOnly=true because it might trigger lazy finalization (write)
     @Cacheable(value = "leaderboard", key = "#challengeId")
     public List<ChallengeRankingResponse> getTopRankings(Long challengeId) {
-        List<ChallengeRankingResponse> topRankings = challengeRankingMapper.findLiveTopRankingsByChallengeId(challengeId, 10);
+        // Enriched DTOs with challengeType
+        List<ChallengeRankingResponse> topRankings = resolveTopRankings(challengeId);
         
         String type = challengeMapper.findById(challengeId).map(Challenge::getChallengeType).orElse("UNKNOWN");
-        // Enrich DTOs with challengeType locally if not fetched by query (Query fetches submission data mostly)
-        // Actually mapper query SHOULD fetch it or we set it here.
         topRankings.forEach(r -> r.setChallengeType(type));
         
         return topRankings;
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional // removed readOnly=true
     public LeaderboardResponse getLeaderboard(Long challengeId, Long userId) {
-        // 1. Top Rankings (Reusing logic, calling mapper directly to avoid self-invocation proxy issues unless necessary)
-        List<ChallengeRankingResponse> topRankings = challengeRankingMapper.findLiveTopRankingsByChallengeId(challengeId, 10);
+        // 1. Top Rankings (Lazy Finalization if needed)
+        List<ChallengeRankingResponse> topRankings = resolveTopRankings(challengeId);
+        
         String type = challengeMapper.findById(challengeId).map(Challenge::getChallengeType).orElse("UNKNOWN");
         topRankings.forEach(r -> r.setChallengeType(type));
 
         // 2. My Ranking
         ChallengeRankingResponse myRanking = null;
         if (userId != null) {
-             Submission s = challengeRankingMapper.findSubmissionByUserIdAndChallengeId(userId, challengeId);
-                 
-             if (s != null) {
-                 int rank = challengeRankingMapper.getLiveRanking(
-                     challengeId, 
-                     s.getCorrectCount(), 
-                     s.getPlayTime(), 
-                     s.getSubmittedAt()
-                 );
-                 
-                 myRanking = ChallengeRankingResponse.builder()
-                         .challengeId(challengeId)
-                         .userId(userId)
-                         .ranking(rank)
-                         .nickname("Me") // Placeholder, frontend has user info
-                         .score((double) s.getCorrectCount())
-                         .playTime(s.getPlayTime())
-                         .challengeType(type)
-                         .build();
-             }
+            myRanking = findMyBestRanking(userId, challengeId, type);
         }
         
-        // Default empty ranking for guest or no-submission
+        // Return 0-score ranking if user has no record (User request: "10등 + 내 기록 0점")
         if (myRanking == null) {
              myRanking = ChallengeRankingResponse.builder()
+                .challengeId(challengeId)
+                .userId(userId) // Can be null if guest
                 .ranking(0)
                 .score(0.0)
                 .playTime(0.0)
@@ -240,6 +254,75 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .topRankings(topRankings)
                 .myRanking(myRanking)
                 .build();
+    }
+    
+    // Unifies logic for finding "My Ranking" whether Active or Archived
+    private ChallengeRankingResponse findMyBestRanking(Long userId, Long challengeId, String challengeType) {
+         boolean isExpired = isChallengeExpired(challengeId);
+         
+         if (isExpired) {
+             // 1. Try Archive
+             ChallengeRankingResponse ranking = challengeRankingMapper.loginUserRanking(userId, challengeId);
+             if (ranking != null) {
+                 ranking.setChallengeType(challengeType);
+                 return ranking;
+             }
+             // If not in archive, fallback to Live logic below? 
+             // Logic: If finalizeChallenge ran, it used live submissions. 
+             // If "lazy finalization" happens in resolveTopRankings just before this, key submissions are in archive.
+             // If user was duplicate or somehow missed, checking live is safer fallback?
+             // Actually if finalized, Archive IS the source of truth.
+             // But for safety/robustness, if Archive is empty for user, maybe they are not in valid set.
+         }
+         
+         // 2. Try Live (Active or Fallback)
+         Submission s = challengeRankingMapper.findSubmissionByUserIdAndChallengeId(userId, challengeId);
+         if (s != null) {
+             int rank = challengeRankingMapper.getLiveRanking(
+                 challengeId, 
+                 s.getCorrectCount(), 
+                 s.getPlayTime(), 
+                 s.getSubmittedAt()
+             );
+             
+             return ChallengeRankingResponse.builder()
+                     .challengeId(challengeId)
+                     .userId(userId)
+                     .ranking(rank)
+                     .nickname("Me")
+                     .score((double) s.getCorrectCount())
+                     .playTime(s.getPlayTime())
+                     .challengeType(challengeType)
+                     .build();
+         }
+         
+         return null;
+    }
+    
+    // Helper method for Lazy Finalization
+    private List<ChallengeRankingResponse> resolveTopRankings(Long challengeId) {
+        Challenge challenge = challengeMapper.findById(challengeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
+        
+        boolean isExpired = challenge.getEndAt() != null && LocalDateTime.now().isAfter(challenge.getEndAt());
+        
+        if (isExpired) {
+            // Check if archived
+            if (!challengeRankingMapper.existsByChallengeId(challengeId)) {
+                // Lazy Finalization
+                finalizeChallenge(challengeId);
+            }
+            // Return from Archive
+            return challengeRankingMapper.challengeTotalRanking(challengeId, 10);
+        } else {
+            // Return from Live
+            return challengeRankingMapper.findLiveTopRankingsByChallengeId(challengeId, 10);
+        }
+    }
+    
+    private boolean isChallengeExpired(Long challengeId) {
+        Challenge challenge = challengeMapper.findById(challengeId).orElse(null);
+        return challenge != null && challenge.getEndAt() != null && LocalDateTime.now().isAfter(challenge.getEndAt());
     }
 
     private final com.problemio.quiz.mapper.QuizMapper quizMapper;

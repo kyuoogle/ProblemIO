@@ -33,7 +33,17 @@
         </foreach>
     </insert>
 
-    <select id="findRankingsByChallengeId" resultMap="ChallengeRankingResultMap">
+    <!-- findRankingsByChallengeId removed -->
+    
+    <delete id="deleteRankingsByChallengeId">
+        DELETE FROM challenge_rankings WHERE challenge_id = #{challengeId}
+    </delete>
+
+    <select id="existsByChallengeId" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM challenge_rankings WHERE challenge_id = #{challengeId})
+    </select>
+
+    <select id="challengeTotalRanking" resultMap="ChallengeRankingResultMap">
         SELECT
             cr.challenge_id,
             cr.user_id,
@@ -50,11 +60,27 @@
         WHERE cr.challenge_id = #{challengeId}
         AND u.is_deleted = 0
         ORDER BY cr.ranking ASC
+        LIMIT #{limit}
     </select>
-    
-    <delete id="deleteRankingsByChallengeId">
-        DELETE FROM challenge_rankings WHERE challenge_id = #{challengeId}
-    </delete>
+
+    <select id="loginUserRanking" resultMap="ChallengeRankingResultMap">
+        SELECT
+            cr.challenge_id,
+            cr.user_id,
+            u.nickname,
+            u.profile_image_url,
+            cr.ranking,
+            cr.score,
+            cr.play_time,
+            c.challenge_type,
+            cr.created_at
+        FROM challenge_rankings cr
+        JOIN users u ON u.id = cr.user_id
+        JOIN challenges c ON c.id = cr.challenge_id
+        WHERE cr.challenge_id = #{challengeId}
+        AND cr.user_id = #{userId}
+        AND u.is_deleted = 0
+    </select>
 
     <!-- ResultMap for Submission -->
     <resultMap id="ChallengeSubmissionResultMap" type="com.problemio.submission.domain.Submission">
@@ -76,13 +102,13 @@
     <select id="findSubmissionByUserIdAndChallengeId" resultMap="ChallengeSubmissionResultMap">
         SELECT * FROM submissions 
         WHERE user_id = #{userId} AND challenge_id = #{challengeId}
-        ORDER BY submitted_at DESC
+        ORDER BY correct_count DESC, play_time ASC, submitted_at ASC
         LIMIT 1
     </select>
 
-    <!-- Live Ranking -->
+    <!-- Live Ranking (Unique User) -->
     <select id="getLiveRanking" resultType="int">
-        SELECT COUNT(*) + 1
+        SELECT COUNT(DISTINCT user_id) + 1
         FROM submissions
         WHERE challenge_id = #{challengeId}
           AND (correct_count > #{correctCount}
@@ -92,18 +118,30 @@
 
     <select id="findLiveTopRankingsByChallengeId" resultType="com.problemio.challenge.dto.ChallengeRankingResponse">
         SELECT
-            s.challenge_id AS challengeId,
-            s.user_id AS userId,
-            u.nickname,
-            u.profile_image_url AS profileImageUrl,
-            s.correct_count AS score,
-            s.play_time AS playTime,
-            s.submitted_at AS recordedAt,
-            RANK() OVER (ORDER BY s.correct_count DESC, s.play_time ASC, s.submitted_at ASC) AS ranking
-        FROM submissions s
-        JOIN users u ON u.id = s.user_id
-        WHERE s.challenge_id = #{challengeId}
-        AND u.is_deleted = 0
+            challengeId,
+            userId,
+            nickname,
+            profileImageUrl,
+            score,
+            playTime,
+            recordedAt,
+            RANK() OVER (ORDER BY score DESC, playTime ASC, recordedAt ASC) AS ranking
+        FROM (
+            SELECT
+                s.challenge_id AS challengeId,
+                s.user_id AS userId,
+                u.nickname,
+                u.profile_image_url AS profileImageUrl,
+                s.correct_count AS score,
+                s.play_time AS playTime,
+                s.submitted_at AS recordedAt,
+                ROW_NUMBER() OVER (PARTITION BY s.user_id ORDER BY s.correct_count DESC, s.play_time ASC, s.submitted_at ASC) as rn
+            FROM submissions s
+            JOIN users u ON u.id = s.user_id
+            WHERE s.challenge_id = #{challengeId}
+            AND u.is_deleted = 0
+        ) sub
+        WHERE rn = 1
         LIMIT #{limit}
     </select>
 
