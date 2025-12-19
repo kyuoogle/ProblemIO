@@ -565,6 +565,13 @@ const handleCheckNickname = async () => {
     nicknameState.value.error = "닉네임은 2자 이상이어야 합니다.";
     return;
   }
+  
+  // 금칙어 검사
+  if (nickname.includes("admin") || nickname.includes("관리자") || nickname.includes("운영자")) {
+    nicknameState.value.error = "사용할 수 없는 닉네임입니다.";
+    return;
+  }
+
   nicknameState.value.isChecking = true;
   nicknameState.value.error = "";
 

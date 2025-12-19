@@ -95,7 +95,16 @@ const avatarStyle = computed(() => {
     // Reset inherited text styles that might come from themes (prevent neon effects on avatar text)
     textShadow: 'none',
     WebkitTextStroke: '0',
-    color: '#374151' // Force dark text (gray-700) for readability inside avatar
+    color: '#374151', // Force dark text (gray-700) for readability inside avatar
+    objectFit: 'cover', // Force image to not stretch
   }
 })
 </script>
+
+<style scoped>
+:deep(.p-avatar img) {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+</style>
