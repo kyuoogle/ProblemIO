@@ -167,8 +167,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore()
 
-    // 로그인 페이지로 이동할 때 redirect 파라미터가 없으면 직전 페이지를 기억
-    if (to.name === 'login' && !to.query.redirect && from && from.name !== 'login') {
+    // 로그인 페이지로 이동할 때 redirect 파라미터가 없으면 직전 페이지를 기억 (signup 페이지 제외)
+    if (to.name === 'login' && !to.query.redirect && from && from.name !== 'login' && from.name !== 'signup') {
         return next({
             ...to,
             query: { ...to.query, redirect: from.fullPath || '/' },

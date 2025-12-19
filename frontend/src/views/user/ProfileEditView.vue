@@ -15,17 +15,25 @@
               <h2 class="text-xl font-bold border-l-4 border-primary pl-3">내 정보 수정</h2>
               
               <div class="flex flex-col gap-2 items-center my-8">
-                <div class="relative inline-block group cursor-pointer" @click="openAvatarEditor">
-                   <UserAvatar 
-                   :user="previewUser"
-                   class="font-bold surface-200 transition-transform group-hover:scale-105" 
-                   style="width: 200px; height: 200px; font-size: 80px"/>
-                   
+                <div class="relative inline-block group cursor-pointer" @click="triggerFileUpload">
+                   <img 
+                   v-if="previewUrl"
+                   :src="previewUrl" 
+                   class="w-48 h-48 rounded-full object-cover border-4 border-surface-100 shadow-md transition-transform group-hover:scale-105" 
+                   alt="Profile"
+                   />
+                   <div v-else class="w-48 h-48 rounded-full bg-surface-200 flex items-center justify-center border-4 border-surface-100 shadow-md transition-transform group-hover:scale-105">
+                      <i class="pi pi-user text-7xl text-gray-400"></i>
+                   </div>
+
                    <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <i class="pi pi-pencil text-white text-3xl"></i>
+                      <i class="pi pi-camera text-white text-4xl"></i>
                    </div>
                 </div>
-                <small class="text-gray-500 mt-2">아바타를 클릭하여 꾸밀 수 있습니다</small>
+                <!-- Hidden File Input -->
+                <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleFileChange" style="display: none;" />
+                
+                <span class="text-sm text-gray-500 cursor-pointer hover:text-primary underline" @click="triggerFileUpload">프로필 사진 바꾸기</span>
               </div>
 
               <div class="grid gap-4">
@@ -185,27 +193,7 @@
           <div class="flex flex-col gap-6">
               <!-- Preview Area -->
               <div class="preview-area bg-surface-ground p-6 rounded-xl border flex items-center justify-center relative overflow-hidden" :style="previewContainerStyle">
-                   <!-- Avatar Preview -->
-                   <div v-if="customType === 'AVATAR'" class="text-center">
-                       <UserAvatar 
-                         :user="tempPreviewUser"
-                         size="xlarge"
-                         style="width: 150px; height: 150px; font-size: 50px"
-                       />
-                       <div class="mt-4">
-                            <FileUpload
-                                mode="basic"
-                                name="file"
-                                accept="image/*"
-                                :maxFileSize="5000000"
-                                @select="onFileCustomSelect"
-                                :auto="false"
-                                chooseIcon="pi pi-camera"
-                                chooseLabel="이미지 변경"
-                                class="p-button-outlined p-button-secondary p-button-sm p-button-rounded"
-                            />
-                       </div>
-                   </div>
+
 
                    <!-- Theme Preview -->
                    <ProfileBackground 
@@ -342,13 +330,12 @@ const showDeleteDialog = ref(false);
 
 // Customization Dialog State
 const showCustomDialog = ref(false);
-const customType = ref<'AVATAR' | 'THEME' | 'POPOVER'>('AVATAR');
+const customType = ref<'THEME' | 'POPOVER'>('THEME');
 
 const profileForm = ref({
   nickname: "",
   statusMessage: "",
   profileTheme: null,
-  avatarDecoration: null,
   popoverDecoration: null,
 });
 
@@ -390,7 +377,6 @@ const loadProfile = async () => {
     profileForm.value.nickname = user.nickname || "";
     profileForm.value.statusMessage = user.statusMessage || "";
     profileForm.value.profileTheme = user.profileTheme || null;
-    profileForm.value.avatarDecoration = user.avatarDecoration || null;
     profileForm.value.popoverDecoration = user.popoverDecoration || null;
 
     originalNickname.value = user.nickname || "";
@@ -419,14 +405,12 @@ onMounted(async () => {
 
 // Computed available items based on type
 const availableItems = computed(() => {
-    if (customType.value === 'AVATAR') return Object.values(customItemStore.avatarItems);
     if (customType.value === 'THEME') return Object.values(customItemStore.themeItems);
     if (customType.value === 'POPOVER') return Object.values(customItemStore.popoverItems);
     return [];
 });
 
 const customDialogTitle = computed(() => {
-    if (customType.value === 'AVATAR') return '아바타 꾸미기';
     if (customType.value === 'THEME') return '프로필 테마 설정';
     return '팝오버 디자인 설정';
 });
@@ -444,16 +428,6 @@ const currentPopoverName = computed(() => {
 });
 
 // Open Editors
-const openAvatarEditor = () => {
-    customType.value = 'AVATAR';
-    tempSelection.value = profileForm.value.avatarDecoration;
-    // Keep current preview image if exists
-    tempPreviewUrl.value = previewUrl.value; 
-    tempFile.value = selectedFile.value; // Sync if user selected file in main form before opening modal? 
-    // Actually simplicity: separate.
-    showCustomDialog.value = true;
-};
-
 const openThemeEditor = () => {
     customType.value = 'THEME';
     tempSelection.value = profileForm.value.profileTheme;
@@ -497,7 +471,6 @@ const tempPreviewUser = computed(() => {
         statusMessage: profileForm.value.statusMessage,
         profileImageUrl: tempPreviewUrl.value || authStore.user?.profileImageUrl,
         // 미리보기용 오버라이드
-        avatarDecoration: customType.value === 'AVATAR' ? tempSelection.value : profileForm.value.avatarDecoration,
         profileTheme: customType.value === 'THEME' ? tempSelection.value : profileForm.value.profileTheme,
         popoverDecoration: customType.value === 'POPOVER' ? tempSelection.value : profileForm.value.popoverDecoration
     };
@@ -527,41 +500,8 @@ const applyCustomization = async () => {
         const updateData: any = {};
         
         // 타입에 따른 데이터 준비
-        if (customType.value === 'AVATAR') {
-             // 아바타 꾸미기
-             if (tempSelection.value !== profileForm.value.avatarDecoration) {
-                 updateData.avatarDecoration = tempSelection.value;
-             }
-             
-             // 아바타 이미지 (파일) - 모달에서 새 파일이 업로드된 경우
-             if (tempFile.value) {
-                 // 즉시 파일 업로드
-                 const formData = new FormData();
-                 formData.append("file", tempFile.value);
-                 // 데이터와 함께 파일을 전송해야 할 수도 있음.
-                 // 현재 문자열 필드들도 함께 전송한다고 가정.
-                 const currentData = {
-                     ...profileForm.value,
-                     avatarDecoration: tempSelection.value
-                 };
-                 formData.append("data", new Blob([JSON.stringify(currentData)], { type: "application/json" }));
-                 
-                 await updateMyProfile(formData);
-                 toast.add({ severity: "success", summary: "성공", detail: "아바타가 변경되었습니다.", life: 3000 });
-                 
-                 // 로컬 상태 동기화
-                 selectedFile.value = null; 
-                 previewUrl.value = tempPreviewUrl.value;
-                 profileForm.value.avatarDecoration = tempSelection.value;
-                 await authStore.refreshUser();
-                 showCustomDialog.value = false;
-                 return;
-             }
-             
-             profileForm.value.avatarDecoration = tempSelection.value;
-             updateData.avatarDecoration = tempSelection.value;
-
-        } else if (customType.value === 'THEME') {
+        // 타입에 따른 데이터 준비
+        if (customType.value === 'THEME') {
             profileForm.value.profileTheme = tempSelection.value;
             updateData.profileTheme = tempSelection.value;
             
@@ -594,9 +534,17 @@ const applyCustomization = async () => {
 
 // --- Existing Logic ---
 
-const onFileSelect = (event: any) => {
-  const file = event.files[0];
-  if (file) {
+// File Upload Logic
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const triggerFileUpload = () => {
+  fileInput.value?.click();
+};
+
+const handleFileChange = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
     selectedFile.value = file;
     previewUrl.value = URL.createObjectURL(file);
   }
