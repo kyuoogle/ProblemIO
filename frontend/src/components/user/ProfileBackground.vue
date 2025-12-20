@@ -46,10 +46,15 @@ const backgroundStyle = computed(() => {
 
   if (theme.image) {
     // Shorthand background to override any default card background colors.
-    const bg = `url('${resolveImageUrl(theme.image)}') center / cover no-repeat !important`;
+    // Spread theme.style FIRST so the image overrides any background defined there
     return {
-      background: bg,
-      ...theme.style
+      ...theme.style,
+      backgroundImage: `url('${resolveImageUrl(theme.image)}') !important`,
+      backgroundSize: 'cover !important',
+      backgroundPosition: 'center !important',
+      backgroundRepeat: 'no-repeat !important',
+      background: 'none !important', // Reset shorthand in case it was used in theme.style
+      backgroundColor: 'transparent !important' // Ensure color doesn't conflict
     };
   }
   
@@ -58,7 +63,10 @@ const backgroundStyle = computed(() => {
 
 const backgroundClass = computed(() => {
     // 기본 스타일(배경, 테두리, 그림자)을 상속받기 위해 p-card 클래스 추가
-    return `p-card ${themeConfig.value?.class || ''}`;
+    // Custom theme이 적용된 경우 다크모드 강제 스타일을 피하기 위해 'EditCustom' 클래스 추가
+    const theme = themeConfig.value;
+    const isCustom = theme && Object.keys(theme).length > 0;
+    return `p-card ${isCustom ? 'EditCustom' : ''} ${theme?.class || ''}`;
 });
 
 // 텍스트 색상은 콘텐츠 래퍼에 적용하거나 상속해야 함
@@ -69,11 +77,11 @@ const contentStyle = computed(() => {
     const textColor = theme.textColor;
     if (textColor) {
         return {
-            color: textColor,
-            '--text-color': textColor,
-            '--text-color-secondary': textColor,
-            '--color-heading': textColor,
-            '--p-text-color': textColor 
+            color: `${textColor} !important`,
+            '--text-color': `${textColor} !important`,
+            '--text-color-secondary': `${textColor} !important`,
+            '--color-heading': `${textColor} !important`,
+            '--p-text-color': `${textColor} !important`
         };
     }
     return {};

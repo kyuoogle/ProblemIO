@@ -90,32 +90,32 @@ const popoverStyle = computed(() => {
   // 1. 직접 Config 우선
   if (props.previewConfig) {
       const deco = props.previewConfig;
-      // ... Logic same as below ...
-      // Refactor repetition or just copy logic for now
-      // Logic Duplication for Safety:
-        const varsStyle = deco.textColor ? {
-            '--text-color': `${deco.textColor} !important`,
-            '--text-color-secondary': `${deco.textColor} !important`
-        } : {};
+      
+      const varsStyle = deco.textColor ? {
+          '--text-color': `${deco.textColor} !important`,
+          '--text-color-secondary': `${deco.textColor} !important`
+      } : {};
 
-        const baseStyle = {
-            color: deco.textColor || 'inherit',
-            overlayStyle: deco.overlayStyle || '', 
-            textStyle: deco.textStyle || {},
-            buttonStyle: deco.buttonStyle || {},
-            ...varsStyle,
-            ...(deco.style || {})
-        };
+      const baseStyle = {
+          color: deco.textColor || 'inherit',
+          overlayStyle: deco.overlayStyle || '', 
+          textStyle: deco.textStyle || {},
+          buttonStyle: deco.buttonStyle || {},
+          ...varsStyle,
+          ...(deco.style || {})
+      };
 
-        if (deco.image) {
-            return {
-                backgroundImage: `url('${resolveImageUrl(deco.image)}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                ...baseStyle
-            }
-        }
-        return baseStyle;
+      if (deco.image) {
+          return {
+              ...baseStyle,
+              backgroundImage: `url('${resolveImageUrl(deco.image)}') !important`,
+              backgroundSize: 'cover !important',
+              backgroundPosition: 'center !important',
+              background: 'none !important',
+              backgroundColor: 'transparent !important'
+          }
+      }
+      return baseStyle;
   }
 
   // 2. ID Based

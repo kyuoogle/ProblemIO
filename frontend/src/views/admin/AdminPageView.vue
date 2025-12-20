@@ -147,133 +147,217 @@
        <div v-show="activeTab === 'custom-items'" class="tab-content">
           <div class="challenge-form-card mb-6">
               <h2 class="form-title">커스텀 아이템 생성</h2>
-              <div class="grid grid-cols-2 gap-4">
-                  <div class="field">
-                      <label class="field-label">아이템 유형</label>
-                      <Dropdown v-model="newItem.itemType" :options="['THEME', 'POPOVER']" placeholder="유형 선택" class="w-full" />
+              <div class="grid grid-cols-1 gap-6">
+                  <!-- 1. Metadata Fields (Topmost) -->
+                  <div class="grid grid-cols-1 gap-4">
+                    <div class="field">
+                        <label class="field-label">아이템 유형</label>
+                        <Dropdown v-model="newItem.itemType" :options="['THEME', 'POPOVER']" placeholder="유형 선택" class="w-full p-dropdown" />
+                    </div>
+                    <div class="field">
+                        <label class="field-label">이름</label>
+                        <InputText v-model="newItem.name" class="w-full" placeholder="Cybercity" />
+                    </div>
+                    <div class="field">
+                        <label class="field-label">설명</label>
+                        <InputText v-model="newItem.description" class="w-full" placeholder="1회 챌린지 우승 기념 테마" />
+                    </div>
                   </div>
-                  <div class="field">
-                      <label class="field-label">이름</label>
-                      <InputText v-model="newItem.name" class="w-full" placeholder="Cybercity" />
-                  </div>
-                   <div class="field col-span-2" style="grid-column: span 2;">
-                      <label class="field-label">설명 (사용자에게 표시)</label>
-                      <InputText v-model="newItem.description" class="w-full" placeholder="1회 챌린지 우승 기념 테마" />
-                  </div>
-                  
-                   <div class="field col-span-2" style="grid-column: span 2;">
-                      <label class="field-label">이미지 업로드 (선택)</label>
-                      
+
+                  <!-- 2. Image Upload (Top) -->
+                  <div class="bg-surface-card border rounded-xl p-4 flex flex-col gap-4 shadow-sm border-surface-border">
+                      <div class="flex justify-between items-center">
+                          <h3 class="font-bold text-sm text-secondary flex items-center gap-2">
+                              <i class="pi pi-image"></i> 에셋 업로드 (배경 이미지)
+                          </h3>
+                          <Button v-if="uploadedImageUrl" label="이미지 삭제" icon="pi pi-trash" size="small" severity="danger" text @click="removeImage" />
+                      </div>
                       <div 
-                        class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors gap-3 group"
-                        style="border-color: var(--color-border); background: var(--color-background-soft);"
+                        class="border-2 border-dashed border-surface-border rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:bg-surface-hover transition-colors group bg-surface-50"
                         @click="triggerFileUpload"
                       >
-                            <div class="w-12 h-12 rounded-full bg-surface-200 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                                <i v-if="!uploadedImageUrl" class="pi pi-cloud-upload text-xl text-gray-500 group-hover:text-primary"></i>
-                                <i v-else class="pi pi-check text-xl text-green-500"></i>
+                            <div class="w-10 h-10 rounded-full bg-surface-200 flex items-center justify-center group-hover:bg-primary/20 transition-colors flex-shrink-0">
+                                <i v-if="!uploadedImageUrl" class="pi pi-image text-lg text-secondary group-hover:text-primary"></i>
+                                <img v-else :src="resolveImageUrl(uploadedImageUrl)" class="w-full h-full object-cover rounded-full border border-surface-border" />
                             </div>
-                            
-                            <div class="text-center">
-                                <p class="font-bold text-sm m-0 mb-1" style="color:var(--color-heading)">
-                                    {{ uploadedImageUrl ? '이미지 변경하기' : '클릭하여 업로드' }}
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-sm m-0 text-heading truncate">
+                                    {{ uploadedImageUrl ? '이미지 변경' : '이미지 업로드' }}
                                 </p>
                                 <p class="text-xs text-secondary m-0">
-                                    지원 형식: PNG, JPG, GIF (권장 크기: 500x500)
+                                    업로드한 이미지는 미리보기와 실제 아이템에 자동 적용됩니다.
                                 </p>
                             </div>
+                            <i v-if="uploadedImageUrl" class="pi pi-check-circle text-primary"></i>
+                      </div>
+                      <input type="file" ref="fileInput" @change="onFileSelect" accept="image/*" class="hidden" />
+                  </div>
 
-                            <input 
-                                type="file" 
-                                ref="fileInput" 
-                                @change="onFileSelect" 
-                                accept="image/*" 
-                                class="hidden" 
-                                style="display: none" 
-                            />
-                            
-                            <div v-if="uploadedImageUrl" class="mt-2 bg-primary/10 text-primary px-3 py-1 rounded text-xs font-mono">
-                                {{ uploadedImageUrl }}
-                            </div>
+                  <!-- 3. Preview Section (Middle) -->
+                  <div class="flex flex-col gap-2">
+                      <div class="flex justify-between items-center px-1">
+                          <label class="field-label m-0">라이브 미리보기</label>
+                          <Button label="미리보기 갱신" icon="pi pi-refresh" size="small" outlined @click="applyPreview" />
+                      </div>
+                      
+                      <div class="preview-area border border-surface-border p-6 rounded-xl flex items-center justify-center relative overflow-hidden min-h-[400px]">
+                          <!-- Label -->
+                          <div class="absolute top-4 left-4 z-10 bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur-md">
+                              Live Preview
+                          </div>
+
+                          <!-- Theme Preview: Scaled Container -->
+                          <div v-if="newItem.itemType === 'THEME'" class="w-full overflow-hidden rounded-xl border relative shadow-sm" style="height: 300px;">
+                              <div class="origin-top-left transform scale-[0.65] w-[154%] h-[154%] p-4 flex items-center justify-center">
+                                 <ProfileHeader 
+                                      :user="{ 
+                                        nickname: 'Preview User', 
+                                        statusMessage: newItem.name ? newItem.name + ' Theme Preview' : 'Your Custom Theme Preview', 
+                                        profileTheme: 'preview',
+                                        followerCount: 1234,
+                                        followingCount: 567,
+                                        quizCount: 89
+                                      }" 
+                                      :previewConfig="currentPreviewConfig"
+                                      class="!mb-0 shadow-lg w-full max-w-3xl" 
+                                  />
+                              </div>
+                          </div>
+
+                          <!-- Popover Preview -->
+                            <div v-if="newItem.itemType === 'POPOVER'" class="flex items-center justify-center h-full w-full overflow-hidden p-6">
+                              <div class="transform scale-110 origin-center transition-transform hover:scale-110">
+                                  <UserPopoverCard 
+                                      :profile="{ nickname: 'Preview User', statusMessage: 'Custom Popover Preview', followerCount: 100, followingCount: 50 }"
+                                        :previewConfig="currentPreviewConfig"
+                                        class="shadow-2xl"
+                                  >
+                                      <template #action-button>
+                                          <Button icon="pi pi-user-plus" size="small" outlined class="!text-xs !px-3" />
+                                      </template>
+                                      <template #bottom-button>
+                                          <Button class="w-full mt-4 !text-sm" severity="secondary" outlined label="프로필 보기" />
+                                      </template>
+                                  </UserPopoverCard>
+                              </div>
+                          </div>
                       </div>
                   </div>
 
-                      <div class="field col-span-2" style="grid-column: span 2;">
-                          <div class="flex justify-between items-center mb-2">
-                              <label class="field-label m-0">설정 (JSON)</label>
-                              <Button label="미리보기 적용" icon="pi pi-refresh" size="small" outlined @click="applyPreview" />
-                          </div>
-                          
-                          <div class="flex gap-4">
-                            <Textarea v-model="newItem.configStr" rows="5" class="w-1/2 font-mono" placeholder='{ "image": "...", "style": { "color": "#fff" } }' />
-                            
-                            <!-- Preview Box -->
-                            <div class="w-1/2 border rounded p-2 bg-gray-50 flex items-center justify-center overflow-hidden relative" style="min-height: 200px;">
-                            <!-- Theme Preview -->
-                            <div v-if="newItem.itemType === 'THEME'" class="w-full h-full flex items-center justify-center p-4 bg-gray-100">
-                                <!-- Mimic a standard profile card width/ratio -->
-                                <div class="w-full max-w-sm aspect-[4/2] shadow-lg rounded-xl overflow-hidden relative bg-white">
-                                    <ProfileBackground 
-                                        :user="{ nickname: 'Preview', statusMessage: 'Test Status', profileTheme: 'preview' }" 
-                                        :previewConfig="currentPreviewConfig"
-                                        class="w-full h-full flex flex-col p-6 justify-between"
-                                    >
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-16 h-16 rounded-full bg-gray-200 border-2 border-white shadow-sm flex-shrink-0"></div>
-                                            <div class="min-w-0">
-                                                <div class="font-bold text-xl text-white drop-shadow-md">User Name</div>
-                                                <div class="text-sm text-white/90 drop-shadow-sm truncate">Status Message</div>
-                                            </div>
+                  <!-- 4. Style Settings (Bottom) -->
+                  <div class="flex flex-col gap-4">
+                      <!-- Style Builder -->
+                      <div class="flex flex-col gap-2 mt-2">
+                            <div class="flex justify-between items-center px-1">
+                                <label class="field-label m-0">스타일 설정</label>
+                            </div>
+
+                            <div class="p-5 border rounded-xl bg-surface-card flex flex-col gap-6 shadow-sm" style="background: var(--color-background-soft); border-color: var(--color-border);">
+                                
+                                <!-- Background Group -->
+                                <div class="pb-4 border-b border-dashed border-surface-border" v-if="!uploadedImageUrl">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="text-sm font-bold opacity-80 flex items-center gap-2">
+                                            <i class="pi pi-palette"></i> 배경 스타일
+                                        </span>
+                                        <div class="flex items-center gap-2 text-xs bg-surface-ground p-1 rounded-lg">
+                                            <span :class="!builderForm.useGradient ? 'font-bold text-primary' : ''">단색</span>
+                                            <InputSwitch v-model="builderForm.useGradient" class="scale-75" />
+                                            <span :class="builderForm.useGradient ? 'font-bold text-primary' : ''">그라데이션</span>
                                         </div>
-                                        <div class="flex gap-6 text-sm text-white/90 drop-shadow-md font-medium">
-                                            <div><strong>120</strong> 팔로워</div>
-                                            <div><strong>45</strong> 팔로잉</div>
+                                    </div>
+                                    
+                                    <div v-if="!builderForm.useGradient" class="flex items-center gap-3">
+                                        <div class="p-1 border rounded-full"><ColorPicker v-model="builderForm.bgColor" /></div>
+                                        <span class="text-xs font-mono opacity-70 bg-surface-ground px-2 py-1 rounded">#{{ builderForm.bgColor }}</span>
+                                    </div>
+                                    <div v-else class="flex items-center gap-2">
+                                        <div class="p-1 border rounded-full"><ColorPicker v-model="builderForm.gradientStart" /></div>
+                                        <i class="pi pi-arrow-right text-xs opacity-50"></i>
+                                        <div class="p-1 border rounded-full"><ColorPicker v-model="builderForm.gradientEnd" /></div>
+                                    </div>
+                                </div>
+
+                                <!-- Colors & Border Group -->
+                                <div class="grid grid-cols-2 gap-4 pb-4 border-b border-dashed border-surface-border">
+                                    <div>
+                                        <label class="block text-xs font-bold mb-2 opacity-80">텍스트 색상</label>
+                                        <div class="flex items-center gap-2">
+                                            <div class="p-1 border rounded-full"><ColorPicker v-model="builderForm.textColor" /></div>
+                                            <span class="text-xs font-mono opacity-70">#{{ builderForm.textColor }}</span>
                                         </div>
-                                    </ProfileBackground>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold mb-2 opacity-80">테두리 색상</label>
+                                        <div class="flex items-center gap-2">
+                                            <div class="p-1 border rounded-full"><ColorPicker v-model="builderForm.borderColor" /></div>
+                                            <span class="text-xs font-mono opacity-70">#{{ builderForm.borderColor }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-2 mt-2">
+                                        <label class="block text-xs font-bold mb-2 opacity-80 flex justify-between">
+                                            <span>테두리 두께</span>
+                                            <span class="text-primary">{{ builderForm.borderWidth }}px</span>
+                                        </label>
+                                        <Slider v-model="builderForm.borderWidth" :min="0" :max="10" />
+                                    </div>
+                                </div>
+
+                                <!-- Animation Group -->
+                                <div>
+                                    <label class="block text-sm font-bold mb-3 opacity-80 flex items-center gap-2">
+                                        <i class="pi pi-bolt"></i> 애니메이션 효과
+                                    </label>
+                                    <Dropdown 
+                                        v-model="builderForm.animationName" 
+                                        :options="animationOptions" 
+                                        optionLabel="label" 
+                                        optionValue="value" 
+                                        placeholder="효과 선택..." 
+                                        class="w-full mb-4 p-dropdown"
+                                        showClear
+                                    />
+                                    
+                                    <div v-if="builderForm.animationName && builderForm.animationName !== 'none'" class="bg-surface-ground p-3 rounded-lg">
+                                        <div class="flex justify-between text-xs mb-2 opacity-70">
+                                            <span>빠르게 (0.5s)</span>
+                                            <span>느리게 (5s)</span>
+                                        </div>
+                                        <Slider v-model="builderForm.animationDuration" :min="0.5" :max="5" :step="0.1" />
+                                        <div class="text-center text-xs mt-2 font-mono">{{ builderForm.animationDuration }}s</div>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Popover Preview -->
-                             <div v-if="newItem.itemType === 'POPOVER'" class="flex items-center justify-center h-full p-4 bg-gray-100">
-                                <UserPopoverCard 
-                                    :profile="{ nickname: 'Preview', statusMessage: 'Test Status' }"
-                                     :previewConfig="currentPreviewConfig"
-                                     class="shadow-xl scale-95"
-                                />
-                            </div>
-                            </div>
-                          </div>
-                          <small class="block mt-1 text-gray-400">
-                              * '미리보기 적용' 버튼을 눌러야 오른쪽 화면이 갱신됩니다.
-                          </small>
                       </div>
                   
-                  <div class="field col-span-2" style="grid-column: span 2;">
-                       <div 
-                         class="flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:bg-surface-50"
-                         :class="newItem.isDefault ? 'border-primary bg-primary/5' : 'border-surface-200'"
-                         @click="newItem.isDefault = !newItem.isDefault"
-                       >
-                            <div class="flex items-center gap-3">
-                                <div 
-                                    class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                    :style="newItem.isDefault ? 'background-color: var(--color-primary); color: white;' : 'background-color: var(--surface-200); color: var(--text-color-secondary);'"
-                                >
-                                    <i class="pi" :class="newItem.isDefault ? 'pi-check' : 'pi-gift'"></i>
+                      <div class="field col-span-2" style="grid-column: span 2;">
+                           <div 
+                             class="flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:bg-surface-50"
+                             :class="newItem.isDefault ? 'border-primary bg-primary/5' : 'border-surface-200'"
+                             @click="newItem.isDefault = !newItem.isDefault"
+                           >
+                                <div class="flex items-center gap-3">
+                                    <div 
+                                        class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                                        :style="newItem.isDefault ? 'background-color: var(--color-primary); color: white;' : 'background-color: var(--surface-200); color: var(--text-color-secondary);'"
+                                    >
+                                        <i class="pi" :class="newItem.isDefault ? 'pi-check' : 'pi-gift'"></i>
+                                    </div>
+                                    <div>
+                                        <label class="font-bold text-sm cursor-pointer select-none block" style="color:var(--color-heading)">
+                                            기본 지급 아이템
+                                        </label>
+                                        <span class="text-xs text-secondary block">
+                                            {{ newItem.isDefault ? '모든 신규 사용자에게 자동으로 지급됩니다.' : '사용자가 획득해야 하는 아이템입니다.' }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="font-bold text-sm cursor-pointer select-none block" style="color:var(--color-heading)">
-                                        기본 지급 아이템
-                                    </label>
-                                    <span class="text-xs text-secondary block">
-                                        {{ newItem.isDefault ? '모든 신규 사용자에게 자동으로 지급됩니다.' : '사용자가 획득해야 하는 아이템입니다.' }}
-                                    </span>
-                                </div>
-                            </div>
-                            <Checkbox v-model="newItem.isDefault" :binary="true" inputId="isDefault" class="pointer-events-none" />
-                       </div>
+                                <Checkbox v-model="newItem.isDefault" :binary="true" inputId="isDefault" class="pointer-events-none" />
+                           </div>
+                      </div>
                   </div>
               </div>
-               <div class="flex gap-2 mt-4">
+               <div class="flex gap-2 mt-8">
                   <Button v-if="isEditMode" label="취소" icon="pi pi-times" severity="secondary" @click="cancelEdit" class="flex-1"/>
                   <Button :label="isEditMode ? '아이템 수정' : '아이템 생성'" :icon="isEditMode ? 'pi pi-save' : 'pi pi-plus'" @click="isEditMode ? updateItem() : createItem()" :loading="creatingItem" class="flex-1" />
               </div>
@@ -284,7 +368,10 @@
               <div v-for="item in customItems" :key="item.id" class="p-4 border rounded-lg bg-surface-card relative group" style="background:var(--color-background-soft); border-color:var(--color-border)">
                   <div class="font-bold text-lg" style="color:var(--color-heading)">{{ item.name }}</div>
                   <div class="text-sm mb-2" style="color:var(--text-color-secondary)">{{ item.itemType }}</div>
-                  <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto h-24 mb-2" style="background:rgba(0,0,0,0.1); color:var(--color-text)">{{ JSON.stringify(item.config, null, 2) }}</pre>
+                  <!-- Mini Preview of JSON for reference, or removed if too cluttered. Keeping for admin debug. -->
+                  <div class="text-xs bg-black/5 p-2 rounded overflow-hidden h-16 mb-2 opacity-50 font-mono">
+                      {{ item.config ? item.config.substring(0, 100) + '...' : '{}' }}
+                  </div>
                   <div class="flex flex-col gap-2 mt-2">
                       <div class="flex justify-between gap-2">
                            <Button label="유저 할당" size="small" outlined icon="pi pi-user-plus" @click="openAssignDialog(item)" class="flex-1 p-button-sm text-xs" />
@@ -396,7 +483,8 @@ import {
     deleteCustomItem
 } from '@/api/admin';
 import { resolveImageUrl } from '@/lib/image';
-import ProfileBackground from '@/components/user/ProfileBackground.vue';
+import ProfileBackground from '@/components/user/ProfileBackground.vue'; // Keeping for reference if needed, but likely replaced
+import ProfileHeader from '@/components/user/ProfileHeader.vue';
 import UserPopoverCard from '@/components/common/UserPopoverCard.vue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -409,11 +497,164 @@ import Calendar from 'primevue/calendar';
 import Paginator from 'primevue/paginator';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
+import ColorPicker from 'primevue/colorpicker';
+import Slider from 'primevue/slider';
+import InputSwitch from 'primevue/inputswitch';
 
 const toast = useToast();
 const activeTab = ref('quizzes');
 const loading = ref(false);
 const submitting = ref(false);
+
+// --- Visual Builder State ---
+const useBuilder = ref(true); // Default to Builder mode
+const builderForm = reactive({
+    backgroundColor: '255, 255, 255', // RGB for ColorPicker (PrimeVue uses HEX by default? No, ColorPicker default is HEX but can be configurable. Let's assume HEX)
+    // Actually PrimeVue ColorPicker default is HEX string if format not specified? 
+    // Let's check docs or assume standard. Usually returns hex string like 'ff0000'.
+    bgColor: 'ffffff',
+    textColor: '000000',
+    borderColor: 'cccccc',
+    borderWidth: 1,
+    shadowColor: '000000',
+    animationName: 'none',
+    animationDuration: 2,
+    useGradient: false,
+    gradientStart: 'ffffff',
+    gradientEnd: '000000'
+});
+
+const animationOptions = ref([
+    { label: '없음', value: 'none' },
+    // Attention
+    { label: '바운스 (Bounce)', value: 'bounce' },
+    { label: '펄스 (Pulse)', value: 'pulse' },
+    { label: '흔들기 (Shake)', value: 'shake' },
+    { label: '젤로 (Jello)', value: 'jello' },
+    { label: '러버밴드 (RubberBand)', value: 'rubberBand' },
+    // Continuous
+    { label: '숨쉬기 (Breathing)', value: 'breathing' },
+    { label: '회전 (Rotate)', value: 'rotate-slow' },
+    { label: '스윙 (Swing)', value: 'swing' },
+    { label: '둥둥 떠다니기 (Floating)', value: 'floating' },
+    // Special
+    { label: '네온 글로우 (Neon)', value: 'neon-pulse' }, // utilizing existing class logic or keyframe
+    { label: '무지개 테두리 (Rainbow)', value: 'rainbow-border' },
+    { label: '글리치 (Glitch)', value: 'glitch-skew' },
+    { label: '빛나는 효과 (Shine)', value: 'shine' },
+    { label: '테두리 댄스 (Border Dance)', value: 'border-dance' }
+]);
+
+// Auto-sync Builder -> ConfigStr
+watch(builderForm, () => {
+    // Only generate if we are in builder mode/editing.
+    // Since we removed the toggle, we assume we are using the builder essentially.
+    generateConfigFromBuilder();
+}, { deep: true });
+
+// Auto-sync JSON -> Builder when switching modes or loading
+const parseConfigToBuilder = () => {
+    if (!newItem.configStr) return;
+    try {
+        const config = JSON.parse(newItem.configStr);
+        const style = config.style || {};
+        
+        // Background
+        if (style.background && style.background.includes('linear-gradient')) {
+            builderForm.useGradient = true;
+            // Best effort extraction: linear-gradient(45deg, #ffffff, #000000)
+            const matches = style.background.match(/#([a-fA-F0-9]{3,6})/g);
+            if (matches && matches.length >= 2) {
+                builderForm.gradientStart = matches[0].replace('#', '');
+                builderForm.gradientEnd = matches[1].replace('#', '');
+            }
+        } else if (style.backgroundColor) {
+            builderForm.useGradient = false;
+            builderForm.bgColor = style.backgroundColor.replace('#', '');
+        }
+        
+        // Text Color
+        if (config.textColor) {
+            builderForm.textColor = config.textColor.replace('#', '');
+        }
+        
+        // Border
+        if (style.border && style.border !== 'none') {
+             // "1px solid #cccccc"
+             const parts = style.border.split(' ');
+             if (parts.length >= 3) {
+                 builderForm.borderWidth = parseInt(parts[0]);
+                 builderForm.borderColor = parts[2].replace('#', '');
+             }
+        } else {
+            builderForm.borderWidth = 0;
+        }
+        
+        // Animation
+        if (style.animation) {
+            // "bounce 2s infinite linear"
+            const parts = style.animation.split(' ');
+            if (parts.length > 0) builderForm.animationName = parts[0];
+            if (parts.length > 1) builderForm.animationDuration = parseFloat(parts[1]);
+        } else {
+            builderForm.animationName = 'none';
+        }
+        
+    } catch (e) {
+        console.warn("Failed to parse config to builder", e);
+    }
+};
+
+watch(useBuilder, (val) => {
+    if (val) {
+        parseConfigToBuilder();
+    }
+});
+
+const generateConfigFromBuilder = () => {
+    // Construct configuration object based on builder state
+    const style = {};
+    const textStyle = {}; // Some animations/styles apply to text
+    
+    // Background - Force color if NO image is uploaded
+    // Note: We check uploadedImageUrl. If user wants to switch back to color, they MUST remove the image.
+    if (!uploadedImageUrl.value) {
+        if (builderForm.useGradient) {
+            style.background = `linear-gradient(45deg, #${builderForm.gradientStart}, #${builderForm.gradientEnd}) !important`;
+            style.backgroundSize = '200% 200%';
+            style.animation = builderForm.animationName === 'none' ? 'gradient-flow 3s ease infinite' : style.animation; 
+        } else {
+            style.backgroundColor = `#${builderForm.bgColor} !important`;
+        }
+    }
+    
+    // Border
+    if (builderForm.borderWidth > 0) {
+        style.border = `${builderForm.borderWidth}px solid #${builderForm.borderColor} !important`;
+    } else {
+        style.border = 'none !important';
+    }
+    
+    // Animation
+    if (builderForm.animationName && builderForm.animationName !== 'none') {
+        const duration = builderForm.animationDuration || 2;
+        let animLine = `${builderForm.animationName} ${duration}s infinite linear`;
+        
+        if (['bounce', 'pulse', 'shake', 'swing', 'rubberBand', 'jello'].includes(builderForm.animationName)) {
+            animLine = `${builderForm.animationName} ${duration}s infinite ease-in-out`;
+        }
+        style.animation = animLine;
+    }
+    
+    const config = {
+        style: style,
+        textColor: `#${builderForm.textColor}`, 
+        image: uploadedImageUrl.value || null // Only include image if currently uploaded
+    };
+    
+    newItem.configStr = JSON.stringify(config, null, 2);
+    applyPreview(); // Auto-apply for builder
+};
 
 // Quiz Tab State
 const quizzes = ref([]);
@@ -663,7 +904,18 @@ const onFileSelect = async (event) => {
         toast.add({ severity: 'error', summary: '업로드 실패', detail: '이미지 업로드 중 오류가 발생했습니다.', life: 3000 });
     } finally {
         creatingItem.value = false;
+        // Reset file input
+        if (fileInput.value) fileInput.value.value = ''; 
     }
+};
+
+const removeImage = () => {
+    uploadedImageUrl.value = '';
+    
+    // Trigger config regeneration to restore color
+    generateConfigFromBuilder();
+    
+    toast.add({ severity: 'info', summary: '삭제 완료', detail: '이미지가 삭제되었습니다.', life: 3000 });
 };
 
 const createItem = async () => {
@@ -733,6 +985,11 @@ const startEdit = (item) => {
         if (conf.image) uploadedImageUrl.value = conf.image;
     } catch(e) {/* ignore */}
     
+    // Initial Parse for Builder
+    if (useBuilder.value) {
+        parseConfigToBuilder();
+    }
+
     applyPreview();
     
     // Scroll to top

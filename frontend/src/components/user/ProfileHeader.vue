@@ -2,6 +2,7 @@
   <ProfileBackground 
     :user="user" 
     :previewThemeId="previewThemeId"
+    :previewConfig="previewConfig"
     class="mb-8 p-6 shadow-4 profile-card-content"
   >
       <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
@@ -70,6 +71,10 @@ const props = defineProps({
   },
   previewThemeId: {
     type: [String, Number],
+    default: null
+  },
+  previewConfig: {
+    type: Object,
     default: null
   },
   quizCount: {

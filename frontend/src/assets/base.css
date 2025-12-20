@@ -175,7 +175,119 @@ p, span, label, small {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
+/* Dark Mode Extentions for Admin UI Components */
+/* Dark Mode Extentions for Admin UI Components */
+[data-theme="dark"] .p-datepicker,
+[data-theme="dark"] .p-datepicker-panel,
+[data-theme="dark"] .p-datepicker-header,
+[data-theme="dark"] .p-datepicker table,
+[data-theme="dark"] .p-datepicker-calendar,
+[data-theme="dark"] .p-datepicker-calendar-container,
+[data-theme="dark"] .p-datepicker-group-container,
+[data-theme="dark"] .p-datepicker-group,
+[data-theme="dark"] .p-datepicker-time-picker,
+[data-theme="dark"] .p-datepicker-monthpicker,
+[data-theme="dark"] .p-datepicker-yearpicker,
+[data-theme="dark"] .p-datepicker-trigger,
+[data-theme="dark"] .p-datepicker-dropdown,
+[data-theme="dark"] .p-paginator,
+[data-theme="dark"] .p-dropdown,
+[data-theme="dark"] .p-dropdown-panel,
+[data-theme="dark"] .p-dropdown-items,
+[data-theme="dark"] .p-dropdown-items-wrapper,
+[data-theme="dark"] .p-select,
+[data-theme="dark"] .p-select-panel,
+[data-theme="dark"] .p-select-option,
+[data-theme="dark"] .p-select-options,
+[data-theme="dark"] .p-select-list,
+[data-theme="dark"] .p-select-list-container {
+  background: var(--color-background-soft) !important;
+  color: var(--color-heading) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Force inner containers to be transparent so main background shows */
+[data-theme="dark"] .p-datepicker .p-datepicker-calendar,
+[data-theme="dark"] .p-datepicker .p-datepicker-header,
+[data-theme="dark"] .p-datepicker table,
+[data-theme="dark"] .p-datepicker tbody,
+[data-theme="dark"] .p-datepicker tr,
+[data-theme="dark"] .p-datepicker td,
+[data-theme="dark"] .p-datepicker th,
+[data-theme="dark"] .p-select .p-select-label,
+[data-theme="dark"] .p-select .p-select-dropdown {
+    background: transparent !important;
+    color: var(--color-heading) !important;
+}
+
+/* Specific text colors for headers and numbers */
+[data-theme="dark"] .p-datepicker table th,
+[data-theme="dark"] .p-datepicker table th > span {
+    color: var(--color-text-muted) !important;
+}
+
+[data-theme="dark"] .p-datepicker table td > span {
+  color: var(--color-heading) !important;
+}
+
+[data-theme="dark"] .p-datepicker table td > span:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--color-heading) !important;
+}
+
+[data-theme="dark"] .p-datepicker table td.p-datepicker-today > span {
+  background: rgba(51, 224, 255, 0.2) !important; /* Brand Cyan Soft */
+  color: var(--brand-cyan) !important;
+  font-weight: bold;
+}
+
+/* Dropdown specific fixes */
+[data-theme="dark"] .p-dropdown .p-dropdown-label,
+[data-theme="dark"] .p-dropdown .p-dropdown-trigger {
+  color: var(--color-heading) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .p-dropdown-item {
+  color: var(--color-heading) !important;
+}
+
+[data-theme="dark"] .p-dropdown-item:hover,
+[data-theme="dark"] .p-dropdown-item.p-highlight {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--color-primary) !important;
+}
+
+/* Paginator Fixes */
+[data-theme="dark"] .p-paginator .p-paginator-element {
+  color: var(--color-text-muted) !important; 
+}
+[data-theme="dark"] .p-paginator .p-paginator-element:not(.p-disabled):not(.p-highlight):hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--color-heading) !important;
+}
+[data-theme="dark"] .p-paginator .p-paginator-element.p-highlight {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+}
+
+/* Helper for Timepicker text */
+[data-theme="dark"] .p-datepicker .p-timepicker span {
+  color: var(--color-heading) !important;
+}
+[data-theme="dark"] .p-datepicker .p-timepicker button {
+  color: var(--color-heading) !important; 
+}
+[data-theme="dark"] .p-datepicker .p-timepicker button:hover {
+  background: rgba(255, 255, 255, 0.1) !important; 
+}
+
 /* Toast Dark Mode Fix */
+[data-theme="dark"] .p-card.EditCustom {
+  background: initial !important; /* 인라인 스타일이나 기본값 사용 */
+  color: initial !important;
+  border-color: initial !important;
+}
 [data-theme="dark"] .p-toast .p-toast-message {
   background: var(--color-background-soft) !important;
   color: var(--color-heading) !important;
@@ -388,3 +500,10 @@ p, span, label, small {
 }
 
 
+
+/* Dark Mode fix for Custom Themes */
+[data-theme="dark"] .p-card.EditCustom {
+  background: initial !important; 
+  color: initial !important;
+  border-color: initial !important;
+}
