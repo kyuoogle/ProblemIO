@@ -44,26 +44,31 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isFollowing(Long followerId, Long targetUserId) {
         return followMapper.exists(followerId, targetUserId) > 0;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<FollowUserDto> getFollowers(Long userId) {
         return followMapper.findFollowers(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<FollowUserDto> getFollowings(Long userId) {
         return followMapper.findFollowings(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getFollowerCount(Long userId) {
         return followMapper.countFollowers(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getFollowingCount(Long userId) {
         return followMapper.countFollowings(userId);
     }

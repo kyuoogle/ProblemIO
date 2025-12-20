@@ -14,4 +14,6 @@ public interface QuestionAnswerMapper {
     void deleteByQuestionId(@Param("questionId") Long questionId);
 
     List<QuestionAnswer> findByQuestionId(@Param("questionId") Long questionId);
+
+    List<QuestionAnswer> findByQuestionIds(@Param("questionIds") List<Long> questionIds);
 }

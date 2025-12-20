@@ -64,7 +64,7 @@
                 <Button
                   v-for="option in questionOptions"
                   :key="option"
-                  :label="`${option}개 풀기`"
+                  :label="getOptionLabel(option)"
                   icon="pi pi-play"
                   size="large"
                   class="start-button"
@@ -121,7 +121,19 @@ const loading = ref(false);
 const isLiked = ref(false);
 const isFollowed = ref(false);
 const quizId = computed(() => Number(route.params.id));
-const questionOptions = [10, 20, 30, 50];
+const totalQuestionCount = computed(() =>
+  quiz.value?.questions?.length ??
+  quiz.value?.questionCount ??
+  0
+);
+const questionOptions = computed(() => {
+  const total = totalQuestionCount.value;
+  if (total >= 50) return [10, 20, 30, 50];
+  if (total >= 30) return [10, 20, 30];
+  if (total >= 20) return [10, 20];
+  if (total >= 10) return [Math.min(10, total)];
+  return [Math.max(total, 1)];
+});
 const startLoadingOption = ref<number | null>(null);
 
 // 팝오버 ref
@@ -269,6 +281,14 @@ const startQuizWithLimit = async (count: number) => {
 onMounted(() => {
   loadQuiz();
 });
+
+// 버튼 라벨 헬퍼
+const getOptionLabel = (option: number) => {
+  const total = totalQuestionCount.value;
+  // 10 미만 또는 10~19 구간: 숫자 대신 "문제 풀기" 노출
+  if (total < 20) return "문제 풀기";
+  return `${option}개 풀기`;
+};
 </script>
 
 <style scoped>

@@ -59,7 +59,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         SubmissionDetail detail = new SubmissionDetail();
         detail.setSubmissionId(submission.getId());
         detail.setQuestionId(question.getId());
-        detail.setUserAnswer(request.getAnswerText());
         detail.setCorrect(correct);
         submissionDetailMapper.insertSubmissionDetail(detail);
 

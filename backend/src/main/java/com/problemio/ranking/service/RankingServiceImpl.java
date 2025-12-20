@@ -6,6 +6,7 @@ import com.problemio.ranking.dto.RankingRowDto;
 import com.problemio.ranking.mapper.RankingMapper;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ public class RankingServiceImpl implements RankingService {
             key = "#period.name() + '_' + #limit",
             unless = "#result == null || #result.isEmpty()"
     )
+    @Transactional(readOnly = true)
     public List<RankingResponseDto> getRanking(RankingPeriod period, int limit) {
         int topN = (limit > 0 && limit <= 100) ? limit : 20;
 

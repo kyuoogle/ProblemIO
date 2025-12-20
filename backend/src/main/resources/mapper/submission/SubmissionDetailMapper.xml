@@ -13,15 +13,16 @@
     </resultMap>
 
     <insert id="insertSubmissionDetail" parameterType="com.problemio.submission.domain.SubmissionDetail" useGeneratedKeys="true" keyProperty="id">
+        <!-- user_answer 컬럼은 NOT NULL 제약이 있어 빈 문자열을 넣어준다 (사용자 입력값은 저장하지 않음) -->
         INSERT INTO submission_details (submission_id, question_id, user_answer, is_correct)
-        VALUES (#{submissionId}, #{questionId}, #{userAnswer}, #{correct})
+        VALUES (#{submissionId}, #{questionId}, '', #{correct})
     </insert>
 
     <insert id="insertSubmissionDetails">
         INSERT INTO submission_details (submission_id, question_id, user_answer, is_correct)
         VALUES
         <foreach collection="details" item="d" separator=",">
-            (#{d.submissionId}, #{d.questionId}, #{d.userAnswer}, #{d.correct})
+            (#{d.submissionId}, #{d.questionId}, '', #{d.correct})
         </foreach>
     </insert>
 

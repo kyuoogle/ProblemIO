@@ -400,28 +400,58 @@ public class QuizServiceImpl implements QuizService {
 
     private List<QuestionResponse> loadQuestions(Long quizId) {
         List<Question> questions = questionMapper.findByQuizId(quizId);
+        Map<Long, List<QuestionAnswerDto>> answersByQuestion = loadAnswersByQuestionIds(
+                questions.stream().map(Question::getId).toList()
+        );
         return questions.stream()
                 .map(q -> QuestionResponse.builder()
                         .id(q.getId())
                         .order(q.getQuestionOrder())
                         .description(q.getDescription())
                         .imageUrl(q.getImageUrl())
-                        .answers(loadAnswers(q.getId()))
+                        .answers(answersByQuestion.getOrDefault(q.getId(), List.of()))
                         .build())
                 .collect(Collectors.toList());
     }
 
-    private List<QuestionAnswerDto> loadAnswers(Long questionId) {
-        List<QuestionAnswer> answers = questionAnswerMapper.findByQuestionId(questionId);
-        return answers.stream()
-                .map(a -> {
-                    QuestionAnswerDto dto = new QuestionAnswerDto();
-                    dto.setId(a.getId());
-                    dto.setAnswerText(a.getAnswerText());
-                    dto.setSortOrder(a.getSortOrder());
-                    return dto;
-                })
+    private List<QuestionResponse> mapQuestionsWithAnswers(List<Question> questions) {
+        Map<Long, List<QuestionAnswerDto>> answersByQuestion = loadAnswersByQuestionIds(
+                questions.stream().map(Question::getId).toList()
+        );
+
+        final int[] orderSeq = {1};
+        return questions.stream()
+                .map(q -> QuestionResponse.builder()
+                        .id(q.getId())
+                        .order(orderSeq[0]++)
+                        .description(q.getDescription())
+                        .imageUrl(q.getImageUrl())
+                        .answers(answersByQuestion.getOrDefault(q.getId(), List.of()))
+                        .build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 지정된 질문 ID들의 정답을 한 번에 조회해 맵으로 반환한다.
+     */
+    private Map<Long, List<QuestionAnswerDto>> loadAnswersByQuestionIds(List<Long> questionIds) {
+        if (questionIds == null || questionIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<QuestionAnswer> answers = questionAnswerMapper.findByQuestionIds(questionIds);
+
+        return answers.stream()
+                .collect(Collectors.groupingBy(
+                        QuestionAnswer::getQuestionId,
+                        Collectors.mapping(a -> {
+                            QuestionAnswerDto dto = new QuestionAnswerDto();
+                            dto.setId(a.getId());
+                            dto.setAnswerText(a.getAnswerText());
+                            dto.setSortOrder(a.getSortOrder());
+                            return dto;
+                        }, Collectors.toList())
+                ));
     }
 
     private UserResponse findAuthor(Long userId) {
@@ -469,17 +499,7 @@ public class QuizServiceImpl implements QuizService {
 
         int safeLimit = normalizeLimit(limit);
         List<Question> questions = questionMapper.findRandomByQuizId(quizId, safeLimit);
-
-        final int[] orderSeq = {1};
-        return questions.stream()
-                .map(q -> QuestionResponse.builder()
-                        .id(q.getId())
-                        .order(orderSeq[0]++)
-                        .description(q.getDescription())
-                        .imageUrl(q.getImageUrl())
-                        .answers(loadAnswers(q.getId()))
-                        .build())
-                .collect(Collectors.toList());
+        return mapQuestionsWithAnswers(questions);
     }
 
     private int normalizeLimit(Integer limit) {

@@ -21,6 +21,8 @@ import com.problemio.user.mapper.RefreshTokenMapper;
 import com.problemio.user.mapper.UserAuthMapper;
 import com.problemio.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,14 +52,17 @@ public class UserServiceImpl implements UserService {
     private final SubmissionMapper submissionMapper;
     private final SubmissionDetailMapper submissionDetailMapper;
     private final RefreshTokenMapper refreshTokenMapper;
+    private final CacheManager cacheManager;
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         return userMapper.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserProfile(Long userId, Long viewerId) {
         long vId = (viewerId == null) ? 0L : viewerId;
         UserResponse user = userMapper.findUserProfile(userId, vId);
@@ -78,8 +83,10 @@ public class UserServiceImpl implements UserService {
         
         // 금칙어 검사 (회원가입 로직과 동일)
         String nickname = request.getNickname();
-        if (nickname != null && (nickname.contains("admin") || nickname.contains("관리자") || nickname.contains("운영자"))) {
-             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        if (nickname != null
+                && !nickname.equals(oldUser.getNickname())
+                && (nickname.contains("admin") || nickname.contains("관리자") || nickname.contains("운영자"))) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
         String oldFilePath = oldUser.getProfileImageUrl();
@@ -133,6 +140,7 @@ public class UserServiceImpl implements UserService {
 
         String encodedPassword = passwordEncoder.encode(newPassword);
         userMapper.updatePassword(userId, encodedPassword);
+        evictUserDetailsCache(user.getEmail());
     }
 
     @Override
@@ -170,12 +178,15 @@ public class UserServiceImpl implements UserService {
             quizService.deleteQuiz(userId, quiz.getId());
         }
 
+        evictUserDetailsCache(user.getEmail());
+
         String tombstone = "deleted_" + UUID.randomUUID();
         userMapper.anonymizeCredentials(userId, tombstone + "@deleted.local", tombstone);
         userMapper.deleteUser(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserSummaryDto getMySummary(Long userId) {
         UserResponse user = getUserById(userId);
         return UserSummaryDto.builder()
@@ -196,21 +207,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuizSummaryDto> getMyQuizzes(Long userId) {
         return List.of();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuizSummaryDto> getMyLikedQuizzes(Long userId) {
         return List.of();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuizSummaryDto> getFollowingQuizzes(Long userId) {
         return List.of();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserPopoverResponse getUserPopover(Long userId, Long viewerId) {
         Long searchViewerId = (viewerId == null) ? 0L : viewerId;
         UserPopoverResponse res = userMapper.findUserPopover(userId, searchViewerId);
@@ -230,6 +245,16 @@ public class UserServiceImpl implements UserService {
         }
 
         return res;
+    }
+
+    /**
+     * 인증 캐시(UserDetails) 무효화 - 이메일 단위 캐시이므로 이메일 키로 제거한다.
+     */
+    private void evictUserDetailsCache(String email) {
+        Cache cache = cacheManager.getCache("userDetails");
+        if (cache != null && email != null) {
+            cache.evict(email);
+        }
     }
 
     /**
