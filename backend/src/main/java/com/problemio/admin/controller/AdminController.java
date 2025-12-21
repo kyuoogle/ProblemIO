@@ -139,6 +139,9 @@ public class AdminController {
         customItemService.deleteItem(itemId);
         return ResponseEntity.ok().build();
     }
+    @Autowired
+    private com.problemio.global.service.S3Service s3Service;
+
     @PostMapping("/items/upload")
     public ResponseEntity<String> uploadItemImage(@RequestParam("file") org.springframework.web.multipart.MultipartFile file, @RequestParam("type") String type) {
         if (file.isEmpty()) {
@@ -151,37 +154,19 @@ public class AdminController {
             if ("POPOVER".equalsIgnoreCase(type)) subDir = "popover";
             else if ("AVATAR".equalsIgnoreCase(type)) subDir = "avatar";
             
-            // Use backend managed directory as mapped in WebMvcConfig
-            // Mapped to C:/public/{subDir}/
-            Path uploadDir = Paths.get("C:/public/" + subDir);
-            
-            // Log for debugging
-            System.out.println("Uploading to: " + uploadDir.toAbsolutePath());
-            
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-
-            // Save file
+            // Format: public/{subDir}/{timestamp}_{originalName}
             String originalFilename = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
-            
-            // Generate filename: Timestamp + Original Name (to ensure uniqueness but keep readability)
-            // Example: 1700000000000_myimage.jpg
             String filename = System.currentTimeMillis() + "_" + originalFilename;
+            String s3Key = "public/" + subDir + "/" + filename;
             
-            // Security check: ensure no directory traversal
-            if (filename.contains("..")) {
-                 throw new RuntimeException("Invalid filename: " + filename);
-            }
+            // Upload to S3
+            String uploadedPath = s3Service.upload(file, s3Key);
+            
+            // Return path (s3Key) to be stored in config
+            // Frontend resolveImageUrl handles "public/..." path by prepending S3 Base URL
+            return ResponseEntity.ok(uploadedPath);
 
-            Path filePath = uploadDir.resolve(filename);
-            
-            Files.copy(file.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            
-            // Return relative path for use in config (e.g., /theme/123123_bg.jpg)
-            return ResponseEntity.ok("/" + subDir + "/" + filename);
-
-        } catch (java.io.IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("Failed to upload file: " + e.getMessage());
         }

@@ -28,10 +28,9 @@
 
 <template #footer>
         <Button 
-          :label="isExpired ? '종료됨' : '도전하기'" 
-          :class="['w-full', isExpired ? 'opacity-60' : '']" 
-          :icon="isExpired ? 'pi pi-lock' : 'pi pi-bolt'" 
-          :disabled="isExpired" 
+          :label="isExpired ? '이미 종료됨 (결과 보기)' : '도전하기'" 
+          :class="['w-full', isExpired ? 'opacity-80' : '']" 
+          :icon="isExpired ? 'pi pi-chart-bar' : 'pi pi-bolt'" 
           :severity="isExpired ? 'secondary' : 'primary'"
         />
     </template>
@@ -61,7 +60,7 @@ const isExpired = computed(() => {
 });
 
 const handleClick = () => {
-    if (isExpired.value) return; // Prevent click if expired
+    // if (isExpired.value) return; // Allow click even if expired
     emit('click');
 }
 

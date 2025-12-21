@@ -96,12 +96,15 @@
 
     <!-- Submission Queries -->
     <select id="findSubmissionsByChallengeId" resultMap="ChallengeSubmissionResultMap">
-        SELECT * FROM submissions WHERE challenge_id = #{challengeId}
+        SELECT * FROM submissions 
+        WHERE challenge_id = #{challengeId} 
+        AND submitted_at IS NOT NULL
     </select>
 
     <select id="findSubmissionByUserIdAndChallengeId" resultMap="ChallengeSubmissionResultMap">
         SELECT * FROM submissions 
         WHERE user_id = #{userId} AND challenge_id = #{challengeId}
+        AND submitted_at IS NOT NULL
         ORDER BY correct_count DESC, play_time ASC, submitted_at ASC
         LIMIT 1
     </select>
@@ -111,6 +114,7 @@
         SELECT COUNT(DISTINCT user_id) + 1
         FROM submissions
         WHERE challenge_id = #{challengeId}
+          AND submitted_at IS NOT NULL
           AND (correct_count > #{correctCount}
                OR (correct_count = #{correctCount} AND play_time &lt; #{playTime})
                OR (correct_count = #{correctCount} AND play_time = #{playTime} AND submitted_at &lt; #{submittedAt}))
@@ -139,6 +143,7 @@
             FROM submissions s
             JOIN users u ON u.id = s.user_id
             WHERE s.challenge_id = #{challengeId}
+            AND s.submitted_at IS NOT NULL
             AND u.is_deleted = 0
         ) sub
         WHERE rn = 1

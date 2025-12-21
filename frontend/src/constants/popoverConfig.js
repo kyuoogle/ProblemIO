@@ -15,7 +15,7 @@ export const POPOVER_DECORATIONS = {
   },
   cybercity: {
     name: 'Cybercity',
-    image: withS3Public('public/popover/cybercity.jpg'),
+    image: '/popover/cybercity.jpg',
     textColor: '#ffffff',
     textStyle: {
       textShadow: '0 0 5px #00eaff, 0 0 10px #00eaff',
@@ -33,6 +33,7 @@ export const POPOVER_DECORATIONS = {
   },
   neon_cyber: {
     name: 'Neon Cyber',
+    image: '/popover/cyberpunk.jpg',
     textColor: '#00ff00',
     style: {
       backgroundColor: '#0a0a0a',

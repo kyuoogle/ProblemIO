@@ -15,7 +15,15 @@ export const resolveImageUrl = (url) => {
   // Public S3 paths
   if (url.startsWith('public/') || url.startsWith('/public/')) {
       const cleanPath = url.startsWith('/') ? url.substring(1) : url;
+      // Ensure we don't double slash if s3BaseUrl has trailing slash (handled by regex above but good to be safe)
+      // Also check if s3BaseUrl is just '/' or empty, though environment variable should be set.
+      if (!s3BaseUrl || s3BaseUrl === '/') return `/${cleanPath}`; 
       return `${s3BaseUrl}/${cleanPath}`;
+  }
+
+  // Local static assets (Frontend public folder)
+  if (url.startsWith('/theme/') || url.startsWith('/popover/')) {
+      return url;
   }
 
   const prefix = url.startsWith('/') ? '' : '/'

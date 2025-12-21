@@ -32,7 +32,8 @@ const loadChallenges = async () => {
   loading.value = true;
   try {
     const data = await getChallenges();
-    challenges.value = data;
+    const now = new Date();
+    challenges.value = data.filter((c: any) => !c.endAt || new Date(c.endAt) > now);
   } catch (error: any) {
     console.error(error);
   } finally {

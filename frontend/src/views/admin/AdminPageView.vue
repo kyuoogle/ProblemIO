@@ -156,11 +156,11 @@
                     </div>
                     <div class="field">
                         <label class="field-label">이름</label>
-                        <InputText v-model="newItem.name" class="w-full" placeholder="Cybercity" />
+                        <InputText v-model="newItem.name" class="w-full" placeholder="테마 이름" />
                     </div>
                     <div class="field">
                         <label class="field-label">설명</label>
-                        <InputText v-model="newItem.description" class="w-full" placeholder="1회 챌린지 우승 기념 테마" />
+                        <InputText v-model="newItem.description" class="w-full" placeholder="테마 설명" />
                     </div>
                   </div>
 
@@ -177,8 +177,8 @@
                         @click="triggerFileUpload"
                       >
                             <div class="w-10 h-10 rounded-full bg-surface-200 flex items-center justify-center group-hover:bg-primary/20 transition-colors flex-shrink-0">
-                                <i v-if="!uploadedImageUrl" class="pi pi-image text-lg text-secondary group-hover:text-primary"></i>
-                                <img v-else :src="resolveImageUrl(uploadedImageUrl)" class="w-full h-full object-cover rounded-full border border-surface-border" />
+                                <i v-if="!uploadedImageUrl && !localPreviewUrl" class="pi pi-image text-lg text-secondary group-hover:text-primary"></i>
+                                <img v-else :src="localPreviewUrl || resolveImageUrl(uploadedImageUrl)" class="w-full h-full object-cover rounded-full border border-surface-border" />
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="font-bold text-sm m-0 text-heading truncate">
@@ -245,7 +245,7 @@
                   </div>
 
                   <!-- 4. Style Settings (Bottom) -->
-                  <div class="flex flex-col gap-4">
+                  <div class="flex flex-col gap-4 mb-4">
                       <!-- Style Builder -->
                       <div class="flex flex-col gap-2 mt-2">
                             <div class="flex justify-between items-center px-1">
@@ -255,10 +255,11 @@
                             <div class="p-5 border rounded-xl bg-surface-card flex flex-col gap-6 shadow-sm" style="background: var(--color-background-soft); border-color: var(--color-border);">
                                 
                                 <!-- Background Group -->
-                                <div class="pb-4 border-b border-dashed border-surface-border" v-if="!uploadedImageUrl">
+                                <div class="pb-4 border-b border-dashed border-surface-border" :class="{ 'opacity-40 pointer-events-none grayscale': uploadedImageUrl || localPreviewUrl }">
                                     <div class="flex justify-between items-center mb-3">
                                         <span class="text-sm font-bold opacity-80 flex items-center gap-2">
                                             <i class="pi pi-palette"></i> 배경 스타일
+                                            <span v-if="uploadedImageUrl || localPreviewUrl" class="text-xs font-normal text-red-400 ml-2">(이미지 사용 중 비활성화)</span>
                                         </span>
                                         <div class="flex items-center gap-2 text-xs bg-surface-ground p-1 rounded-lg">
                                             <span :class="!builderForm.useGradient ? 'font-bold text-primary' : ''">단색</span>
@@ -308,17 +309,17 @@
                                     <label class="block text-sm font-bold mb-3 opacity-80 flex items-center gap-2">
                                         <i class="pi pi-bolt"></i> 애니메이션 효과
                                     </label>
-                                    <Dropdown 
-                                        v-model="builderForm.animationName" 
+                                    <MultiSelect 
+                                        v-model="builderForm.animationNames" 
                                         :options="animationOptions" 
                                         optionLabel="label" 
                                         optionValue="value" 
-                                        placeholder="효과 선택..." 
-                                        class="w-full mb-4 p-dropdown"
-                                        showClear
+                                        placeholder="효과 선택 (다중 선택 가능)..." 
+                                        class="w-full mb-4"
+                                        display="chip"
                                     />
                                     
-                                    <div v-if="builderForm.animationName && builderForm.animationName !== 'none'" class="bg-surface-ground p-3 rounded-lg">
+                                    <div v-if="builderForm.animationNames && builderForm.animationNames.length > 0" class="bg-surface-ground p-3 rounded-lg">
                                         <div class="flex justify-between text-xs mb-2 opacity-70">
                                             <span>빠르게 (0.5s)</span>
                                             <span>느리게 (5s)</span>
@@ -366,7 +367,12 @@
           <h2 class="text-xl font-bold mb-4" style="color:var(--color-heading)">아이템 목록</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div v-for="item in customItems" :key="item.id" class="p-4 border rounded-lg bg-surface-card relative group" style="background:var(--color-background-soft); border-color:var(--color-border)">
-                  <div class="font-bold text-lg" style="color:var(--color-heading)">{{ item.name }}</div>
+                  <div class="font-bold text-lg" style="color:var(--color-heading)">
+                      {{ item.name }}
+                  </div>
+                  <div v-if="item.isDefault" class="default-item-badge absolute top-2 right-2 bg-primary/90 text-xs px-2 py-1 rounded shadow-sm font-bold z-10">
+                      Default
+                  </div>
                   <div class="text-sm mb-2" style="color:var(--text-color-secondary)">{{ item.itemType }}</div>
                   <!-- Mini Preview of JSON for reference, or removed if too cluttered. Keeping for admin debug. -->
                   <div class="text-xs bg-black/5 p-2 rounded overflow-hidden h-16 mb-2 opacity-50 font-mono">
@@ -500,11 +506,49 @@ import { useToast } from 'primevue/usetoast';
 import ColorPicker from 'primevue/colorpicker';
 import Slider from 'primevue/slider';
 import InputSwitch from 'primevue/inputswitch';
+import MultiSelect from 'primevue/multiselect';
 
 const toast = useToast();
 const activeTab = ref('quizzes');
 const loading = ref(false);
+
 const submitting = ref(false);
+
+// --- Custom Item Logic ---
+const customItems = ref([]);
+const newItem = reactive({
+    itemType: 'THEME',
+    name: '',
+    description: '', 
+    configStr: '',
+    isDefault: false
+});
+
+const defaultConfigs = {
+  THEME: {
+    style: {
+      color: "#ffffff",
+      textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
+    },
+    textColor: "#ffffff"
+  },
+  POPOVER: {
+    style: {
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+    },
+    textColor: "#000000",
+    overlayStyle: "bg-white/90 backdrop-blur-sm"
+  }
+};
+
+// Auto-fill config JSON when type changes
+watch(() => newItem.itemType, (newType) => {
+    // Only set if empty to avoid overwriting user's custom edits
+    if (!newItem.configStr) {
+        newItem.configStr = JSON.stringify(defaultConfigs[newType] || {}, null, 2);
+    }
+}, { immediate: true });
 
 // --- Visual Builder State ---
 const useBuilder = ref(true); // Default to Builder mode
@@ -517,7 +561,11 @@ const builderForm = reactive({
     borderColor: 'cccccc',
     borderWidth: 1,
     shadowColor: '000000',
-    animationName: 'none',
+    borderColor: 'cccccc',
+    borderWidth: 1,
+    shadowColor: '000000',
+    animationNames: [], // Changed from animationName string to array
+    animationDuration: 2,
     animationDuration: 2,
     useGradient: false,
     gradientStart: 'ffffff',
@@ -545,15 +593,24 @@ const animationOptions = ref([
     { label: '테두리 댄스 (Border Dance)', value: 'border-dance' }
 ]);
 
-// Auto-sync Builder -> ConfigStr
+// Auto-sync Builder -> ConfigStr & Preview
 watch(builderForm, () => {
     // Only generate if we are in builder mode/editing.
     // Since we removed the toggle, we assume we are using the builder essentially.
     generateConfigFromBuilder();
 }, { deep: true });
 
+// Auto-sync configStr -> Preview (React to direct JSON edits OR Builder updates)
+watch(() => newItem.configStr, () => {
+   applyPreview();
+});
+
 // Auto-sync JSON -> Builder when switching modes or loading
 const parseConfigToBuilder = () => {
+    // Avoid re-parsing if we just generated it from builder to prevent loops?
+    // Actually, if we type in JSON, we want builder to update.
+    // Ideally we track 'source' of change.
+    
     if (!newItem.configStr) return;
     try {
         const config = JSON.parse(newItem.configStr);
@@ -592,12 +649,29 @@ const parseConfigToBuilder = () => {
         
         // Animation
         if (style.animation) {
-            // "bounce 2s infinite linear"
-            const parts = style.animation.split(' ');
-            if (parts.length > 0) builderForm.animationName = parts[0];
-            if (parts.length > 1) builderForm.animationDuration = parseFloat(parts[1]);
+            // "bounce 2s infinite linear, pulse 2s infinite linear"
+            // Split by comma
+            const anims = style.animation.split(',');
+            const names = [];
+            let duration = 2;
+            
+            anims.forEach(animStr => {
+                 const parts = animStr.trim().split(' ');
+                 if (parts.length > 0) {
+                     const name = parts[0];
+                     if(name !== 'gradient-flow') { // internal use
+                        names.push(name);
+                     }
+                     if (parts.length > 1) {
+                         const d = parseFloat(parts[1]);
+                         if (!isNaN(d)) duration = d;
+                     }
+                 }
+            });
+            builderForm.animationNames = names;
+            builderForm.animationDuration = duration;
         } else {
-            builderForm.animationName = 'none';
+            builderForm.animationNames = [];
         }
         
     } catch (e) {
@@ -617,8 +691,8 @@ const generateConfigFromBuilder = () => {
     const textStyle = {}; // Some animations/styles apply to text
     
     // Background - Force color if NO image is uploaded
-    // Note: We check uploadedImageUrl. If user wants to switch back to color, they MUST remove the image.
-    if (!uploadedImageUrl.value) {
+    // Check both uploadedImageUrl and localPreviewUrl
+    if (!uploadedImageUrl.value && !localPreviewUrl.value) {
         if (builderForm.useGradient) {
             style.background = `linear-gradient(45deg, #${builderForm.gradientStart}, #${builderForm.gradientEnd}) !important`;
             style.backgroundSize = '200% 200%';
@@ -636,24 +710,37 @@ const generateConfigFromBuilder = () => {
     }
     
     // Animation
-    if (builderForm.animationName && builderForm.animationName !== 'none') {
+    // Animation
+    // Multiple animations joined by comma
+    if (builderForm.animationNames && builderForm.animationNames.length > 0) {
         const duration = builderForm.animationDuration || 2;
-        let animLine = `${builderForm.animationName} ${duration}s infinite linear`;
         
-        if (['bounce', 'pulse', 'shake', 'swing', 'rubberBand', 'jello'].includes(builderForm.animationName)) {
-            animLine = `${builderForm.animationName} ${duration}s infinite ease-in-out`;
+        const animStrings = builderForm.animationNames.map(name => {
+             if (name === 'none') return null;
+             
+             let timing = 'linear';
+             if (['bounce', 'pulse', 'shake', 'swing', 'rubberBand', 'jello'].includes(name)) {
+                timing = 'ease-in-out';
+             }
+             return `${name} ${duration}s infinite ${timing}`;
+        }).filter(s => s !== null);
+        
+        if (animStrings.length > 0) {
+            // Should valid CSS animation syntax: anim1, anim2
+            style.animation = animStrings.join(', ') + ' !important';
         }
-        style.animation = animLine;
     }
     
     const config = {
         style: style,
         textColor: `#${builderForm.textColor}`, 
-        image: uploadedImageUrl.value || null // Only include image if currently uploaded
+        // Fix: Do NOT include localPreviewUrl (Blob) in configStr to prevent saving it to DB.
+        // applyPreview() handles the visual preview of the Blob separately.
+        image: uploadedImageUrl.value || null 
     };
     
     newItem.configStr = JSON.stringify(config, null, 2);
-    applyPreview(); // Auto-apply for builder
+    // applyPreview(); // handled by watch(newItem.configStr)
 };
 
 // Quiz Tab State
@@ -795,47 +882,29 @@ const submitChallenge = async () => {
 };
 
 
-// --- Custom Item Logic ---
-const customItems = ref([]);
-const newItem = reactive({
-    itemType: 'THEME',
-    name: '',
-    description: '', // Add description
-    configStr: '',
-    isDefault: false
-});
-const defaultConfigs = {
-  THEME: {
-    style: {
-      color: "#ffffff",
-      textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
-    },
-    textColor: "#ffffff"
-  },
-  POPOVER: {
-    style: {
-      border: "1px solid #e2e8f0",
-      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-    },
-    textColor: "#000000",
-    overlayStyle: "bg-white/90 backdrop-blur-sm"
-  }
-};
+// --- Custom Item Logic Variables Moved to Top ---
 
-// Auto-fill config JSON when type changes
-watch(() => newItem.itemType, (newType) => {
-    // Only set if empty to avoid overwriting user's custom edits
-    if (!newItem.configStr) {
-        newItem.configStr = JSON.stringify(defaultConfigs[newType] || {}, null, 2);
-    }
-}, { immediate: true });
+// Watcher moved to top
 
 const creatingItem = ref(false);
 const showAssignDialog = ref(false);
 const selectedItemToAssign = ref(null);
 const assignUserId = ref(null);
-const assigning = ref(false);
-const uploadedImageUrl = ref('');
+const assignedUsers = ref([]);
+
+const assigning = ref(false); // Restore assigning state
+const uploadedImageUrl = ref(''); // Restore uploadedImageUrl
+const localPreviewUrl = ref(''); // For immediate preview
+// --- Edit & User Management Logic Definitions (Hoisted) ---
+const isEditMode = ref(false);
+const editingItemId = ref(null);
+const showUserDialog = ref(false);
+const loadingUsers = ref(false);
+
+watch(localPreviewUrl, () => {
+    // When image changes, re-generate config to apply 'disabled' background logic
+    generateConfigFromBuilder();
+});
 const fileInput = ref(null);
 
 const triggerFileUpload = () => {
@@ -860,7 +929,9 @@ const applyPreview = () => {
         
         // Inject uploaded image into config if present and not already manually set (or just force overwrite/merge?)
         // Let's merge: if uploaded exists, it takes precedence for the 'image' field for preview convenience
-        if (uploadedImageUrl.value) {
+        if (localPreviewUrl.value) {
+            config.image = localPreviewUrl.value;
+        } else if (uploadedImageUrl.value) {
             config.image = uploadedImageUrl.value;
         }
         
@@ -882,6 +953,12 @@ const onFileSelect = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
     
+    // Immediate local preview
+    localPreviewUrl.value = URL.createObjectURL(file);
+    // Immediate local preview
+    localPreviewUrl.value = URL.createObjectURL(file);
+    // applyPreview(); // Explicit update handled by watcher on localPreviewUrl/configStr now 
+
     try {
         creatingItem.value = true; // Use loading state
         const path = await uploadItemImage(file, newItem.itemType);
@@ -896,8 +973,8 @@ const onFileSelect = async (event) => {
         config.image = path; // Set image path
         newItem.configStr = JSON.stringify(config, null, 2);
         
-        // Trigger preview update
-        applyPreview();
+        // Trigger preview update (fallback to path if local blob somehow failed or just to ensure config consistency)
+        // We keep using localPreviewUrl for display until page reload or reset
         
         toast.add({ severity: 'info', summary: '업로드 완료', detail: '이미지 경로가 설정에 추가되었습니다.', life: 3000 });
     } catch (e) {
@@ -911,6 +988,7 @@ const onFileSelect = async (event) => {
 
 const removeImage = () => {
     uploadedImageUrl.value = '';
+    localPreviewUrl.value = '';
     
     // Trigger config regeneration to restore color
     generateConfigFromBuilder();
@@ -947,7 +1025,10 @@ const createItem = async () => {
         newItem.description = '';
         newItem.configStr = '';
         newItem.isDefault = false;
+        newItem.configStr = '';
+        newItem.isDefault = false;
         uploadedImageUrl.value = '';
+        localPreviewUrl.value = '';
         currentPreviewConfig.value = { image: null };
         
         await loadCustomItems();
@@ -961,11 +1042,7 @@ const createItem = async () => {
 };
 
 // --- Edit & User Management Logic ---
-const isEditMode = ref(false);
-const editingItemId = ref(null);
-const assignedUsers = ref([]);
-const showUserDialog = ref(false);
-const loadingUsers = ref(false);
+// Variables moved to top for hoisting safety
 
 const startEdit = (item) => {
     isEditMode.value = true;
@@ -1003,7 +1080,9 @@ const cancelEdit = () => {
     newItem.description = '';
     newItem.configStr = '';
     newItem.isDefault = false;
+    newItem.isDefault = false;
     uploadedImageUrl.value = '';
+    localPreviewUrl.value = '';
     currentPreviewConfig.value = { image: null };
 };
 
@@ -1273,6 +1352,14 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.default-item-badge {
+    color: #000000 !important;
+}
+
+[data-theme="dark"] .default-item-badge {
+    color: #ffffff !important;
 }
 
 .quiz-stat {

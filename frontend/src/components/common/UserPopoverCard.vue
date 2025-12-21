@@ -111,7 +111,7 @@ const popoverStyle = computed(() => {
               backgroundImage: `url('${resolveImageUrl(deco.image)}') !important`,
               backgroundSize: 'cover !important',
               backgroundPosition: 'center !important',
-              background: 'none !important',
+              // background: 'none !important',
               backgroundColor: 'transparent !important'
           }
       }
