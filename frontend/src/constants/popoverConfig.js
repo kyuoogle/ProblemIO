@@ -10,7 +10,7 @@ const withS3Public = (path) => {
 export const POPOVER_DECORATIONS = {
   default: {
     name: 'Default',
-    style: { backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-main)' }, // Use vars for Dark Mode
+    style: { backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-main)' },
     textColor: 'var(--color-text-main)' 
   },
   cybercity: {
@@ -42,7 +42,7 @@ export const POPOVER_DECORATIONS = {
       '--neon-color': '#00ff00'
     },
     textStyle: {
-      background: '#00ff00', // For lines
+      background: '#00ff00', 
       animation: 'text-neon-pulse 1.5s infinite alternate'
     },
     buttonStyle: {
@@ -50,8 +50,6 @@ export const POPOVER_DECORATIONS = {
       boxShadow: '0 0 5px #00ff00'
     }
   },
-
-
   gold_rush: {
     name: 'Gold Rush',
     textColor: '#4a3b0f',
@@ -88,7 +86,7 @@ export const POPOVER_DECORATIONS = {
         background: '#fff',
         border: '3px solid transparent',
         animation: 'rainbow-border 4s linear infinite',
-        boxShadow: '0 0 10px #ff0000' // Initial shadow from keyframe
+        boxShadow: '0 0 10px #ff0000'
     },
     buttonStyle: {
         background: '#333',
@@ -96,8 +94,6 @@ export const POPOVER_DECORATIONS = {
         border: 'none'
     }
   },
-
-
   retro_terminal: {
     name: 'Retro Terminal',
     textColor: '#33ff33',
@@ -119,9 +115,6 @@ export const POPOVER_DECORATIONS = {
     name: 'Shimmering Ocean',
     textColor: '#fff',
     style: {
-        // Combined gradient for ocean + shimmer effect approximation since keyframes are hardcoded.
-        // base.css shimmer animation uses background-position.
-        // We need the gradient that allows shimmer.
         background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 60%), #006994',
         backgroundSize: '200% 100%',
         animation: 'shimmer 2.5s infinite linear',

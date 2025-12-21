@@ -61,15 +61,12 @@ export const PROFILE_THEMES = {
     name: 'Golden Luxury',
     textColor: '#5a3e1a',
     style: {
-      background: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%) !important',
-      position: 'relative !important'
+        background: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%) !important',
+        position: 'relative !important',
+        animation: 'shimmer 3s infinite linear !important', // restored shimmer for luxury feel
+        backgroundSize: '200% auto !important'
     }
-    // Note: ::after psuedo-element cannot be inline styled easily in Vue without specific component support.
-    // However, we added 'shimmer' keyframe. We might need a way to support overlay or just simplify.
-    // For now, I'll stick to basic background. If the user wants the shimmer overlay, we'd need a specific class or structure change.
-    // Given the constraints, I will simplify or rely on the gradient.
   },
-
 
   matrix_code: {
     name: 'Matrix Code',
@@ -78,10 +75,10 @@ export const PROFILE_THEMES = {
     style: {
       backgroundColor: '#000 !important',
       fontFamily: 'monospace !important',
-      border: '2px solid #00FF00 !important'
+      border: '2px solid #00FF00 !important',
+      boxShadow: '0 0 10px #00FF00 !important'
     }
   },
-
 
   minimalist_float: {
     name: 'Minimalist Float',
@@ -90,8 +87,6 @@ export const PROFILE_THEMES = {
       backgroundColor: '#fff !important',
       backgroundImage: 'radial-gradient(#e5e7eb 2px, transparent 2px) !important',
       backgroundSize: '20px 20px !important',
-      // The floating animation was on .mock-avatar in example, but here we apply to background container? 
-      // If we want the whole card to float, we can add animation here.
       animation: 'floating 3s ease-in-out infinite !important'
     }
   }
