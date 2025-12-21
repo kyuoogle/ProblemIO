@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
@@ -19,6 +20,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService; // 유저 정보 조회용 (구현 필요)
+    private final UserCache userCache;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -27,13 +29,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         // 토큰 유효성 검사
-        if (token != null && jwtTokenProvider.validateToken(token)) {
+        if (token != null
+                && jwtTokenProvider.validateToken(token)
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             // 토큰에서 이메일 추출
             String email = jwtTokenProvider.getEmail(token);
 
-            // DB에서 유저 정보 가져오기
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            // 캐시 → DB 순으로 UserDetails 조회
+            UserDetails cached = userCache.getUserFromCache(email);
+            UserDetails userDetails = cached != null
+                    ? cached
+                    : userDetailsService.loadUserByUsername(email);
+            if (cached == null) {
+                userCache.putUserInCache(userDetails);
+            }
 
             // 스프링 시큐리티에 인증 정보 저장
             UsernamePasswordAuthenticationToken authentication =

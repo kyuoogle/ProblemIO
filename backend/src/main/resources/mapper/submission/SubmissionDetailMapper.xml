@@ -16,6 +16,9 @@
         <!-- user_answer 컬럼은 NOT NULL 제약이 있어 빈 문자열을 넣어준다 (사용자 입력값은 저장하지 않음) -->
         INSERT INTO submission_details (submission_id, question_id, user_answer, is_correct)
         VALUES (#{submissionId}, #{questionId}, '', #{correct})
+        ON DUPLICATE KEY UPDATE
+            user_answer = VALUES(user_answer),
+            is_correct = VALUES(is_correct)
     </insert>
 
     <insert id="insertSubmissionDetails">
@@ -32,6 +35,14 @@
 
     <select id="countBySubmissionId" resultType="int">
         SELECT COUNT(*) FROM submission_details WHERE submission_id = #{submissionId}
+    </select>
+
+    <select id="countBySubmissionIdForUpdate" resultType="int">
+        SELECT COUNT(*) FROM submission_details WHERE submission_id = #{submissionId} FOR UPDATE
+    </select>
+
+    <select id="countCorrectBySubmissionId" resultType="int">
+        SELECT COUNT(*) FROM submission_details WHERE submission_id = #{submissionId} AND is_correct = true
     </select>
 
     <select id="findBySubmissionIdAndQuestionId" resultMap="SubmissionDetailResultMap">

@@ -16,4 +16,6 @@ public interface QuestionAnswerMapper {
     List<QuestionAnswer> findByQuestionId(@Param("questionId") Long questionId);
 
     List<QuestionAnswer> findByQuestionIds(@Param("questionIds") List<Long> questionIds);
+
+    List<QuestionAnswer> findByQuizId(@Param("quizId") Long quizId);
 }

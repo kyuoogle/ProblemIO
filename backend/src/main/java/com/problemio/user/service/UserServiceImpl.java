@@ -125,6 +125,7 @@ public class UserServiceImpl implements UserService {
         request.setId(userId);
         userMapper.updateProfile(request);
 
+        evictUserCaches(oldUser.getEmail(), userId);
         return getUserById(userId);
     }
 
@@ -140,7 +141,7 @@ public class UserServiceImpl implements UserService {
 
         String encodedPassword = passwordEncoder.encode(newPassword);
         userMapper.updatePassword(userId, encodedPassword);
-        evictUserDetailsCache(user.getEmail());
+        evictUserCaches(user.getEmail(), userId);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class UserServiceImpl implements UserService {
             quizService.deleteQuiz(userId, quiz.getId());
         }
 
-        evictUserDetailsCache(user.getEmail());
+        evictUserCaches(user.getEmail(), userId);
 
         String tombstone = "deleted_" + UUID.randomUUID();
         userMapper.anonymizeCredentials(userId, tombstone + "@deleted.local", tombstone);
@@ -250,10 +251,14 @@ public class UserServiceImpl implements UserService {
     /**
      * 인증 캐시(UserDetails) 무효화 - 이메일 단위 캐시이므로 이메일 키로 제거한다.
      */
-    private void evictUserDetailsCache(String email) {
+    private void evictUserCaches(String email, Long userId) {
         Cache cache = cacheManager.getCache("userDetails");
         if (cache != null && email != null) {
             cache.evict(email);
+        }
+        Cache profileCache = cacheManager.getCache("userProfile");
+        if (profileCache != null && userId != null) {
+            profileCache.evict(userId);
         }
     }
 

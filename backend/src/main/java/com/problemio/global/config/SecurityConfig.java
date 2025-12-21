@@ -2,17 +2,23 @@ package com.problemio.global.config;
 
 import com.problemio.global.jwt.JwtAuthenticationFilter;
 import com.problemio.global.jwt.JwtTokenProvider;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.cache.SpringCacheBasedUserCache;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
@@ -24,10 +30,25 @@ public class SecurityConfig {
     }
 
     @Bean
+    public UserCache userCache(CacheManager cacheManager) {
+        Cache cache = Objects.requireNonNull(cacheManager.getCache("userDetails"), "userDetails cache not found");
+        return new SpringCacheBasedUserCache(cache);
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
+            JwtTokenProvider jwtTokenProvider,
+            UserDetailsService userDetailsService,
+            UserCache userCache
+    ) {
+        return new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, userCache);
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtTokenProvider jwtTokenProvider,
-            UserDetailsService userDetailsService
+            UserDetailsService userDetailsService,
+            JwtAuthenticationFilter jwtAuthenticationFilter
     ) throws Exception {
 
         http
@@ -96,10 +117,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .httpBasic(basic -> basic.disable())
-                .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService),
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

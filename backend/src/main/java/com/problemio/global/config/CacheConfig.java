@@ -35,8 +35,39 @@ public class CacheConfig {
                         .build()
         );
 
+        // quiz question/answer 캐시: 제출 시 반복 조회 최소화
+        CaffeineCache questionCache = new CaffeineCache(
+                "question",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(10, TimeUnit.MINUTES)
+                        .maximumSize(5_000)
+                        .build()
+        );
+        CaffeineCache questionAnswersCache = new CaffeineCache(
+                "questionAnswers",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(10, TimeUnit.MINUTES)
+                        .maximumSize(5_000)
+                        .build()
+        );
+
+        // 유저 프로필 캐시: 작성자 정보 반복 조회 최소화
+        CaffeineCache userProfileCache = new CaffeineCache(
+                "userProfile",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(10, TimeUnit.MINUTES)
+                        .maximumSize(5_000)
+                        .build()
+        );
+
         SimpleCacheManager cacheManager = new SimpleCacheManager();
-        cacheManager.setCaches(List.of(rankingCache, userDetailsCache));
+        cacheManager.setCaches(List.of(
+                rankingCache,
+                userDetailsCache,
+                questionCache,
+                questionAnswersCache,
+                userProfileCache
+        ));
         return cacheManager;
     }
 }

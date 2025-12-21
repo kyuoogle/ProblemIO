@@ -25,6 +25,8 @@ import com.problemio.user.dto.UserResponse;
 import com.problemio.user.mapper.UserMapper;
 import com.problemio.comment.mapper.CommentMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,8 @@ public class QuizServiceImpl implements QuizService {
     private final CommentMapper commentMapper;
     // 댓글 좋아요 정리용
     private final CommentLikeMapper commentLikeMapper;
+    // 캐시 관리자 (userProfile 캐시 활용)
+    private final CacheManager cacheManager;
 
     /**
      * 퀴즈 목록 조회 (페이징 + 정렬 + 검색)
@@ -455,7 +459,19 @@ public class QuizServiceImpl implements QuizService {
     }
 
     private UserResponse findAuthor(Long userId) {
-        return userMapper.findById(userId).orElse(null);
+        Cache cache = cacheManager.getCache("userProfile");
+        if (cache != null) {
+            UserResponse cached = cache.get(userId, UserResponse.class);
+            if (cached != null) {
+                return cached;
+            }
+        }
+
+        UserResponse author = userMapper.findById(userId).orElse(null);
+        if (cache != null && author != null) {
+            cache.put(userId, author);
+        }
+        return author;
     }
 
     /**

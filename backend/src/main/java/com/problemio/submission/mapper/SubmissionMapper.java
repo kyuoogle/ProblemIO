@@ -12,9 +12,15 @@ public interface SubmissionMapper {
 
     void insertSubmission(Submission submission);
 
-    void updateCorrectCount(@Param("id") Long id, @Param("correctCount") int correctCount);
+    void updateCorrectCount(@Param("id") Long id,
+                            @Param("quizId") Long quizId,
+                            @Param("correctCount") int correctCount);
 
-    void updatePlayTime(@Param("id") Long id, @Param("playTime") Double playTime);
+    void updatePlayTime(@Param("id") Long id,
+                        @Param("quizId") Long quizId,
+                        @Param("playTime") Double playTime);
+
+    void updatePlayTimeNow(@Param("id") Long id, @Param("quizId") Long quizId);
 
 
 
