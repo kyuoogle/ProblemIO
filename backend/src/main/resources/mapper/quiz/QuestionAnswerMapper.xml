@@ -33,4 +33,12 @@
         </foreach>
         ORDER BY question_id ASC, sort_order ASC
     </select>
+
+    <select id="findByQuizId" resultMap="QuestionAnswerResultMap">
+        SELECT qa.*
+        FROM question_answers qa
+        JOIN questions q ON q.id = qa.question_id
+        WHERE q.quiz_id = #{quizId}
+        ORDER BY qa.question_id ASC, qa.sort_order ASC
+    </select>
 </mapper>

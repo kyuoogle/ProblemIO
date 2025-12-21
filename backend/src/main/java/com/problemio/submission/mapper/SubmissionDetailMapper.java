@@ -17,6 +17,8 @@ public interface SubmissionDetailMapper {
     List<SubmissionDetail> findBySubmissionId(@Param("submissionId") Long submissionId);
 
     int countBySubmissionId(@Param("submissionId") Long submissionId);
+    int countCorrectBySubmissionId(@Param("submissionId") Long submissionId);
+    int countBySubmissionIdForUpdate(@Param("submissionId") Long submissionId);
 
     Optional<SubmissionDetail> findBySubmissionIdAndQuestionId(@Param("submissionId") Long submissionId,
                                                                @Param("questionId") Long questionId);

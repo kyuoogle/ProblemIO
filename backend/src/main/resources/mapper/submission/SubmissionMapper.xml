@@ -24,12 +24,25 @@
         UPDATE submissions
         SET correct_count = #{correctCount}
         WHERE id = #{id}
+          AND quiz_id = #{quizId}
     </update>
 
     <update id="updatePlayTime">
         UPDATE submissions
         SET play_time = #{playTime}
         WHERE id = #{id}
+          AND quiz_id = #{quizId}
+    </update>
+
+    <update id="updatePlayTimeNow">
+        UPDATE submissions
+        SET play_time = CASE
+                            WHEN submitted_at IS NULL THEN 0
+                            ELSE TIMESTAMPDIFF(SECOND, submitted_at, NOW())
+                                 + (MICROSECOND(NOW()) - MICROSECOND(submitted_at)) / 1000000.0
+                        END
+        WHERE id = #{id}
+          AND quiz_id = #{quizId}
     </update>
 
     <select id="findById" resultMap="SubmissionResultMap">

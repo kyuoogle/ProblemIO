@@ -10,11 +10,15 @@ import com.problemio.quiz.mapper.QuizMapper;
 import com.problemio.submission.domain.Submission;
 import com.problemio.submission.domain.SubmissionDetail;
 import com.problemio.submission.dto.QuizAnswerResponse;
+import com.problemio.submission.dto.QuizPlayContextResponse;
 import com.problemio.submission.dto.QuizSubmissionRequest;
 import com.problemio.submission.dto.QuizSubmissionResponse;
 import com.problemio.submission.mapper.SubmissionDetailMapper;
 import com.problemio.submission.mapper.SubmissionMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,37 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final QuizMapper quizMapper;
     private final QuestionMapper questionMapper;
     private final QuestionAnswerMapper questionAnswerMapper;
+    private final CacheManager cacheManager;
+
+    @Override
+    @Transactional(readOnly = true)
+    public QuizPlayContextResponse getPlayContext(Long quizId) {
+        var quiz = quizMapper.findById(quizId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
+
+        List<Question> questions = questionMapper.findByQuizId(quizId);
+
+        // 미리 캐시에 로드
+        preloadQuestionCaches(questions, quizId);
+
+        List<QuizPlayContextResponse.QuestionDto> questionDtos = questions.stream()
+                .map(q -> QuizPlayContextResponse.QuestionDto.builder()
+                        .id(q.getId())
+                        .order(q.getQuestionOrder())
+                        .imageUrl(q.getImageUrl())
+                        .description(q.getDescription())
+                        .build())
+                .toList();
+
+        return QuizPlayContextResponse.builder()
+                .quizId(quizId)
+                .title(quiz.getTitle())
+                .description(quiz.getDescription())
+                .thumbnailUrl(quiz.getThumbnailUrl())
+                .totalQuestions(questions.size())
+                .questions(questionDtos)
+                .build();
+    }
 
     @Override
     @Transactional
@@ -39,22 +74,15 @@ public class SubmissionServiceImpl implements SubmissionService {
         quizMapper.findById(quizId).orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
         // 문제 검증 및 정답 목록 조회
-        Question question = questionMapper.findById(request.getQuestionId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+        Question question = getQuestionCached(request.getQuestionId());
         if (!question.getQuizId().equals(quizId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        List<QuestionAnswer> answers = questionAnswerMapper.findByQuestionId(request.getQuestionId());
+        List<QuestionAnswer> answers = getQuestionAnswersCached(request.getQuestionId());
         boolean correct = isAnswerCorrect(request.getAnswerText(), answers);
 
         Submission submission = resolveSubmission(quizId, userIdOrNull, request.getSubmissionId(), request.getTotalQuestions());
-
-        // 기존 제출이 있으면 삭제 후 새로 저장하여 정답 개수 재계산
-        boolean hadCorrect = submissionDetailMapper.findBySubmissionIdAndQuestionId(submission.getId(), question.getId())
-                .map(SubmissionDetail::isCorrect)
-                .orElse(false);
-        submissionDetailMapper.deleteBySubmissionIdAndQuestionId(submission.getId(), question.getId());
 
         SubmissionDetail detail = new SubmissionDetail();
         detail.setSubmissionId(submission.getId());
@@ -62,22 +90,11 @@ public class SubmissionServiceImpl implements SubmissionService {
         detail.setCorrect(correct);
         submissionDetailMapper.insertSubmissionDetail(detail);
 
-        int correctCount = submission.getCorrectCount();
-        if (hadCorrect && !correct) {
-            correctCount -= 1;
-        } else if (!hadCorrect && correct) {
-            correctCount += 1;
-        }
-        
-        // Challenge: Calculate and update playTime (submittedAt = challenge start time)
-        if (submission.getSubmittedAt() != null) {
-            long diffMillis = java.time.Duration.between(submission.getSubmittedAt(), LocalDateTime.now()).toMillis();
-            double playTime = diffMillis / 1000.0;
-            submission.setPlayTime(playTime);
-            submissionMapper.updatePlayTime(submission.getId(), playTime);
-        }
+        int correctCount = submissionDetailMapper.countCorrectBySubmissionId(submission.getId());
 
-        submissionMapper.updateCorrectCount(submission.getId(), correctCount);
+        // DB 측 timestamp 차이로 play_time 업데이트 (추가 조회 없이)
+        submissionMapper.updatePlayTimeNow(submission.getId(), quizId);
+        submissionMapper.updateCorrectCount(submission.getId(), quizId, correctCount);
 
         int answeredCount = submissionDetailMapper.countBySubmissionId(submission.getId());
         submission.setCorrectCount(correctCount);
@@ -127,12 +144,10 @@ public class SubmissionServiceImpl implements SubmissionService {
             return submission;
         }
 
-        Submission submission = submissionMapper.findById(submissionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED));
-
-        if (!submission.getQuizId().equals(quizId)) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED);
-        }
+        Submission submission = new Submission();
+        submission.setId(submissionId);
+        submission.setQuizId(quizId);
+        submission.setTotalQuestions(requestedTotal);
         return submission;
     }
 
@@ -144,8 +159,45 @@ public class SubmissionServiceImpl implements SubmissionService {
                 .anyMatch(ans -> ans.equals(normalizedUser));
     }
 
+    @Cacheable(cacheNames = "question", key = "#questionId", sync = true)
+    private Question getQuestionCached(Long questionId) {
+        return questionMapper.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+    }
+
+    @Cacheable(cacheNames = "questionAnswers", key = "#questionId", sync = true)
+    private List<QuestionAnswer> getQuestionAnswersCached(Long questionId) {
+        return questionAnswerMapper.findByQuestionId(questionId);
+    }
+
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void preloadQuestionCaches(List<Question> questions, Long quizId) {
+        Cache questionCache = cacheManager.getCache("question");
+        Cache answerCache = cacheManager.getCache("questionAnswers");
+        if (questionCache == null || answerCache == null) {
+            return;
+        }
+
+        // 질문 캐시 채우기
+        for (Question q : questions) {
+            questionCache.put(q.getId(), q);
+        }
+
+        // 퀴즈 단위로 정답을 한 번에 조회해 캐시에 채움
+        List<QuestionAnswer> answers = questionAnswerMapper.findByQuizId(quizId);
+        // questionId별 리스트 구성
+        java.util.Map<Long, java.util.List<QuestionAnswer>> grouped = new java.util.HashMap<>();
+        for (QuestionAnswer a : answers) {
+            grouped.computeIfAbsent(a.getQuestionId(), k -> new java.util.ArrayList<>()).add(a);
+        }
+        // 캐시에 넣기 (빈 정답도 빈 리스트로 채워 캐시 미스 방지)
+        for (Question q : questions) {
+            java.util.List<QuestionAnswer> list = grouped.getOrDefault(q.getId(), java.util.List.of());
+            answerCache.put(q.getId(), list);
+        }
     }
     @Override
     @Transactional

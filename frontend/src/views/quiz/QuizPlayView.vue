@@ -140,7 +140,10 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useQuizStore } from '@/stores/quiz'
-import { submitQuiz as submitQuizAPI } from '@/api/submission'
+import {
+  submitQuiz as submitQuizAPI,
+  getPlayContext,
+} from '@/api/submission'
 
 const route = useRoute()
 const router = useRouter()
@@ -313,10 +316,31 @@ const goToResult = () => {
   router.push(`/quiz/${route.params.id}/result`)
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!quizStore.currentQuiz) {
-    router.push('/')
-    return
+    try {
+      const quizId = Number(route.params.id)
+      const context = await getPlayContext(quizId)
+      quizStore.startQuiz(
+        {
+          id: context.quizId ?? quizId,
+          title: context.title,
+          description: context.description,
+          thumbnailUrl: context.thumbnailUrl,
+        },
+        context.questions || [],
+      )
+    } catch (error: any) {
+      console.error(error)
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: '퀴즈 정보를 불러오지 못했습니다.',
+        life: 3000,
+      })
+      router.push('/')
+      return
+    }
   }
 
   const q = currentQuestion.value
