@@ -19,7 +19,7 @@ import java.util.UUID;
 public class AiQuizThumbnailService {
 
     private final CandidateCache candidateCache;
-    private final GmsOpenAiClient gmsOpenAiClient;
+    private final GmsGeminiClient gmsGeminiClient;
     private final S3Service s3Service;
 
     @Value("${spring.cloud.aws.s3.url:}")
@@ -72,7 +72,7 @@ public class AiQuizThumbnailService {
             String description,
             String styleHint
     ) {
-        byte[] bytes = gmsOpenAiClient.generatePngBytes(title, description, styleHint);
+        byte[] bytes = gmsGeminiClient.generatePngBytes(title, description, styleHint);
         String candidateId = UUID.randomUUID().toString();
         candidateCache.put(candidateId, bytes);
 

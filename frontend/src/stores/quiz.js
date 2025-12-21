@@ -66,7 +66,7 @@ export const useQuizStore = defineStore('quiz', () => {
     const shuffledQuestions = [...sourceQuestions]
     for (let i = shuffledQuestions.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]]
+        ;[shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]]
     }
     // 섞인 순서에 맞춰 questionOrder를 재부여
     const randomizedQuiz = {
@@ -108,13 +108,15 @@ export const useQuizStore = defineStore('quiz', () => {
       })
     }
 
-    // 🔥 정답 카드 표시 상태 On (정답 여부는 컴포넌트에서 set)
-    showAnswerCard.value = true
+    // 🔥 정답 카드 표시 상태 On (데이터 설정 후 변경해야 함)
+    // showAnswerCard.value = true  <-- 여기서 제거
   }
 
   // 🔥 컴포넌트에서 서버 응답 기반으로 정답/오답 데이터 저장
   function setLastAnswerResult(result) {
     lastAnswerResult.value = result
+    // 🔥 데이터가 준비되었을 때 카드를 보여준다
+    showAnswerCard.value = true
   }
 
   // 다음 문제 이동
@@ -128,6 +130,13 @@ export const useQuizStore = defineStore('quiz', () => {
 
     // 정답 카드 닫기
     showAnswerCard.value = false
+
+    // 🔥 이전 정답 정보 초기화 (중요: 이렇게 해야 다음 문제에서 카드 열릴 때 "이전 데이터"가 안 보임)
+    lastAnswerResult.value = {
+      correct: null,
+      correctAnswers: [],
+      userAnswer: '',
+    }
   }
 
   // 서버 결과 저장

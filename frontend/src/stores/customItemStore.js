@@ -7,9 +7,9 @@ import { PROFILE_THEMES } from '@/constants/themeConfig'
 
 export const useCustomItemStore = defineStore('customItem', () => {
     // State
-    const avatarItems = ref([])
-    const popoverItems = ref([])
-    const themeItems = ref([])
+    const avatarItems = ref({})
+    const popoverItems = ref({})
+    const themeItems = ref({})
     const loading = ref(false)
 
     const itemDefinitions = ref({}) // Dictionary of all items by ID ~ { id: config } to merge into static constants
@@ -32,20 +32,20 @@ export const useCustomItemStore = defineStore('customItem', () => {
                     try {
                         config = JSON.parse(config);
                     } catch (e) {
-                         console.error('Failed to parse item config', item);
+                        console.error('Failed to parse item config', item);
                     }
                 }
-                
+
                 // Overwrite 'Cybercity' config with local constant to ensure animation updates apply immediately
                 // regardless of stale DB data.
                 if (item.name === 'Cybercity') {
-                   if (item.itemType === 'POPOVER' && POPOVER_DECORATIONS.cybercity) {
-                       config = { ...config, ...POPOVER_DECORATIONS.cybercity };
-                   } else if (item.itemType === 'THEME' && PROFILE_THEMES.cybercity) {
-                       config = { ...config, ...PROFILE_THEMES.cybercity };
-                   }
+                    if (item.itemType === 'POPOVER' && POPOVER_DECORATIONS.cybercity) {
+                        config = { ...config, ...POPOVER_DECORATIONS.cybercity };
+                    } else if (item.itemType === 'THEME' && PROFILE_THEMES.cybercity) {
+                        config = { ...config, ...PROFILE_THEMES.cybercity };
+                    }
                 }
-                
+
                 defs[item.id] = {
                     id: item.id,
                     name: item.name,
@@ -79,22 +79,22 @@ export const useCustomItemStore = defineStore('customItem', () => {
             // Actually, `getMyItems` returns CustomItemResponse which HAS config.
             // But we might want to unify the source of truth for "what exists" vs "what I have".
             // The existing `avatarConfig` logic expects an Object of "Available Items".
-            
+
             // For now, let's just make the "Available Items" be the defaults + what I own.
             // Wait, the requirement is "Everyone can see others' themes". 
             // So if I view someone else's profile, I need to know what "Theme ID 5" is.
             // That comes from `fetchItemDefinitions`.
-            
+
             // So `avatarItems` state should probably be `All Definitions` (for rendering) 
             // OR `My Available Choices` (for editing).
-            
+
             // `UserAvatar` component uses `AVATAR_DECORATIONS`. 
             // We should replace that usage with `store.getAvatarConfig(id)`.
-            
+
             // For editing profile, we need "My Owned Items".
-            
+
             // Let's store "My Items" separately.
-            
+
             avatarItems.value = formatMyItems(avatars.data, AVATAR_DECORATIONS)
             popoverItems.value = formatMyItems(popovers.data, POPOVER_DECORATIONS)
             themeItems.value = formatMyItems(themes.data, PROFILE_THEMES)
@@ -128,18 +128,18 @@ export const useCustomItemStore = defineStore('customItem', () => {
         // 2. 백엔드 아이템 병합 (이미 'id'를 가지고 있음)
         if (backendItems) {
             backendItems.forEach(item => {
-                 let config = item.config;
-                 if (typeof config === 'string') {
-                     try { config = JSON.parse(config); } catch(e){}
-                 }
-                 result[item.id] = {
+                let config = item.config;
+                if (typeof config === 'string') {
+                    try { config = JSON.parse(config); } catch (e) { }
+                }
+                result[item.id] = {
                     id: item.id,
                     name: item.name,
                     description: item.description,
                     isDefault: item.isDefault,
                     isOwned: item.isOwned,
                     ...config
-                 }
+                }
             });
         }
         return result;
@@ -150,15 +150,15 @@ export const useCustomItemStore = defineStore('customItem', () => {
         // 정의(동적)를 먼저 확인하고, 정적 기본값을 확인
         // 하지만 definition은 ID로 평탄화되어 있음.
         // 정적 기본값은 'cybercity' 같은 키를 사용.
-        
+
         // 키가 정의에 있다면 (숫자 또는 DB ID와 일치하는 문자열)
         if (itemDefinitions.value[key]) return itemDefinitions.value[key];
-        
+
         // 정적 파일로 폴백 (상단에서 가져옴)
         if (type === 'AVATAR') return AVATAR_DECORATIONS[key];
         if (type === 'POPOVER') return POPOVER_DECORATIONS[key];
         if (type === 'THEME') return PROFILE_THEMES[key];
-        
+
         return null;
     }
 

@@ -49,12 +49,12 @@ const backgroundStyle = computed(() => {
     // Spread theme.style FIRST so the image overrides any background defined there
     return {
       ...theme.style,
+      background: 'none !important', // Reset shorthand first
+      backgroundColor: 'transparent !important', // Ensure color doesn't conflict
       backgroundImage: `url('${resolveImageUrl(theme.image)}') !important`,
       backgroundSize: 'cover !important',
       backgroundPosition: 'center !important',
       backgroundRepeat: 'no-repeat !important',
-      background: 'none !important', // Reset shorthand in case it was used in theme.style
-      backgroundColor: 'transparent !important' // Ensure color doesn't conflict
     };
   }
   
@@ -63,10 +63,14 @@ const backgroundStyle = computed(() => {
 
 const backgroundClass = computed(() => {
     // 기본 스타일(배경, 테두리, 그림자)을 상속받기 위해 p-card 클래스 추가
-    // Custom theme이 적용된 경우 다크모드 강제 스타일을 피하기 위해 'EditCustom' 클래스 추가
+    // 단, Custom theme이 적용된 경우 다크모드 강제 스타일(배경색 등)을 피하기 위해 p-card를 제거함
     const theme = themeConfig.value;
     const isCustom = theme && Object.keys(theme).length > 0;
-    return `p-card ${isCustom ? 'EditCustom' : ''} ${theme?.class || ''}`;
+    
+    // 'default' 테마이거나 테마가 없는 경우에만 p-card 적용
+    const isDefault = !theme || theme.id === 'default' || theme.name === 'Default';
+    
+    return `${isDefault ? 'p-card' : ''} ${isCustom ? 'EditCustom' : ''} ${theme?.class || ''}`;
 });
 
 // 텍스트 색상은 콘텐츠 래퍼에 적용하거나 상속해야 함
