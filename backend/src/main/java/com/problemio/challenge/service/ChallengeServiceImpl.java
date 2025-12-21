@@ -60,6 +60,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = challengeMapper.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
+        if (challenge.getEndAt() != null && LocalDateTime.now().isAfter(challenge.getEndAt())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
         Long submissionId = submissionService.createSubmission(challenge.getTargetQuizId(), userId, challengeId);
 
         List<QuestionResponse> questions = questionMapper.findByQuizId(challenge.getTargetQuizId()).stream()
@@ -191,8 +195,8 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         // 3. Prepare Ranking Entities
         List<ChallengeRanking> rankings = new java.util.ArrayList<>();
-        for (int i = 0; i < submissions.size(); i++) {
-            Submission s = submissions.get(i);
+        for (int i = 0; i < bestSubmissions.size(); i++) {
+            Submission s = bestSubmissions.get(i);
             
             ChallengeRanking ranking = new ChallengeRanking();
             ranking.setChallengeId(challengeId);

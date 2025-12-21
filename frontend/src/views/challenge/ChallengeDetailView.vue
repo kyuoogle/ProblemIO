@@ -62,7 +62,10 @@
                 <template #footer>
                     <div class="flex gap-4 mt-2 p-2">
                         <Button label="뒤로가기" icon="pi pi-arrow-left" severity="secondary" outlined class="w-32" @click="router.back()" />
-                        <Button label="도전 시작하기" icon="pi pi-bolt" size="large" class="flex-1 font-bold p-button-lg shadow-lg shadow-indigo-500/30" @click="startChallengeGame" />
+                        <Button :label="isExpired ? '이미 종료된 챌린지입니다' : '도전 시작하기'" 
+                                :icon="isExpired ? 'pi pi-lock' : 'pi pi-bolt'" 
+                                :disabled="isExpired"
+                                size="large" class="flex-1 font-bold p-button-lg shadow-lg shadow-indigo-500/30" @click="startChallengeGame" />
                     </div>
                 </template>
             </Card>
@@ -102,6 +105,11 @@ const error = ref<string | null>(null);
 
 const challengeId = computed(() => Number(route.params.id));
 
+const isExpired = computed(() => {
+    if (!challenge.value || !challenge.value.endAt) return false;
+    return new Date(challenge.value.endAt) < new Date();
+});
+
 const loadChallengeDetail = async () => {
     loading.value = true;
     error.value = null;
@@ -117,6 +125,7 @@ const loadChallengeDetail = async () => {
 };
 
 const startChallengeGame = () => {
+    if (isExpired.value) return;
     router.push(`/challenges/${challengeId.value}/play`);
 };
 
