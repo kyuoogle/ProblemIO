@@ -30,7 +30,9 @@
           :disabled="
             !isFormValid ||
             thumbnailUploading ||
-            questionUploadingIndex !== null
+            questionUploadingIndex !== null ||
+            isGenerating ||
+            isConfirming
           "
           @click="handleSubmit"
         />
@@ -163,6 +165,61 @@
                 <span>썸네일을 추가해보세요. (설정하지 않으면 첫 문제 이미지)</span>
               </div>
             </div>
+
+            <div class="ai-thumbnail-actions">
+              <Button
+                label="AI 추천 나만의 썸네일 생성"
+                icon="pi pi-sparkles"
+                severity="secondary"
+                outlined
+                class="ai-generate-button"
+                :loading="isGenerating"
+                :disabled="!canGenerateAiThumbnail || isGenerating || isConfirming"
+                @click="handleGenerateAiCandidates"
+              />
+              <small v-if="!canGenerateAiThumbnail" class="text-color-secondary ai-helper">
+                제목/설명을 조금 더 입력하면 정확한 썸네일을 추천할 수 있어요.
+              </small>
+              <small v-else-if="thumbnailPreview" class="text-color-secondary ai-helper">
+                AI 적용 시 현재 썸네일이 교체됩니다.
+              </small>
+            </div>
+
+            <div v-if="aiCandidates.length > 0" class="ai-candidate-panel">
+              <div class="ai-candidate-grid">
+                <button
+                  v-for="candidate in aiCandidates"
+                  :key="candidate.candidateId"
+                  type="button"
+                  class="ai-candidate-card"
+                  :class="{ selected: selectedCandidateId === candidate.candidateId }"
+                  @click="selectAiCandidate(candidate.candidateId)"
+                >
+                  <img :src="candidate.previewDataUrl" alt="AI thumbnail" />
+                  <span v-if="selectedCandidateId === candidate.candidateId" class="ai-selected-badge">
+                    선택됨
+                  </span>
+                </button>
+              </div>
+              <div class="ai-candidate-footer">
+                <Button
+                  label="다시 생성"
+                  icon="pi pi-refresh"
+                  severity="secondary"
+                  outlined
+                  :loading="isGenerating"
+                  :disabled="isConfirming"
+                  @click="handleGenerateAiCandidates"
+                />
+                <Button
+                  label="이 썸네일 적용"
+                  icon="pi pi-check"
+                  :loading="isConfirming"
+                  :disabled="!selectedCandidateId || isGenerating"
+                  @click="applyAiCandidate"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="flex justify-end gap-2 mt-4">
@@ -244,6 +301,7 @@ import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useQuizStore } from "@/stores/quiz";
 import { createQuiz, getQuiz, updateQuiz } from "@/api/quiz";
+import { createCandidates, confirmCandidate } from "@/api/aiThumbnail";
 import { uploadFile } from "@/api/file";
 import { resolveImageUrl } from "@/lib/image";
 
@@ -263,6 +321,12 @@ const loading = ref(false);
 const thumbnailDragOver = ref(false);
 const questionCardDragOverIndex = ref<number | null>(null);
 const questionDialogDragOver = ref(false);
+const aiCandidates = ref<{ candidateId: string; previewDataUrl: string }[]>([]);
+const selectedCandidateId = ref<string | null>(null);
+const isGenerating = ref(false);
+const isConfirming = ref(false);
+const aiTitleMin = 5;
+const aiDescriptionMin = 10;
 
 // 퀴즈 메타/문제 편집 모달
 const metaDialogVisible = ref(props.mode === "create");
@@ -278,6 +342,11 @@ const buildImageUrl = (path?: string) => resolveImageUrl(path);
 const thumbnailPreview = computed(() =>
   buildImageUrl(quizForm.value.thumbnailUrl)
 );
+const canGenerateAiThumbnail = computed(() => {
+  const titleLength = quizForm.value.title?.trim().length || 0;
+  const descriptionLength = quizForm.value.description?.trim().length || 0;
+  return titleLength >= aiTitleMin && descriptionLength >= aiDescriptionMin;
+});
 
 // 모달 내에서 쓰는 questionForm
 const questionForm = reactive({
@@ -432,6 +501,66 @@ const handleThumbnailDrop = async (event: DragEvent) => {
   const file = event.dataTransfer?.files?.[0];
   if (!file) return;
   await uploadThumbnailFile(file);
+};
+
+// ==== AI 썸네일 후보 생성 ====
+const handleGenerateAiCandidates = async () => {
+  if (!canGenerateAiThumbnail.value || isGenerating.value) return;
+
+  isGenerating.value = true;
+  try {
+    const data = await createCandidates(
+      quizForm.value.title?.trim() || "",
+      quizForm.value.description?.trim() || ""
+    );
+    aiCandidates.value = data?.candidates || [];
+    selectedCandidateId.value = null;
+  } catch (error: any) {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      life: 3000,
+    });
+  } finally {
+    isGenerating.value = false;
+  }
+};
+
+const selectAiCandidate = (candidateId: string) => {
+  selectedCandidateId.value = candidateId;
+};
+
+const applyAiCandidate = async () => {
+  if (!selectedCandidateId.value || isConfirming.value) return;
+
+  isConfirming.value = true;
+  try {
+    const data = await confirmCandidate(selectedCandidateId.value);
+    quizForm.value.thumbnailUrl = data?.thumbnailUrl || "";
+    toast.add({
+      severity: "success",
+      summary: "Success",
+      detail: "AI 썸네일이 적용되었습니다.",
+      life: 2000,
+    });
+  } catch (error: any) {
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "적용에 실패했습니다. 다시 시도해 주세요.",
+      life: 3000,
+    });
+  } finally {
+    isConfirming.value = false;
+  }
+};
+
+const resetAiState = () => {
+  aiCandidates.value = [];
+  selectedCandidateId.value = null;
+  isGenerating.value = false;
+  isConfirming.value = false;
 };
 
 // ==== 문제 카드/이미지/모달 ====
@@ -592,6 +721,16 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (isGenerating.value || isConfirming.value) {
+    toast.add({
+      severity: "warn",
+      summary: "Generating thumbnails",
+      detail: "AI 썸네일 작업이 완료될 때까지 기다려주세요.",
+      life: 2500,
+    });
+    return;
+  }
+
   if (!isFormValid.value) {
     toast.add({
       severity: "warn",
@@ -645,6 +784,7 @@ const handleSubmit = async () => {
 onMounted(() => {
   if (props.mode === "create") {
     quizStore.resetQuizForm();
+    resetAiState();
   } else if (props.mode === "edit") {
     loadQuiz();
   }
@@ -892,6 +1032,90 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   color: #7c4dff;
+}
+
+.ai-thumbnail-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ai-helper {
+  font-size: 0.8rem;
+}
+
+.ai-candidate-panel {
+  margin-top: 0.9rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-mute);
+}
+
+.ai-candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.ai-candidate-card {
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #111;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.ai-candidate-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.ai-candidate-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-hover);
+}
+
+.ai-candidate-card.selected {
+  border-color: #7c4dff;
+}
+
+.ai-selected-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #7c4dff;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+.ai-candidate-footer {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+:deep(.ai-generate-button.p-button) {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+:global([data-theme="dark"] :deep(.ai-generate-button.p-button:hover)) {
+  background: rgba(124, 77, 255, 0.18) !important;
+  border-color: rgba(124, 77, 255, 0.5) !important;
+  color: #e9ddff !important;
+}
+
+:global([data-theme="dark"] :deep(.ai-generate-button.p-button:enabled:focus-visible)) {
+  box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.35) !important;
 }
 
 /* 문제 편집 모달 */

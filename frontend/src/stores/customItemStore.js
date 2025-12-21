@@ -1,37 +1,58 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import axios from '@/api/axios' // Correct path to global axios instance
-import { AVATAR_DECORATIONS } from '@/constants/avatarConfig'
-import { POPOVER_DECORATIONS } from '@/constants/popoverConfig'
-import { PROFILE_THEMES } from '@/constants/themeConfig'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import axios from '@/api/axios';
+import { AVATAR_DECORATIONS } from '@/constants/avatarConfig';
+import { POPOVER_DECORATIONS } from '@/constants/popoverConfig';
+import { PROFILE_THEMES } from '@/constants/themeConfig';
 
 export const useCustomItemStore = defineStore('customItem', () => {
     // State
-    const avatarItems = ref([])
-    const popoverItems = ref([])
-    const themeItems = ref([])
-    const loading = ref(false)
+    const avatarItems = ref([]);
+    const popoverItems = ref([]);
+    const themeItems = ref([]);
+    const loading = ref(false);
 
-    const itemDefinitions = ref({}) // Dictionary of all items by ID ~ { id: config } to merge into static constants
+    // Dictionary of all items by DB id: { [id]: mergedConfig }
+    const itemDefinitions = ref({});
+
+    const safeParseConfig = (config, itemForLog) => {
+        if (!config) return {};
+        if (typeof config === 'object') return config;
+
+        if (typeof config === 'string') {
+            try {
+                return JSON.parse(config);
+            } catch (e) {
+                console.error('Failed to parse item config', itemForLog);
+                return {};
+            }
+        }
+        return {};
+    };
+
+    // 로컬 상수로 특정 아이템(예: Cybercity) override/보정
+    const applyLocalOverrides = (itemType, itemName, baseConfig) => {
+        if (itemName !== 'Cybercity') return baseConfig;
+
+        if (itemType === 'POPOVER' && POPOVER_DECORATIONS.cybercity) {
+            return { ...baseConfig, ...POPOVER_DECORATIONS.cybercity };
+        }
+        if (itemType === 'THEME' && PROFILE_THEMES.cybercity) {
+            return { ...baseConfig, ...PROFILE_THEMES.cybercity };
+        }
+        return baseConfig;
+    };
 
     // Actions
     const fetchItemDefinitions = async () => {
         try {
             const res = await axios.get('/items/definitions');
+
             const defs = {};
-            res.data.forEach(item => {
-                let config = item.config;
-                if (typeof config === 'string') {
-                    try {
-                        config = JSON.parse(config);
-                    } catch (e) {
-                         console.error('Failed to parse item config', item);
-                    }
-                }
-                
-                // Note: We no longer override Cybercity here because we treat it as purely static in fetchUserItems.
-                // If backend returns Cybercity, it will be handled (ignored) there or coexist.
-                
+            (res.data || []).forEach((item) => {
+                let config = safeParseConfig(item.config, item);
+                config = applyLocalOverrides(item.itemType, item.name, config);
+
                 defs[item.id] = {
                     id: item.id,
                     name: item.name,
@@ -39,114 +60,107 @@ export const useCustomItemStore = defineStore('customItem', () => {
                     ...config
                 };
             });
+
             itemDefinitions.value = defs;
         } catch (e) {
             console.error('Failed to fetch item definitions', e);
         }
-    }
+    };
 
     const fetchUserItems = async () => {
-        loading.value = true
-        // Ensure definitions are loaded for shared context if needed
+        loading.value = true;
+
+        // definitions가 비어있으면 먼저 로드 (Admin preview / config merge 용)
         if (Object.keys(itemDefinitions.value).length === 0) {
             await fetchItemDefinitions();
         }
 
         try {
-            // Fetch dynamic items from backend (My Owned Items)
             const [avatars, popovers, themes] = await Promise.all([
                 axios.get('/items/my', { params: { type: 'AVATAR' } }),
                 axios.get('/items/my', { params: { type: 'POPOVER' } }),
                 axios.get('/items/my', { params: { type: 'THEME' } })
             ]);
 
-            // Merge Logic:
-            // 1. Static Defaults (always available, local assets)
-            // 2. Backend Items (dynamic, S3 assets)
-            
-            avatarItems.value = formatMyItems(avatars.data, AVATAR_DECORATIONS)
-            popoverItems.value = formatMyItems(popovers.data, POPOVER_DECORATIONS)
-            themeItems.value = formatMyItems(themes.data, PROFILE_THEMES)
-
+            avatarItems.value = formatMyItems(avatars.data, 'AVATAR', AVATAR_DECORATIONS);
+            popoverItems.value = formatMyItems(popovers.data, 'POPOVER', POPOVER_DECORATIONS);
+            themeItems.value = formatMyItems(themes.data, 'THEME', PROFILE_THEMES);
         } catch (error) {
-            console.error('Failed to fetch user items', error)
+            console.error('Failed to fetch user items', error);
+
             // Fallback to just static defaults
-            avatarItems.value = formatMyItems([], AVATAR_DECORATIONS)
-            popoverItems.value = formatMyItems([], POPOVER_DECORATIONS)
-            themeItems.value = formatMyItems([], PROFILE_THEMES)
+            avatarItems.value = formatMyItems([], 'AVATAR', AVATAR_DECORATIONS);
+            popoverItems.value = formatMyItems([], 'POPOVER', POPOVER_DECORATIONS);
+            themeItems.value = formatMyItems([], 'THEME', PROFILE_THEMES);
         } finally {
-            loading.value = false
+            loading.value = false;
         }
-    }
+    };
 
-    const formatMyItems = (backendItems, staticDefaults) => {
+    const formatMyItems = (backendItems, type, staticDefaults) => {
         const result = [];
-        const addedIds = new Set();
+        const added = new Set();
 
-        // 1. Static Defaults Injection (Always First)
+        // 1) Static defaults (항상 보이도록 먼저 주입)
         if (staticDefaults) {
-            Object.keys(staticDefaults).forEach(key => {
-                const item = staticDefaults[key];
-                // Check if already added to avoid duplicates if staticDefaults contains duplicates (unlikely)
-                if(!addedIds.has(key)) {
-                    result.push({
-                        key: key,      
-                        id: key,       // Use key as ID for static items
-                        isDefault: true, // Mark as default
-                        isOwned: true,   // Always owned
-                        ...item
-                    });
-                    addedIds.add(key);
-                }
+            Object.keys(staticDefaults).forEach((key) => {
+                if (added.has(key)) return;
+
+                result.push({
+                    key,
+                    id: key,          // 정적 아이템은 key를 id로 사용
+                    isDefault: true,
+                    isOwned: true,
+                    ...staticDefaults[key]
+                });
+                added.add(key);
             });
         }
 
-        // 2. Backend Items Merge (Append to end)
-        if (backendItems) {
-            // User requested to simply append backend items after static defaults without explicit re-sorting.
-            // Assuming backend returns them in an acceptable order (e.g., creation order).
-            const sortedBackend = backendItems; 
-            
-            sortedBackend.forEach(item => {
-                 let config = item.config;
-                 if (typeof config === 'string') {
-                     try { config = JSON.parse(config); } catch(e){}
-                 }
-                 
-                 // Avoid collision with static items if IDs conflict
-                 if (!addedIds.has(item.id) && !addedIds.has(String(item.id))) {
-                     result.push({
-                        id: item.id,
-                        name: item.name,
-                        description: item.description,
-                        isDefault: item.isDefault,
-                        isOwned: true, 
-                        ...config
-                     });
-                     addedIds.add(item.id);
-                 }
+        // 2) Backend items (정적 뒤에 append)
+        (backendItems || []).forEach((item) => {
+            const idKey = String(item.id);
+            if (added.has(item.id) || added.has(idKey)) return;
+
+            const parsed = safeParseConfig(item.config, item);
+            const def = itemDefinitions.value[item.id] || itemDefinitions.value[idKey] || null;
+
+            // def(=definitions) 쪽에 로컬 override가 들어갈 수 있으므로 def가 있으면 def가 우선권 가지게 구성
+            const mergedConfig = def ? { ...parsed, ...def } : parsed;
+
+            result.push({
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                isDefault: item.isDefault,
+                isOwned: true,
+                ...mergedConfig
             });
-        }
-        
+
+            added.add(item.id);
+            added.add(idKey);
+        });
+
         return result;
-    }
+    };
 
-    // 키로 설정 가져오기 헬퍼 (정적 키와 숫자 ID 모두 작동)
+    // 키로 설정 가져오기 헬퍼 (정적 키와 숫자/문자 ID 모두 작동)
     const getItemConfig = (type, key) => {
-        // 정의(동적)를 먼저 확인하고, 정적 기본값을 확인
-        // 하지만 definition은 ID로 평탄화되어 있음.
-        // 정적 기본값은 'cybercity' 같은 키를 사용.
-        
-        // 키가 정의에 있다면 (숫자 또는 DB ID와 일치하는 문자열)
+        if (key === null || key === undefined) return null;
+
+        const k = typeof key === 'string' ? key : String(key);
+
+        // 1) dynamic definitions 우선
         if (itemDefinitions.value[key]) return itemDefinitions.value[key];
-        
-        // 정적 파일로 폴백 (상단에서 가져옴)
-        if (type === 'AVATAR') return AVATAR_DECORATIONS[key];
-        if (type === 'POPOVER') return POPOVER_DECORATIONS[key];
-        if (type === 'THEME') return PROFILE_THEMES[key];
-        
+        if (itemDefinitions.value[k]) return itemDefinitions.value[k];
+
+        // 2) static fallback
+        if (type === 'AVATAR') return AVATAR_DECORATIONS[k] || AVATAR_DECORATIONS[key];
+        if (type === 'POPOVER') return POPOVER_DECORATIONS[k] || POPOVER_DECORATIONS[key];
+        if (type === 'THEME') return PROFILE_THEMES[k] || PROFILE_THEMES[key];
+
         return null;
-    }
+    };
 
     return {
         avatarItems,
@@ -156,7 +170,5 @@ export const useCustomItemStore = defineStore('customItem', () => {
         fetchItemDefinitions,
         getItemConfig,
         loading
-    }
-})
-
-
+    };
+});

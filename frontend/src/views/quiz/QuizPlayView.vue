@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useQuizStore } from '@/stores/quiz'
@@ -356,6 +356,28 @@ onMounted(async () => {
   // 전역 엔터 키 핸들러 등록
   window.addEventListener('keydown', handleKeydown)
 })
+
+/**
+ * 다음 문제의 이미지를 미리 로드(Preloading)하여
+ * 문제 전환 시 깜빡임이나 지연을 최소화합니다.
+ */
+watch(
+  () => quizStore.currentQuestionIndex,
+  (newIndex) => {
+    if (!quizStore.currentQuiz) return
+
+    // 다음 문제 인덱스
+    const nextIndex = newIndex + 1
+    if (nextIndex < quizStore.currentQuiz.questions.length) {
+      const nextQuestion = quizStore.currentQuiz.questions[nextIndex]
+      if (nextQuestion?.imageUrl) {
+        const img = new Image()
+        img.src = nextQuestion.imageUrl
+      }
+    }
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   // 전역 핸들러 정리

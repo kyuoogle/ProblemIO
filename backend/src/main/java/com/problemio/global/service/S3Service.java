@@ -50,6 +50,24 @@ public class S3Service {
     }
 
     /**
+     * 바이트 배열을 S3에 업로드하고 Key를 반환합니다.
+     */
+    public String uploadBytes(byte[] bytes, String s3Key, String contentType) {
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(s3Key)
+                    .contentType(contentType)
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(bytes));
+            return s3Key;
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * 파일을 삭제합니다.
      * 파라미터로 전체 URL이 들어오더라도 Key를 추출하여 삭제합니다.
      */

@@ -69,3 +69,9 @@ logging:
   level:
     root: info
     com.problemio: debug
+
+
+gms:
+  base-url: https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta/models
+  api-key: ${GMS_KEY}
+  model: ${GMS_MODEL:gemini-2.0-flash-exp-image-generation}
