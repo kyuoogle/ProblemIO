@@ -158,7 +158,7 @@ const fetchRanking = async () => {
   loading.value = true;
   error.value = "";
   try {
-    const data = await getRanking(period.value, 7);
+    const data = await getRanking(period.value, 5);
     rankings.value = data || [];
     lastUpdated.value = new Date();
   } catch (e) {
