@@ -34,9 +34,8 @@ public class AiQuizThumbnailService {
         }
 
         List<String> styleHints = List.of(
-                "Minimal flat illustration.\nDark background with a single highlighted silhouette.\nStrong contrast and a calm, mysterious mood.",
-                "Colorful modern illustration.\nMultiple abstract elements related to the topic.\nEnergetic, playful quiz-game atmosphere.");
-
+                "Cinematic illustration style.\nDark background with a central symbolic object illuminated by a spotlight.\nSemi-detailed rendering with depth and atmosphere.\nMoody, premium, game-cover-like aesthetic.",
+                "Vibrant modern illustration.\nDynamic composition with multiple topic-related objects.\nBright colors, motion, and playful energy.\nFun but polished quiz-game aesthetic.");
         List<AiThumbnailCandidateResponse.Candidate> candidates = styleHints.stream()
                 .map(style -> createCandidate(safeTitle, safeDescription, style))
                 .toList();
@@ -51,10 +50,15 @@ public class AiQuizThumbnailService {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
+        // DEBUG LOG
+        System.out.println("Confirming Candidate ID: " + candidateId);
+
         byte[] bytes = candidateCache.get(candidateId);
         if (bytes == null) {
+            System.out.println("Cache MISS for ID: " + candidateId);
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
+        System.out.println("Cache HIT for ID: " + candidateId + ", size: " + bytes.length);
 
         String key = "quiz-thumbnails/" + userId + "/" + candidateId + ".png";
         String s3Key = s3Service.uploadBytes(bytes, key, "image/png");
@@ -72,6 +76,11 @@ public class AiQuizThumbnailService {
             String styleHint) {
         byte[] bytes = gmsGeminiClient.generatePngBytes(title, description, styleHint);
         String candidateId = UUID.randomUUID().toString();
+
+        // DEBUG LOG
+        System.out.println(
+                "Generated Candidate ID: " + candidateId + ", bytes: " + (bytes != null ? bytes.length : "null"));
+
         candidateCache.put(candidateId, bytes);
 
         String previewDataUrl = "data:image/png;base64," + Base64.getEncoder().encodeToString(bytes);

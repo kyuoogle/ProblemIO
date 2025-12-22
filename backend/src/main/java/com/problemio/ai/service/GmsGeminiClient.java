@@ -152,28 +152,27 @@ public class GmsGeminiClient {
                         "- It is NOT a question image and must not contain clues or readable information.\n\n" +
                         "Image requirements:\n" +
                         "- Square aspect ratio (1:1), suitable for a quiz thumbnail.\n" +
-                        "- Simple, uncluttered composition with high contrast.\n" +
+                        "- Clean, uncluttered composition with strong visual contrast.\n" +
                         "- Easy to recognize at small sizes.\n" +
                         "- Do NOT include any text, letters, numbers, logos, watermarks, or signatures.\n" +
                         "- Do NOT depict real people, identifiable faces, or specific individuals.\n" +
                         "- Do NOT include copyrighted characters, brand logos, or trademarks.\n\n" +
                         "Conceptual theme:\n" +
-                        "- An illustration representing a \"quiz\" or \"guessing game\" based on the given topic.\n" +
-                        "- Use abstract symbols, silhouettes, icons, or conceptual visuals related to the quiz subject.\n"
-                        +
-                        "- Emphasize curiosity, mystery, or challenge\n" +
-                        "  (e.g., silhouettes, shadows, spotlight lighting, abstract or symbolic shapes).\n" +
-                        "- Subject-related objects or environments may be included,\n" +
-                        "  but they must be generic and non-branded.\n\n" +
+                        "- Create an artistic illustration representing the quiz topic.\n" +
+                        "- Visualize the subject matter using characteristic objects, props, or environments\n" +
+                        "  that are strongly associated with the topic.\n" +
+                        "- Avoid generic avatars, profile icons, or placeholder silhouettes.\n" +
+                        "- Focus on symbolic scenes or compositions that suggest the topic at a glance.\n" +
+                        "- Subject-related elements must be generic and non-branded.\n\n" +
                         "Visual style:\n" +
-                        "- Clean, modern illustration style.\n" +
+                        "- Modern illustrative style (not flat UI icons, not sticker art).\n" +
                         "- High contrast lighting with a dramatic or playful tone.\n" +
-                        "- Professional, game-like thumbnail aesthetic suitable for a quiz or trivia app.\n\n" +
+                        "- Polished, professional thumbnail aesthetic suitable for a quiz or trivia app.\n\n" +
                         "Quiz context (for inspiration only, do NOT render as text):\n" +
                         "Title: %s\n" +
                         "Description: %s\n\n" +
-                        "Style variation (choose ONE for this generation):\n" +
-                        "- %s",
+                        "Style variation (choose ONE and follow it strictly):\n" +
+                        "%s",
                 title, description, styleHint);
     }
 }
