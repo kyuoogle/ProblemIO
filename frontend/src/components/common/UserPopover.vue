@@ -1,5 +1,5 @@
 <template>
-  <OverlayPanel ref="op" class="border-none rounded-xl shadow-lg p-0 popover-panel">
+  <Popover ref="op" class="border-none rounded-xl shadow-lg p-0 popover-panel">
     <!-- 로딩 / 에러 -->
     <div v-if="loading" class="w-96 p-6 text-center text-sm text-gray-500">프로필 정보를 불러오는 중입니다.</div>
     <div v-else-if="error" class="w-96 p-6 text-center text-sm text-red-500">
@@ -10,32 +10,36 @@
     <!-- 배경 이미지 적용: decoration이 있으면 그 이미지를 배경으로 사용 -->
     <!-- 내용 -->
     <!-- 배경 이미지 적용: decoration이 있으면 그 이미지를 배경으로 사용 -->
-    <UserPopoverCard 
-      v-else 
-      :profile="profile"
-      @click-profile="goToProfile"
-    >
-        <template #action-button>
-          <Button v-if="!profile.me" :label="profile.following ? '팔로잉' : '팔로우'" size="small" :outlined="profile.following" class="!text-xs !px-3 whitespace-nowrap" @click.stop="onToggleFollow" :style="computedButtonStyle" />
-           <Button v-else icon="pi pi-cog" rounded outlined size="small" class="!text-xs !px-3" @click.stop="goToProfileEdit" :style="computedButtonStyle" />
-        </template>
+    <UserPopoverCard v-else :profile="profile" @click-profile="goToProfile">
+      <template #action-button>
+        <Button
+          v-if="!profile.me"
+          :label="profile.following ? '팔로잉' : '팔로우'"
+          size="small"
+          :outlined="profile.following"
+          class="!text-xs !px-3 whitespace-nowrap"
+          @click.stop="onToggleFollow"
+          :style="computedButtonStyle"
+        />
+        <Button v-else icon="pi pi-cog" rounded outlined size="small" class="!text-xs !px-3" @click.stop="goToProfileEdit" :style="computedButtonStyle" />
+      </template>
 
-        <template #bottom-button>
-             <Button class="w-full mt-4 !text-sm" severity="secondary" outlined label="프로필 보기" @click="goToProfile" :style="computedButtonStyle" />
-        </template>
+      <template #bottom-button>
+        <Button class="w-full mt-4 !text-sm" severity="secondary" outlined label="프로필 보기" @click="goToProfile" :style="computedButtonStyle" />
+      </template>
     </UserPopoverCard>
-  </OverlayPanel>
+  </Popover>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
-import OverlayPanel from "primevue/overlaypanel";
+import Popover from "primevue/popover";
 import Button from "primevue/button";
 import { getUserPopover, followUser, unfollowUser } from "@/api/user";
 import UserPopoverCard from "@/components/common/UserPopoverCard.vue";
-import { useCustomItemStore } from '@/stores/customItemStore';
-import { resolveImageUrl } from '@/lib/image' 
+import { useCustomItemStore } from "@/stores/customItemStore";
+import { resolveImageUrl } from "@/lib/image";
 
 const op = ref(null);
 const router = useRouter();
@@ -63,16 +67,16 @@ const avatarUrl = computed(() => {
 
 // 업로드 경로 보정: DB에 파일명만 있으면 /upload/profile/ 붙여줌 (이 로직도 사실상 백엔드가 다 처리해야 함)
 const avatarSrc = computed(() => {
-   return resolveImageUrl(profile.profileImageUrl);
+  return resolveImageUrl(profile.profileImageUrl);
 });
 
 const customItemStore = useCustomItemStore();
 
 // Reuse store logic to get button style for the slots (since slots are in parent scope)
 const computedButtonStyle = computed(() => {
-    if (!profile.popoverDecoration) return {};
-    const deco = customItemStore.getItemConfig('POPOVER', profile.popoverDecoration);
-    return deco ? (deco.buttonStyle || {}) : {};
+  if (!profile.popoverDecoration) return {};
+  const deco = customItemStore.getItemConfig("POPOVER", profile.popoverDecoration);
+  return deco ? deco.buttonStyle || {} : {};
 });
 
 async function fetchProfile(userId) {

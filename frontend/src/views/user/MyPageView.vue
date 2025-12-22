@@ -1,33 +1,13 @@
 <template>
-
   <div class="mypage-container">
     <div class="container mx-auto px-4">
-
       <!-- 프로필 헤더 -->
-      <ProfileHeader 
-        :user="me" 
-        :quizCount="myQuizCount"
-      >
+      <ProfileHeader :user="me" :quizCount="myQuizCount">
         <template #actions>
-           <!-- 관리자 버튼 -->
-          <Button
-            v-if="me?.role === 'ROLE_ADMIN'"
-            icon="pi pi-shield"
-            rounded
-            outlined
-            severity="danger"
-            @click="goToAdmin"
-            aria-label="관리자 페이지"
-            v-tooltip.bottom="'관리자 페이지'"
-          />
+          <!-- 관리자 버튼 -->
+          <Button v-if="me?.role === 'ROLE_ADMIN'" icon="pi pi-shield" rounded outlined severity="danger" @click="goToAdmin" aria-label="관리자 페이지" v-tooltip.bottom="'관리자 페이지'" />
           <!-- 설정 버튼 (/mypage/edit 이동) -->
-          <Button
-            icon="pi pi-cog"
-            rounded
-            outlined
-            @click="goToEditProfile"
-            aria-label="프로필 설정"
-          />
+          <Button icon="pi pi-cog" rounded outlined @click="goToEditProfile" aria-label="프로필 설정" />
         </template>
       </ProfileHeader>
 
@@ -44,57 +24,36 @@
           <i class="pi pi-spin pi-spinner text-4xl"></i>
         </div>
 
-         <div v-else-if="myQuizzes.length === 0" class="text-center py-8 text-color-secondary">
-    <p class="text-xl mb-4">아직 퀴즈가 없네요! 퀴즈를 만들어 친구들과 공유해보세요.</p>
-    <Button label="퀴즈 만들기" icon="pi pi-plus" @click="goToCreateQuiz" />
-  </div>
+        <div v-else-if="myQuizzes.length === 0" class="text-center py-8 text-color-secondary">
+          <p class="text-xl mb-4">아직 퀴즈가 없네요! 퀴즈를 만들어 친구들과 공유해보세요.</p>
+          <Button label="퀴즈 만들기" icon="pi pi-plus" @click="goToCreateQuiz" />
+        </div>
 
-  <div v-else class="quiz-grid-container">
-    <div
-      v-for="quiz in myQuizzes"
-      :key="quiz.id"
-      class="quiz-card cursor-pointer"
-      @click="goToQuiz(quiz.id)" 
-    >
-      <div class="quiz-thumbnail">
-        <img
-          :src="quiz.thumbnailUrl || '/placeholder.svg'"
-          :alt="quiz.title"
-          class="quiz-thumbnail-img"
-        />
-      </div>
-      <div class="quiz-meta">
-        <h3 class="quiz-title">{{ quiz.title }}</h3>
-        <div class="quiz-stat">
-          <i class="pi pi-heart text-xs"></i>
-          <span>{{ quiz.likeCount || 0 }}</span>
+        <div v-else class="quiz-grid-container">
+          <div v-for="quiz in myQuizzes" :key="quiz.id" class="quiz-card cursor-pointer" @click="goToQuiz(quiz.id)">
+            <div class="quiz-thumbnail">
+              <img :src="quiz.thumbnailUrl || '/placeholder.svg'" :alt="quiz.title" class="quiz-thumbnail-img" />
+              <div v-if="quiz.hidden" class="hidden-badge">
+                <i class="pi pi-eye-slash mr-1"></i>
+                숨김 처리됨
+              </div>
+            </div>
+            <div class="quiz-meta">
+              <h3 class="quiz-title">{{ quiz.title }}</h3>
+              <div class="quiz-stat">
+                <i class="pi pi-heart text-xs"></i>
+                <span>{{ quiz.likeCount || 0 }}</span>
+              </div>
+            </div>
+
+            <!-- 버튼 클릭 시에는 카드 클릭 이벤트 안 타게 stop -->
+            <div class="quiz-actions" @click.stop>
+              <Button label="수정" icon="pi pi-pencil" severity="secondary" outlined size="small" class="flex-1 text-xs" @click="goToEdit(quiz.id)" />
+              <Button label="삭제" icon="pi pi-trash" severity="danger" outlined size="small" class="text-xs" @click="handleDelete(quiz.id)" />
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- 버튼 클릭 시에는 카드 클릭 이벤트 안 타게 stop -->
-      <div class="quiz-actions" @click.stop>
-        <Button
-          label="수정"
-          icon="pi pi-pencil"
-          severity="secondary"
-          outlined
-          size="small"
-          class="flex-1 text-xs"
-          @click="goToEdit(quiz.id)"
-        />
-        <Button
-          label="삭제"
-          icon="pi pi-trash"
-          severity="danger"
-          outlined
-          size="small"
-          class="text-xs"
-          @click="handleDelete(quiz.id)"
-        />
-      </div>
-    </div>
-  </div>
-</div>
 
       <!-- 팔로우한 유저들의 퀴즈 탭 -->
       <div v-show="activeTab === 'following'" class="tab-content">
@@ -160,18 +119,17 @@ import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/auth";
 import { getFollowingQuizzes, getMyLikedQuizzes } from "@/api/user";
 import { getMyQuizzes, deleteQuiz } from "@/api/quiz";
-import ProfileHeader from '@/components/user/ProfileHeader.vue';
-import { resolveImageUrl } from "@/lib/image"; 
+import ProfileHeader from "@/components/user/ProfileHeader.vue";
+import { resolveImageUrl } from "@/lib/image";
 
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
-const authStore = useAuthStore();  
+const authStore = useAuthStore();
 const me = computed(() => authStore.user);
 
-
 const goToEditProfile = () => {
-  router.push("/mypage/edit"); 
+  router.push("/mypage/edit");
 };
 
 const goToAdmin = () => {
@@ -298,11 +256,7 @@ const formatDate = (dateString: string) => {
 onMounted(() => {
   loadAllData();
 });
-
-
 </script>
-
-
 
 <style scoped>
 /* 프로필 카드 내부 텍스트 색상 강제 상속 */
@@ -314,7 +268,7 @@ onMounted(() => {
 
 /* 통계 부분 */
 .stat-box {
-  width: 60px;          
+  width: 60px;
   text-align: center;
 }
 
@@ -408,6 +362,7 @@ onMounted(() => {
   justify-content: center;
   overflow: hidden;
   border-radius: 14px;
+  position: relative;
   background: linear-gradient(180deg, #eef3f6, #f7ede8);
 }
 
@@ -418,6 +373,23 @@ onMounted(() => {
   object-position: center;
   image-rendering: auto;
   transition: transform 0.2s ease;
+}
+
+.hidden-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #ef4444;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 .quiz-card {

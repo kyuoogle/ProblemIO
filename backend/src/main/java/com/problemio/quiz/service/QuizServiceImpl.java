@@ -310,6 +310,7 @@ public class QuizServiceImpl implements QuizService {
                 .likeCount(quiz.getLikeCount())
                 .playCount(quiz.getPlayCount())
                 .commentCount(commentCount)
+                .hidden(quiz.isHidden())
                 .build();
     }
 

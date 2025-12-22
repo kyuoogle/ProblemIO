@@ -23,5 +23,6 @@ public class QuizSummaryDto {
     private int likeCount;
     private int playCount;
     private Integer commentCount;
+    private boolean hidden;
 
 }
