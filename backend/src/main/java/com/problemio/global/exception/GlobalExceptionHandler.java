@@ -25,12 +25,23 @@ public class GlobalExceptionHandler {
         };
     }
 
-    // 정적 자원 없음 (404) 처리
+
+
+
+    // 404 예외 처리 (SPA 지원)
     @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException e) {
-        return ResponseEntity
-                .status(org.springframework.http.HttpStatus.NOT_FOUND)
-                .body(ApiResponse.fail("NOT_FOUND", "Resource not found: " + e.getResourcePath()));
+    public Object handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException e) {
+        String path = e.getResourcePath();
+
+        // 1. API 요청이거나 파일 확장자가 있는 정적 리소스 요청인 경우 -> 404 JSON 응답
+        if (path.startsWith("api/") || path.contains(".")) {
+            return ResponseEntity
+                    .status(org.springframework.http.HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail("NOT_FOUND", "Resource not found: " + path));
+        }
+
+        // 2. 그 외(SPA 라우트)인 경우 -> index.html로 포워딩 (화면 반환)
+        return new org.springframework.web.servlet.ModelAndView("forward:/index.html");
     }
 
     @ExceptionHandler(Exception.class)
