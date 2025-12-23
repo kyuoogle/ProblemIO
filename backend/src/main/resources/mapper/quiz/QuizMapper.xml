@@ -22,7 +22,7 @@
         INSERT INTO quizzes (
             user_id, title, description, thumbnail_url, is_public, like_count, play_count, is_hidden, created_at, updated_at
         ) VALUES (
-            #{userId}, #{title}, #{description}, #{thumbnailUrl}, #{isPublic}, #{likeCount}, #{playCount}, #{isHidden}, NOW(), NOW()
+            #{userId}, #{title}, #{description}, #{thumbnailUrl}, #{isPublic}, #{likeCount}, #{playCount}, #{isHidden}, #{createdAt}, #{updatedAt}
         )
     </insert>
 
@@ -34,7 +34,7 @@
             thumbnail_url = #{thumbnailUrl},
             is_public = #{isPublic},
             is_hidden = #{isHidden},
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
 

@@ -38,8 +38,8 @@
         UPDATE submissions
         SET play_time = CASE
                             WHEN submitted_at IS NULL THEN 0
-                            ELSE TIMESTAMPDIFF(SECOND, submitted_at, NOW())
-                                 + (MICROSECOND(NOW()) - MICROSECOND(submitted_at)) / 1000000.0
+                            ELSE TIMESTAMPDIFF(SECOND, submitted_at, #{now})
+                                 + (MICROSECOND(#{now}) - MICROSECOND(submitted_at)) / 1000000.0
                         END
         WHERE id = #{id}
           AND quiz_id = #{quizId}

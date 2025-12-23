@@ -33,7 +33,9 @@
             guest_password_hash,
             writer_ip,
             content,
-            like_count
+            like_count,
+            created_at,
+            updated_at
         ) VALUES (
                      #{quizId},
                      #{parentCommentId},
@@ -43,7 +45,9 @@
                      #{guestPasswordHash},
                      #{writerIp},
                      #{content, jdbcType=LONGVARCHAR},
-                     #{likeCount}
+                     #{likeCount},
+                     #{createdAt},
+                     #{updatedAt}
                  )
     </insert>
 
@@ -51,7 +55,7 @@
     <update id="updateComment">
         UPDATE comments
         SET content = #{content, jdbcType=LONGVARCHAR},
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE id = #{id}
           AND is_deleted = 0
     </update>
@@ -60,7 +64,7 @@
     <update id="softDeleteComment">
         UPDATE comments
         SET is_deleted = 1,
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE id = #{id}
             AND is_deleted = 0 <!-- 이미 삭제된 댓글에 대해 불필요한 업데이트 방지-->
     </update>
@@ -206,7 +210,7 @@
     <update id="softDeleteByUserId">
         UPDATE comments
         SET is_deleted = 1,
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE user_id = #{userId}
           AND is_deleted = 0
     </update>
@@ -214,7 +218,7 @@
     <update id="softDeleteByQuizId">
         UPDATE comments
         SET is_deleted = 1,
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE quiz_id = #{quizId}
           AND is_deleted = 0
     </update>
@@ -225,7 +229,7 @@
             guest_nickname = '탈퇴한 회원',
             guest_password_hash = NULL,
             writer_ip = NULL,
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE user_id = #{userId}
     </update>
 

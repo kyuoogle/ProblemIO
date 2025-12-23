@@ -6,6 +6,7 @@ import com.problemio.item.domain.ItemType;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,7 @@ public interface CustomItemMapper {
     boolean existsUserItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
     
     // Assign item
-    // Assign item
-    void saveUserItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
+    void saveUserItem(@Param("userId") Long userId, @Param("itemId") Long itemId, @Param("acquiredAt") LocalDateTime acquiredAt);
 
     void update(CustomItem item);
 

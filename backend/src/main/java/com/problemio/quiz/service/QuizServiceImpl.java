@@ -30,6 +30,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -114,6 +115,10 @@ public class QuizServiceImpl implements QuizService {
         quiz.setPublic(request.isPublic());
         quiz.setLikeCount(0);
         quiz.setPlayCount(0);
+        
+        LocalDateTime now = LocalDateTime.now();
+        quiz.setCreatedAt(now);
+        quiz.setUpdatedAt(now);
 
         // 퀴즈 기본 정보 저장
         quizMapper.insertQuiz(quiz);
@@ -149,6 +154,7 @@ public class QuizServiceImpl implements QuizService {
         }
 
         // 퀴즈 기본 정보 업데이트
+        quiz.setUpdatedAt(LocalDateTime.now());
         quizMapper.updateQuiz(quiz);
 
         // 질문 리스트가 넘어온 경우 기존 질문/정답 전부 삭제 후 새로 저장
@@ -182,7 +188,7 @@ public class QuizServiceImpl implements QuizService {
         List<Long> commentIds = commentMapper.findIdsByQuizId(quizId);
         if (!commentIds.isEmpty()) {
             commentLikeMapper.deleteByCommentIds(commentIds);
-            commentMapper.softDeleteByQuizId(quizId);
+            commentMapper.softDeleteByQuizId(quizId, LocalDateTime.now());
         }
 
         // 관련 좋아요 제거
@@ -369,6 +375,7 @@ public class QuizServiceImpl implements QuizService {
             question.setQuestionOrder(order);
             question.setImageUrl(request.getImageUrl());
             question.setDescription(request.getDescription());
+            question.setCreatedAt(LocalDateTime.now());
 
             // 질문 저장
             questionMapper.insertQuestion(question);
@@ -483,6 +490,7 @@ public class QuizServiceImpl implements QuizService {
         com.problemio.quiz.domain.QuizLike like = new com.problemio.quiz.domain.QuizLike();
         like.setUserId(userId);
         like.setQuizId(quizId);
+        like.setCreatedAt(LocalDateTime.now());
         return like;
     }
 

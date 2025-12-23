@@ -7,7 +7,7 @@
 
     <insert id="insertQuizLike" parameterType="com.problemio.quiz.domain.QuizLike">
         INSERT INTO quiz_likes (user_id, quiz_id, created_at)
-        VALUES (#{userId}, #{quizId}, NOW())
+        VALUES (#{userId}, #{quizId}, #{createdAt})
     </insert>
 
     <delete id="deleteQuizLike">

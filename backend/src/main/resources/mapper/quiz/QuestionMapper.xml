@@ -15,7 +15,7 @@
 
     <insert id="insertQuestion" parameterType="com.problemio.quiz.domain.Question" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO questions (quiz_id, question_order, image_url, description, created_at)
-        VALUES (#{quizId}, #{questionOrder}, #{imageUrl}, #{description}, NOW())
+        VALUES (#{quizId}, #{questionOrder}, #{imageUrl}, #{description}, #{createdAt})
     </insert>
 
     <update id="updateQuestion" parameterType="com.problemio.quiz.domain.Question">

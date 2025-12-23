@@ -20,7 +20,7 @@
         INSERT INTO challenge_rankings (
             challenge_id, user_id, ranking, score, play_time, created_at
         ) VALUES (
-            #{challengeId}, #{userId}, #{ranking}, #{score}, #{playTime}, NOW()
+            #{challengeId}, #{userId}, #{ranking}, #{score}, #{playTime}, #{createdAt}
         )
     </insert>
 
@@ -29,7 +29,7 @@
             challenge_id, user_id, ranking, score, play_time, created_at
         ) VALUES
         <foreach collection="rankings" item="item" separator=",">
-            (#{item.challengeId}, #{item.userId}, #{item.ranking}, #{item.score}, #{item.playTime}, NOW())
+            (#{item.challengeId}, #{item.userId}, #{item.ranking}, #{item.score}, #{item.playTime}, #{item.createdAt})
         </foreach>
     </insert>
 
