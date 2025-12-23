@@ -5,6 +5,7 @@ import com.problemio.user.dto.UserResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,10 +21,10 @@ public interface UserMapper {
     void updateProfile(UserResponse user);
 
     // 3. 비밀번호 변경
-    void updatePassword(@Param("id") Long id, @Param("passwordHash") String passwordHash);
+    void updatePassword(@Param("id") Long id, @Param("passwordHash") String passwordHash, @Param("updatedAt") LocalDateTime updatedAt);
 
     // 4. 회원 탈퇴 (Soft Delete)
-    void deleteUser(Long id);
+    void deleteUser(@Param("id") Long id, @Param("updatedAt") LocalDateTime updatedAt);
 
     // 5. 마이페이지 통계용 카운트
     int countFollowers(Long userId);
@@ -41,7 +42,8 @@ public interface UserMapper {
 
     void anonymizeCredentials(@Param("id") Long id,
                               @Param("email") String email,
-                              @Param("nickname") String nickname);
+                              @Param("nickname") String nickname,
+                              @Param("updatedAt") LocalDateTime updatedAt);
 
     // 8. 프로필 상세 조회 (카운트 포함)
     UserResponse findUserProfile(@Param("userId") Long userId, @Param("viewerId") Long viewerId);

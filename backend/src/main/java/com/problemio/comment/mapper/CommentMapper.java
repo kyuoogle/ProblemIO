@@ -4,6 +4,7 @@ import com.problemio.comment.domain.Comment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -13,7 +14,7 @@ public interface CommentMapper {
 
     void updateComment(Comment comment);
 
-    void softDeleteComment(@Param("id") Long id);
+    void softDeleteComment(@Param("id") Long id, @Param("updatedAt") LocalDateTime updatedAt);
 
     void updateRootCommentId(@Param("id") Long id, @Param("rootCommentId") Long rootCommentId);
 
@@ -41,11 +42,11 @@ public interface CommentMapper {
 
     List<Long> findIdsByQuizId(@Param("quizId") Long quizId);
 
-    void softDeleteByUserId(@Param("userId") Long userId);
+    void softDeleteByUserId(@Param("userId") Long userId, @Param("updatedAt") LocalDateTime updatedAt);
 
-    void softDeleteByQuizId(@Param("quizId") Long quizId);
+    void softDeleteByQuizId(@Param("quizId") Long quizId, @Param("updatedAt") LocalDateTime updatedAt);
 
-    void anonymizeByUserId(@Param("userId") Long userId);
+    void anonymizeByUserId(@Param("userId") Long userId, @Param("updatedAt") LocalDateTime updatedAt);
 
     void deleteByUserId(@Param("userId") Long userId);
 

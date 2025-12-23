@@ -14,7 +14,7 @@
   --color-text-muted: #6b7280;
   --color-border: rgba(15, 23, 42, 0.08);
 
-  --color-primary: #00a6cc;        /* 라이트 프라이머리 */
+  --color-primary: #00a6cc; /* 라이트 프라이머리 */
   --color-primary-hover: #33cfff;
   --color-accent: var(--brand-gold);
 
@@ -30,10 +30,6 @@
   --app-bg-image: url("/bg-light.png");
   --app-bg-image-dark: url("/bg-dark.png"); /* 다크 모드 전용 배경 이미지 */
   --app-bg-overlay: rgba(248, 250, 252, 0.78);
-
-  /* 라이트 모드 전용 헤더 배경 이미지 설정 */
-  --app-header-bg-image: url("/bg-header-light.png");
-  --app-header-bg-overlay: rgba(255, 255, 255, 0.9);
 
   --section-gap: 160px;
 }
@@ -78,23 +74,9 @@ body {
   min-height: 100vh;
   color: var(--color-heading);
   background-color: var(--color-background);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
+  transition: color 0.5s, background-color 0.5s;
   line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -103,9 +85,7 @@ body {
 
 /* 라이트 모드 배경 이미지 적용 */
 body.has-bg-image {
-  background-image:
-    linear-gradient(var(--app-bg-overlay), var(--app-bg-overlay)),
-    var(--app-bg-image);
+  background-image: linear-gradient(var(--app-bg-overlay), var(--app-bg-overlay)), var(--app-bg-image);
   background-attachment: fixed;
   background-size: cover;
   background-position: center center;
@@ -113,11 +93,19 @@ body.has-bg-image {
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--color-heading);
 }
 
-p, span, label, small {
+p,
+span,
+label,
+small {
   color: var(--color-text);
 }
 
@@ -216,14 +204,14 @@ p, span, label, small {
 [data-theme="dark"] .p-datepicker th,
 [data-theme="dark"] .p-select .p-select-label,
 [data-theme="dark"] .p-select .p-select-dropdown {
-    background: transparent !important;
-    color: var(--color-heading) !important;
+  background: transparent !important;
+  color: var(--color-heading) !important;
 }
 
 /* Specific text colors for headers and numbers */
 [data-theme="dark"] .p-datepicker table th,
 [data-theme="dark"] .p-datepicker table th > span {
-    color: var(--color-text-muted) !important;
+  color: var(--color-text-muted) !important;
 }
 
 [data-theme="dark"] .p-datepicker table td > span {
@@ -260,7 +248,7 @@ p, span, label, small {
 
 /* Paginator Fixes */
 [data-theme="dark"] .p-paginator .p-paginator-element {
-  color: var(--color-text-muted) !important; 
+  color: var(--color-text-muted) !important;
 }
 [data-theme="dark"] .p-paginator .p-paginator-element:not(.p-disabled):not(.p-highlight):hover {
   background: rgba(255, 255, 255, 0.05) !important;
@@ -276,10 +264,10 @@ p, span, label, small {
   color: var(--color-heading) !important;
 }
 [data-theme="dark"] .p-datepicker .p-timepicker button {
-  color: var(--color-heading) !important; 
+  color: var(--color-heading) !important;
 }
 [data-theme="dark"] .p-datepicker .p-timepicker button:hover {
-  background: rgba(255, 255, 255, 0.1) !important; 
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Toast Dark Mode Fix */
@@ -433,154 +421,333 @@ p, span, label, small {
 
 /* 1. Neon Pulse (Cyan) */
 @keyframes neon-pulse {
-  0% { text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff; }
-  50% { text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff, 0 0 30px #00eaff; }
-  100% { text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff; }
+  0% {
+    text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff;
+  }
+  50% {
+    text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff, 0 0 30px #00eaff;
+  }
+  100% {
+    text-shadow: 0 0 5px #00eaff, 0 0 10px #00eaff;
+  }
 }
 
 /* 2. Text Neon Pulse (Custom Color) */
 @keyframes text-neon-pulse {
-    0%, 100% { text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-color), 0 0 20px var(--neon-color); }
-    50% { text-shadow: 0 0 2px #fff, 0 0 5px var(--neon-color), 0 0 10px var(--neon-color); }
+  0%,
+  100% {
+    text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-color), 0 0 20px var(--neon-color);
+  }
+  50% {
+    text-shadow: 0 0 2px #fff, 0 0 5px var(--neon-color), 0 0 10px var(--neon-color);
+  }
 }
 
 /* 3. Border Flow (RGB Cycle) */
 @keyframes border-flow {
-  0% { border-color: #00eaff; box-shadow: 0 0 5px #00eaff; }
-  33% { border-color: #ff00ff; box-shadow: 0 0 5px #ff00ff; }
-  66% { border-color: #ffff00; box-shadow: 0 0 5px #ffff00; }
-  100% { border-color: #00eaff; box-shadow: 0 0 5px #00eaff; }
+  0% {
+    border-color: #00eaff;
+    box-shadow: 0 0 5px #00eaff;
+  }
+  33% {
+    border-color: #ff00ff;
+    box-shadow: 0 0 5px #ff00ff;
+  }
+  66% {
+    border-color: #ffff00;
+    box-shadow: 0 0 5px #ffff00;
+  }
+  100% {
+    border-color: #00eaff;
+    box-shadow: 0 0 5px #00eaff;
+  }
 }
 
 /* 4. Gradient Move */
 @keyframes gradient-move {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* 5. Floating */
 @keyframes floating {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 /* 6. Shimmer */
 @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* 7. Rainbow Border */
 @keyframes rainbow-border {
-    0% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
-    20% { border-color: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
-    40% { border-color: #0000ff; box-shadow: 0 0 10px #0000ff; }
-    60% { border-color: #00ffff; box-shadow: 0 0 10px #00ffff; }
-    80% { border-color: #00ff00; box-shadow: 0 0 10px #00ff00; }
-    100% { border-color: #ffff00; box-shadow: 0 0 10px #ffff00; }
+  0% {
+    border-color: #ff0000;
+    box-shadow: 0 0 10px #ff0000;
+  }
+  20% {
+    border-color: #ff00ff;
+    box-shadow: 0 0 10px #ff00ff;
+  }
+  40% {
+    border-color: #0000ff;
+    box-shadow: 0 0 10px #0000ff;
+  }
+  60% {
+    border-color: #00ffff;
+    box-shadow: 0 0 10px #00ffff;
+  }
+  80% {
+    border-color: #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+  }
+  100% {
+    border-color: #ffff00;
+    box-shadow: 0 0 10px #ffff00;
+  }
 }
 
 /* 8. Glitch Skew */
 @keyframes glitch-skew {
-    0% { transform: skew(0deg); }
-    20% { transform: skew(-2deg); }
-    40% { transform: skew(2deg); }
-    60% { transform: skew(-1deg); }
-    80% { transform: skew(1deg); }
-    100% { transform: skew(0deg); }
+  0% {
+    transform: skew(0deg);
+  }
+  20% {
+    transform: skew(-2deg);
+  }
+  40% {
+    transform: skew(2deg);
+  }
+  60% {
+    transform: skew(-1deg);
+  }
+  80% {
+    transform: skew(1deg);
+  }
+  100% {
+    transform: skew(0deg);
+  }
 }
 
 /* 9. Standard Animations */
 @keyframes bounce {
-  0%, 20%, 53%, 80%, 100% { transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); transform: translate3d(0, 0, 0); }
-  40%, 43% { transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06); transform: translate3d(0, -30px, 0); }
-  70% { transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06); transform: translate3d(0, -15px, 0); }
-  90% { transform: translate3d(0, -4px, 0); }
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0);
+  }
+  40%,
+  43% {
+    transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -30px, 0);
+  }
+  70% {
+    transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -15px, 0);
+  }
+  90% {
+    transform: translate3d(0, -4px, 0);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale3d(1, 1, 1); }
-  50% { transform: scale3d(1.05, 1.05, 1.05); }
-  100% { transform: scale3d(1, 1, 1); }
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  50% {
+    transform: scale3d(1.05, 1.05, 1.05);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  10%, 30%, 50%, 70%, 90% { transform: translate3d(-10px, 0, 0); }
-  20%, 40%, 60%, 80% { transform: translate3d(10px, 0, 0); }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translate3d(-10px, 0, 0);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translate3d(10px, 0, 0);
+  }
 }
 
 @keyframes rubberBand {
-  0% { transform: scale3d(1, 1, 1); }
-  30% { transform: scale3d(1.25, 0.75, 1); }
-  40% { transform: scale3d(0.75, 1.25, 1); }
-  50% { transform: scale3d(1.15, 0.85, 1); }
-  65% { transform: scale3d(0.95, 1.05, 1); }
-  75% { transform: scale3d(1.05, 0.95, 1); }
-  100% { transform: scale3d(1, 1, 1); }
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  30% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+  40% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+  50% {
+    transform: scale3d(1.15, 0.85, 1);
+  }
+  65% {
+    transform: scale3d(0.95, 1.05, 1);
+  }
+  75% {
+    transform: scale3d(1.05, 0.95, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
 }
 
 @keyframes jello {
-  0%, 11.1%, 100% { transform: translate3d(0, 0, 0); }
-  22.2% { transform: skewX(-12.5deg) skewY(-12.5deg); }
-  33.3% { transform: skewX(6.25deg) skewY(6.25deg); }
-  44.4% { transform: skewX(-3.125deg) skewY(-3.125deg); }
-  55.5% { transform: skewX(1.5625deg) skewY(1.5625deg); }
-  66.6% { transform: skewX(-0.78125deg) skewY(-0.78125deg); }
-  77.7% { transform: skewX(0.390625deg) skewY(0.390625deg); }
-  88.8% { transform: skewX(-0.1953125deg) skewY(-0.1953125deg); }
+  0%,
+  11.1%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  22.2% {
+    transform: skewX(-12.5deg) skewY(-12.5deg);
+  }
+  33.3% {
+    transform: skewX(6.25deg) skewY(6.25deg);
+  }
+  44.4% {
+    transform: skewX(-3.125deg) skewY(-3.125deg);
+  }
+  55.5% {
+    transform: skewX(1.5625deg) skewY(1.5625deg);
+  }
+  66.6% {
+    transform: skewX(-0.78125deg) skewY(-0.78125deg);
+  }
+  77.7% {
+    transform: skewX(0.390625deg) skewY(0.390625deg);
+  }
+  88.8% {
+    transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+  }
 }
 
 @keyframes swing {
-  20% { transform: rotate3d(0, 0, 1, 15deg); }
-  40% { transform: rotate3d(0, 0, 1, -10deg); }
-  60% { transform: rotate3d(0, 0, 1, 5deg); }
-  80% { transform: rotate3d(0, 0, 1, -5deg); }
-  100% { transform: rotate3d(0, 0, 1, 0deg); }
+  20% {
+    transform: rotate3d(0, 0, 1, 15deg);
+  }
+  40% {
+    transform: rotate3d(0, 0, 1, -10deg);
+  }
+  60% {
+    transform: rotate3d(0, 0, 1, 5deg);
+  }
+  80% {
+    transform: rotate3d(0, 0, 1, -5deg);
+  }
+  100% {
+    transform: rotate3d(0, 0, 1, 0deg);
+  }
 }
 
 /* 10. Additional Custom Animations */
 @keyframes breathing {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.02); opacity: 0.9; }
-    100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes rotate-slow {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes zoom-in-out {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes shine {
-    0% { background-position: -100%; }
-    100% { background-position: 200%; }
+  0% {
+    background-position: -100%;
+  }
+  100% {
+    background-position: 200%;
+  }
 }
 
 @keyframes border-dance {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Alias for gradient flow */
 @keyframes gradient-flow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
-
-
 
 /* Dark Mode fix for Custom Themes */
 [data-theme="dark"] .p-card.EditCustom {
-  background: unset !important; 
+  background: unset !important;
   color: unset !important;
   border-color: unset !important;
 }

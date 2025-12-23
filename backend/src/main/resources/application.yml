@@ -61,15 +61,14 @@ mybatis:
 
 # JWT 설정
 jwt:
-  secret: ${JWT_SECRET:local-dev-secret-key}  # 기본값 추가
-  expiration: 3600000  # 1시간
+  secret: ${JWT_SECRET} # 기본값(Base64)
+  expiration: 3600000 # 1시간
 
 # 로깅 레벨 설정
 logging:
   level:
     root: info
     com.problemio: debug
-
 
 gms:
   base-url: https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta/models

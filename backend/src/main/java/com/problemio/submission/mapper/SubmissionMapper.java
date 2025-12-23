@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Optional;
 
+import java.time.LocalDateTime;
+
 @Mapper
 public interface SubmissionMapper {
 
@@ -20,7 +22,7 @@ public interface SubmissionMapper {
                         @Param("quizId") Long quizId,
                         @Param("playTime") Double playTime);
 
-    void updatePlayTimeNow(@Param("id") Long id, @Param("quizId") Long quizId);
+    void updatePlayTimeNow(@Param("id") Long id, @Param("quizId") Long quizId, @Param("now") LocalDateTime now);
 
 
 

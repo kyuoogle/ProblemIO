@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -123,6 +124,7 @@ public class UserServiceImpl implements UserService {
         request.setPopoverDecoration(normalizeDecorationValue(request.getPopoverDecoration()));
 
         request.setId(userId);
+        request.setUpdatedAt(LocalDateTime.now());
         userMapper.updateProfile(request);
 
         evictUserCaches(oldUser.getEmail(), userId);
@@ -140,7 +142,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String encodedPassword = passwordEncoder.encode(newPassword);
-        userMapper.updatePassword(userId, encodedPassword);
+        userMapper.updatePassword(userId, encodedPassword, LocalDateTime.now());
         evictUserCaches(user.getEmail(), userId);
     }
 
@@ -171,7 +173,7 @@ public class UserServiceImpl implements UserService {
 
         List<Long> myCommentIds = commentMapper.findIdsByUserId(userId);
         if (!myCommentIds.isEmpty()) {
-            commentMapper.anonymizeByUserId(userId);
+            commentMapper.anonymizeByUserId(userId, LocalDateTime.now());
         }
 
         List<Quiz> myQuizzes = quizMapper.findQuizzesByUserId(userId);
@@ -182,8 +184,8 @@ public class UserServiceImpl implements UserService {
         evictUserCaches(user.getEmail(), userId);
 
         String tombstone = "deleted_" + UUID.randomUUID();
-        userMapper.anonymizeCredentials(userId, tombstone + "@deleted.local", tombstone);
-        userMapper.deleteUser(userId);
+        userMapper.anonymizeCredentials(userId, tombstone + "@deleted.local", tombstone, LocalDateTime.now());
+        userMapper.deleteUser(userId, LocalDateTime.now());
     }
 
     @Override

@@ -3,3 +3,6 @@
 *.iml
 *.ipr
 *.env
+
+build/**
+**/resources/static/**

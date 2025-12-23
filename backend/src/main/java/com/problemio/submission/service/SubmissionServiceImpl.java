@@ -91,9 +91,16 @@ public class SubmissionServiceImpl implements SubmissionService {
         submissionDetailMapper.insertSubmissionDetail(detail);
 
         int correctCount = submissionDetailMapper.countCorrectBySubmissionId(submission.getId());
-
-        // DB 측 timestamp 차이로 play_time 업데이트 (추가 조회 없이)
-        submissionMapper.updatePlayTimeNow(submission.getId(), quizId);
+        
+        // Update Play Time in Java
+        LocalDateTime now = LocalDateTime.now();
+        double playTime = 0.0;
+        if (submission.getSubmittedAt() != null) {
+            java.time.Duration duration = java.time.Duration.between(submission.getSubmittedAt(), now);
+            playTime = duration.getSeconds() + (duration.getNano() / 1_000_000_000.0);
+        }
+        
+        submissionMapper.updatePlayTime(submission.getId(), quizId, playTime);
         submissionMapper.updateCorrectCount(submission.getId(), quizId, correctCount);
 
         int answeredCount = submissionDetailMapper.countBySubmissionId(submission.getId());
@@ -144,10 +151,15 @@ public class SubmissionServiceImpl implements SubmissionService {
             return submission;
         }
 
-        Submission submission = new Submission();
-        submission.setId(submissionId);
-        submission.setQuizId(quizId);
-        submission.setTotalQuestions(requestedTotal);
+        // Fetch existing submission to get submittedAt
+        Submission submission = submissionMapper.findById(submissionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED));
+        
+        // Update totalQuestions if needed?
+        if (requestedTotal != null && !requestedTotal.equals(submission.getTotalQuestions())) {
+            // submission.setTotalQuestions(requestedTotal); // Not persisting this update for now as it's not critical
+        }
+        
         return submission;
     }
 

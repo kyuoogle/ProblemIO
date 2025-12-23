@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,6 +78,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setLikeCount(0);
         comment.setWriterIp(writerIp);
         comment.setDeleted(false);
+        // Time injection
+        LocalDateTime now = LocalDateTime.now();
+        comment.setCreatedAt(now);
+        comment.setUpdatedAt(now);
 
         commentMapper.insertComment(comment);
 
@@ -109,6 +114,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         existing.setContent(request.getContent());
+        existing.setUpdatedAt(LocalDateTime.now());
         commentMapper.updateComment(existing);
     }
 
@@ -149,7 +155,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // 물리 삭제 대신 soft delete
-        commentMapper.softDeleteComment(commentId);
+        commentMapper.softDeleteComment(commentId, LocalDateTime.now());
     }
 
     @Override

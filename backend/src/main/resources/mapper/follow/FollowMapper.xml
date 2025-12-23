@@ -23,7 +23,7 @@
         VALUES (
                    #{followerId},
                    #{followingId},
-                   NOW()
+                   #{createdAt}
                )
     </insert>
 

@@ -30,6 +30,25 @@ public class SecurityConfig {
     }
 
     @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        // HTTPS 도메인 및 로컬 개발 환경 허용
+        configuration.setAllowedOriginPatterns(java.util.Arrays.asList(
+            "https://problemio.cloud", 
+            "https://www.problemio.cloud", 
+            "http://localhost:5173", 
+            "http://localhost:8080"
+        ));
+        configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+        configuration.setAllowCredentials(true); // 쿠키/인증정보 포함 허용
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public UserCache userCache(CacheManager cacheManager) {
         Cache cache = Objects.requireNonNull(cacheManager.getCache("userDetails"), "userDetails cache not found");
         return new SpringCacheBasedUserCache(cache);
@@ -58,6 +77,9 @@ public class SecurityConfig {
                         // 1. Auth endpoints (로그인, 회원가입 등)
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/reissue").permitAll()
                         .requestMatchers("/api/auth/email/**").permitAll() // 이메일 인증 관련
+                        
+                        // [Front] Frontend Static Resources
+                        .requestMatchers("/", "/index.html", "/assets/**", "/*.ico", "/*.png", "/*.svg").permitAll()
 
                         // [Admin] 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -114,7 +136,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/follows/**").authenticated()
 
-                        .anyRequest().authenticated()
+                        // [중요] 모든 /api/** 요청은 인증 필요 (위에서 허용된 것 제외)
+                        .requestMatchers("/api/**").authenticated()
+
+                        // [중요] 그 외 모든 요청(프론트엔드 라우트)은 허용 -> WebController가 index.html로 보냄
+                        .anyRequest().permitAll()
                 )
                 .httpBasic(basic -> basic.disable())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

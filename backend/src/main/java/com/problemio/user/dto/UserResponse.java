@@ -29,4 +29,5 @@ public class UserResponse {
     private int quizCount;
     private Boolean isFollowedByMe;
     private String role;
+    private java.time.LocalDateTime updatedAt;
 }

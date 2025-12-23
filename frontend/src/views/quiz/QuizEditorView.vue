@@ -244,14 +244,6 @@ const questionForm = reactive({
 const normalizeAnswers = (arr: string[]): string[] => {
   let normalized = arr.map((v) => v.trim()).filter((v) => v.length > 0);
 
-  if (normalized.length >= 2) {
-    const last = normalized[normalized.length - 1];
-    const prev = normalized[normalized.length - 2];
-    if (last.length <= 2 && prev.endsWith(last)) {
-      normalized = normalized.slice(0, -1);
-    }
-  }
-
   normalized = normalized.filter((v, idx, self) => self.indexOf(v) === idx);
   return normalized;
 };

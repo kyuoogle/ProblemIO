@@ -69,7 +69,7 @@ public class CustomItemService {
             throw new IllegalStateException("User already owns this item");
         }
 
-        customItemMapper.saveUserItem(userId, itemId);
+        customItemMapper.saveUserItem(userId, itemId, LocalDateTime.now());
     }
 
     /**

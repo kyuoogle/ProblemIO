@@ -37,7 +37,7 @@ public class UserAuthController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .httpOnly(true)
-                .secure(false) // 운영 시 true로
+                .secure(true) // HTTPS 배포 환경이므로 true로 설정
                 .sameSite("Lax")
                 .path("/api/auth")
                 .maxAge(14 * 24 * 60 * 60) // 14일
@@ -63,7 +63,7 @@ public class UserAuthController {
 
         ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true) // HTTPS 배포 환경이므로 true로 설정
                 .sameSite("Lax")
                 .path("/api/auth")
                 .maxAge(0)
@@ -83,7 +83,7 @@ public class UserAuthController {
         // refreshToken 재설정 (만료 임박 대비)
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true) // HTTPS 배포 환경이므로 true로 설정
                 .sameSite("Lax")
                 .path("/api/auth")
                 .maxAge(14 * 24 * 60 * 60)

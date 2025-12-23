@@ -204,6 +204,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             ranking.setRanking(i + 1);
             ranking.setScore((double) s.getCorrectCount());
             ranking.setPlayTime(s.getPlayTime());
+            ranking.setCreatedAt(LocalDateTime.now());
             
             rankings.add(ranking);
         }

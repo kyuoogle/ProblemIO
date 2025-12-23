@@ -78,3 +78,45 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// --- Frontend Build Integration ---
+
+def frontendDir = "$projectDir/../frontend"
+
+task installDependencies(type: Exec) {
+    workingDir frontendDir
+    inputs.file "$frontendDir/package.json"
+    inputs.file "$frontendDir/package-lock.json"
+    outputs.dir "$frontendDir/node_modules"
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        commandLine "npm.cmd", "install"
+    } else {
+        commandLine "npm", "install"
+    }
+}
+
+task buildVue(type: Exec) {
+    dependsOn installDependencies
+    workingDir frontendDir
+    inputs.dir "$frontendDir/src"
+    inputs.file "$frontendDir/package.json"
+    inputs.file "$frontendDir/vite.config.js"
+    // Output is handled by Vite config (../backend/src/main/resources/static)
+    // outputs.dir "$projectDir/src/main/resources/static" 
+    
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        commandLine "npm.cmd", "run", "build"
+    } else {
+        commandLine "npm", "run", "build"
+    }
+}
+
+processResources {
+    dependsOn buildVue
+}
+
+bootJar {
+    archiveBaseName = 'problemio'  // JAR 파일의 이름 설정
+    version = '0.0.1-SNAPSHOT'     // 버전 설정
+    mainClass.set('com.problemio.BackendApplication')  // main 클래스 설정
+}

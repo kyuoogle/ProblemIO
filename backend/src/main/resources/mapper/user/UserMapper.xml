@@ -61,18 +61,18 @@
             <if test="profileTheme != null">profile_theme = #{profileTheme},</if>
             <if test="avatarDecoration != null">avatar_decoration = #{avatarDecoration},</if>
             <if test="popoverDecoration != null">popover_decoration = #{popoverDecoration},</if>
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         </set>
         WHERE id = #{id}
     </update>
 
     <update id="updatePassword">
-        UPDATE users SET password_hash = #{passwordHash}, updated_at = NOW()
+        UPDATE users SET password_hash = #{passwordHash}, updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
 
     <update id="deleteUser">
-        UPDATE users SET is_deleted = 1, updated_at = NOW()
+        UPDATE users SET is_deleted = 1, updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
 
@@ -80,7 +80,7 @@
         UPDATE users
         SET email = #{email},
             nickname = #{nickname},
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
 
