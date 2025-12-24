@@ -148,9 +148,9 @@ const rankClass = (rank) => {
 };
 
 const getRankIconColor = (rank) => {
-  if (rank === 1) return "text-amber-400";
-  if (rank === 2) return "text-gray-400";
-  if (rank === 3) return "text-orange-400";
+  if (rank === 1) return "text-[var(--primary)]";
+  if (rank === 2) return "text-[var(--accent)]";
+  if (rank === 3) return "text-[var(--text-sub)]";
   return "";
 };
 
@@ -310,17 +310,35 @@ onUnmounted(() => {
 }
 
 /* Updated Colors (Vivid Cyan) */
+/* Updated Colors (Theme Variables) */
 .table-row.rank-gold {
-  background: linear-gradient(135deg, rgba(255, 215, 128, 0.32), rgba(255, 249, 195, 0.25));
-  border: 1px solid rgba(255, 215, 128, 0.8);
+  background: color-mix(in srgb, var(--primary), transparent 85%);
+  border: 1px solid color-mix(in srgb, var(--primary), transparent 40%);
+  color: var(--color-heading);
 }
 .table-row.rank-silver {
-  background: linear-gradient(135deg, rgba(226, 232, 240, 0.55), rgba(248, 250, 252, 0.5));
-  border: 1px solid rgba(180, 190, 200, 0.7);
+  background: color-mix(in srgb, var(--accent), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--accent), transparent 50%);
 }
 .table-row.rank-bronze {
-  background: linear-gradient(135deg, rgba(244, 164, 96, 0.38), rgba(255, 237, 213, 0.4));
-  border: 1px solid rgba(234, 179, 132, 0.8);
+  background: color-mix(in srgb, var(--text-sub), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--text-sub), transparent 70%);
+}
+
+:global([data-theme="dark"] .table-row.rank-gold) {
+  background: color-mix(in srgb, var(--primary), transparent 85%);
+  border-color: color-mix(in srgb, var(--primary), transparent 50%);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--primary), transparent 90%);
+}
+
+:global([data-theme="dark"] .table-row.rank-silver) {
+  background: color-mix(in srgb, var(--accent), transparent 90%);
+  border-color: color-mix(in srgb, var(--accent), transparent 60%);
+}
+
+:global([data-theme="dark"] .table-row.rank-bronze) {
+  background: color-mix(in srgb, var(--text-sub), transparent 92%);
+  border-color: color-mix(in srgb, var(--text-sub), transparent 80%);
 }
 
 .rank-cell {
