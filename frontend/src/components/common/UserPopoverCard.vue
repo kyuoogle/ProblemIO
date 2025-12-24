@@ -2,7 +2,7 @@
   <!-- 내용 -->
     <!-- 배경 이미지 적용: decoration이 있으면 그 이미지를 배경으로 사용 -->
     <div 
-      class="w-96 p-3 relative overflow-hidden rounded-xl popover-content"
+      class="w-96 p-3 relative overflow-hidden rounded-xl popover-content shadow-lg border-1 border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white"
       :style="popoverStyle" 
     >
       <!-- 배경 오버레이 (텍스트 가독성 + 디자인) -->
@@ -124,7 +124,6 @@ const popoverStyle = computed(() => {
   if (decoId) {
     const deco = customItemStore.getItemConfig('POPOVER', decoId);
     if (deco) {
-        // [수정] !important를 붙여서 우선순위 강제
         const varsStyle = deco.textColor ? {
             '--text-color': `${deco.textColor} !important`,
             '--text-color-secondary': `${deco.textColor} !important`

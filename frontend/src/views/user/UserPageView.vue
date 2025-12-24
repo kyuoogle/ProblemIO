@@ -247,7 +247,8 @@ onMounted(() => {
 
 .quiz-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg, 0 16px 28px rgba(0, 0, 0, 0.08));
 }
 
 .quiz-thumbnail {
@@ -258,7 +259,7 @@ onMounted(() => {
   justify-content: center;
   overflow: hidden;
   border-radius: 14px;
-  background: linear-gradient(180deg, #eef3f6, #f7ede8);
+  background: var(--bg-surface-hover);
 }
 
 .quiz-thumbnail-img {
@@ -297,7 +298,7 @@ onMounted(() => {
   gap: 0.25rem;
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
-  background: rgba(137, 168, 124, 0.15);
+  background: var(--bg-surface-hover);
   color: var(--color-heading);
   font-size: 0.85rem;
 }

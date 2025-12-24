@@ -2,7 +2,7 @@
   <div class="ranking-widget">
     <div class="ranking-header">
       <div class="title">
-        <i class="pi pi-trophy text-amber-400 text-xl" style="color: var(--accent) !important"></i>
+        <i class="pi pi-trophy text-yellow-500 text-xl"></i>
         <span>Challenge Ranking</span>
       </div>
       <div class="header-actions">
@@ -148,7 +148,7 @@ const rankClass = (rank) => {
 };
 
 const getRankIconColor = (rank) => {
-  if (rank === 1) return "text-amber-400";
+  if (rank === 1) return "text-yellow-500";
   if (rank === 2) return "text-gray-400";
   if (rank === 3) return "text-orange-400";
   return "";
@@ -239,7 +239,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   box-sizing: border-box;
-  padding: 20px; /* Original padding */
+  padding: 20px;
   border-radius: 16px;
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
@@ -300,27 +300,26 @@ onUnmounted(() => {
 
 .table-row {
   display: grid;
-  grid-template-columns: 50px 40px minmax(0, 1fr); /* Original Grid */
+  grid-template-columns: 50px 40px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  padding: 10px; /* Original Padding */
+  padding: 10px;
   border-radius: 10px;
   background: var(--color-background-mute);
   transition: transform 0.1s;
 }
 
-/* Updated Colors (Vivid Cyan) */
 .table-row.rank-gold {
-  background: linear-gradient(135deg, rgba(255, 215, 128, 0.32), rgba(255, 249, 195, 0.25));
-  border: 1px solid rgba(255, 215, 128, 0.8);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 223, 0, 0.05));
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 .table-row.rank-silver {
-  background: linear-gradient(135deg, rgba(226, 232, 240, 0.55), rgba(248, 250, 252, 0.5));
-  border: 1px solid rgba(180, 190, 200, 0.7);
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(220, 220, 220, 0.05));
+  border: 1px solid rgba(192, 192, 192, 0.3);
 }
 .table-row.rank-bronze {
-  background: linear-gradient(135deg, rgba(244, 164, 96, 0.38), rgba(255, 237, 213, 0.4));
-  border: 1px solid rgba(234, 179, 132, 0.8);
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(210, 180, 140, 0.05));
+  border: 1px solid rgba(205, 127, 50, 0.3);
 }
 
 .rank-cell {
@@ -366,11 +365,11 @@ onUnmounted(() => {
 .nick-text {
   font-weight: 700;
   color: var(--color-heading);
-  font-size: 0.95rem; /* Original Font Size */
+  font-size: 0.95rem;
 }
 
 .score-big {
-  color: var(--primary); /* Updated to Vivid Cyan */
+  color: #7c3aed;
   font-weight: 800;
   font-family: monospace;
 }
@@ -403,7 +402,7 @@ onUnmounted(() => {
   background: var(--color-border);
 }
 .table-row.my-rank {
-  border: 2px solid var(--primary); /* Updated to Vivid Cyan */
-  background: var(--bg-surface-hover); /* Updated background */
+  border: 2px solid #7c3aed;
+  background: rgba(124, 58, 237, 0.05);
 }
 </style>

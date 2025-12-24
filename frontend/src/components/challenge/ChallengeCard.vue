@@ -83,49 +83,40 @@ const formatTime = (seconds) => {
   border-radius: 0; /* Header shape */
 }
 
-/* Time Attack: Red */
+/* Time Attack: Accent (Gold) */
 .badge-time-attack {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background-color: var(--bg-surface-hover);
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
-/* Survival: Purple */
+/* Survival: Primary (Soft Teal) */
 .badge-survival {
-  background-color: #f3e8ff;
-  color: #9333ea;
+  background-color: var(--bg-surface-hover);
+  color: var(--primary);
+  border: 1px solid var(--primary);
 }
 
 /* Event: Gray */
 .badge-event {
-  background-color: #f3f4f6;
-  color: #4b5563;
+  background-color: var(--bg-surface-hover);
+  color: var(--text-sub);
+  border: 1px solid var(--border);
 }
 
-/* Dark Mode Overrides */
+/* Dark Mode Overrides (Simplification via Variables) */
 :global([data-theme="dark"]) .badge-time-attack {
-  background-color: rgba(220, 38, 38, 0.2);
-  color: #fca5a5 !important;
-}
-:global([data-theme="dark"]) .badge-time-attack strong,
-:global([data-theme="dark"]) .badge-time-attack i {
-  color: #fca5a5 !important;
+  background-color: rgba(255, 200, 49, 0.1); /* Low opacity Accent */
+  color: var(--accent);
 }
 
 :global([data-theme="dark"]) .badge-survival {
-  background-color: rgba(147, 51, 234, 0.2);
-  color: #d8b4fe !important;
-}
-:global([data-theme="dark"]) .badge-survival strong,
-:global([data-theme="dark"]) .badge-survival i {
-  color: #d8b4fe !important;
+  background-color: rgba(100, 189, 172, 0.1); /* Low opacity Primary */
+  color: var(--primary);
 }
 
 :global([data-theme="dark"]) .badge-event {
-  background-color: rgba(75, 85, 99, 0.4);
-  color: #d1d5db !important;
-}
-:global([data-theme="dark"]) .badge-event strong,
-:global([data-theme="dark"]) .badge-event i {
-  color: #d1d5db !important;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-sub);
 }
 </style>

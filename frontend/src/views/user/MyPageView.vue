@@ -263,7 +263,7 @@ onMounted(() => {
 .profile-card-content p,
 .profile-card-content span,
 .profile-card-content h1 {
-  color: inherit !important;
+  color: inherit;
 }
 
 /* 통계 부분 */
@@ -363,7 +363,7 @@ onMounted(() => {
   overflow: hidden;
   border-radius: 14px;
   position: relative;
-  background: linear-gradient(180deg, #eef3f6, #f7ede8);
+  background: var(--bg-surface-hover);
 }
 
 .quiz-thumbnail-img {
@@ -406,7 +406,7 @@ onMounted(() => {
 
 .quiz-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg, 0 16px 28px rgba(0, 0, 0, 0.08));
 }
 
 .quiz-card:hover .quiz-thumbnail-img {
@@ -437,7 +437,7 @@ onMounted(() => {
   gap: 0.25rem;
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
-  background: rgba(137, 168, 124, 0.15);
+  background: var(--bg-surface-hover);
   color: var(--color-heading);
   font-size: 0.85rem;
 }

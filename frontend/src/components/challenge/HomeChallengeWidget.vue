@@ -59,18 +59,16 @@ onMounted(() => {
   width: 100%;
   padding: 22px;
   border-radius: 20px;
-  background: var(--color-background-soft);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
   overflow: hidden;
 }
 
 :global([data-theme="dark"] .challenge-widget) {
-  background: radial-gradient(circle at 20% 20%, rgba(88, 28, 135, 0.08), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 35%),
-    #0f172a;
-  border: 1px solid rgba(94, 234, 212, 0.25);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(148, 163, 184, 0.1), 0 0 30px rgba(94, 234, 212, 0.18);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 .ranking-header {
@@ -90,7 +88,7 @@ onMounted(() => {
   letter-spacing: 1px;
   color: var(--color-heading);
   font-size: 1.1rem;
-  text-shadow: 0 4px 18px rgba(255, 115, 29, 0.35);
+  text-shadow: none;
 }
 
 .flame {

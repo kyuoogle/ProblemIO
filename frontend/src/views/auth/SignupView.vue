@@ -419,7 +419,7 @@ const handleSignup = async () => {
 <style scoped>
 .signup-container {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, var(--primary-50), var(--surface-ground), var(--accent-50));
+  background: var(--bg-main);
 }
 
 .max-w-md {

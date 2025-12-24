@@ -158,9 +158,9 @@ async function submit() {
 :deep(.guest-row .p-inputtext),
 .guest-row .guest-password,
 .guest-row .flex-1 {
-  background: var(--color-background-soft) !important;
-  border: 1px solid var(--color-border) !important;
-  color: var(--color-heading) !important;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
 }
 
 .comment-input-wrapper {
@@ -188,11 +188,11 @@ async function submit() {
   width: 100%;
   min-height: 110px;
   border-radius: 10px;
-  border: none !important;
+  border: none;
   padding: 12px;
   box-sizing: border-box;
-  background: transparent !important; /* 카드 배경이 비치도록 */
-  color: var(--color-heading) !important;
+  background: transparent;
+  color: var(--text-main);
   resize: vertical;
 
   /* 스크롤바 숨김 */
@@ -205,16 +205,16 @@ async function submit() {
 }
 
 .comment-textarea.prime {
-  background: transparent !important;
-  box-shadow: none !important;
+  background: transparent;
+  box-shadow: none;
 }
 
 /* PrimeVue 내부 textarea를 완전히 투명/무테로 맞춤 */
 :deep(.comment-textarea.prime.p-inputtextarea) {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: var(--color-heading) !important;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-main);
   
   /* 스크롤바 숨김 */
   scrollbar-width: none;

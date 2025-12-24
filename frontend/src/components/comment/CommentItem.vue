@@ -566,7 +566,7 @@ const onAuthorClick = (event) => {
   font-weight: 700;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
   /* 다크/라이트 공통 강제 */
-  color: #ef4444 !important;
+  color: #ef4444;
 }
 
 .like-btn .unliked-heart {

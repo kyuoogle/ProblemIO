@@ -53,11 +53,11 @@ const backgroundStyle = computed(() => {
     // background shorthand는 backgroundImage를 덮어쓸 수 있어서 사용하지 않음
     return {
       ...baseStyle,
-      backgroundColor: 'transparent !important',
-      backgroundImage: `url('${resolveImageUrl(theme.image)}') !important`,
-      backgroundSize: 'cover !important',
-      backgroundPosition: 'center !important',
-      backgroundRepeat: 'no-repeat !important'
+      backgroundColor: 'transparent',
+      backgroundImage: `url('${resolveImageUrl(theme.image)}')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
     };
   }
 
@@ -85,11 +85,11 @@ const contentStyle = computed(() => {
   if (!textColor) return {};
 
   return {
-    color: `${textColor} !important`,
-    '--text-color': `${textColor} !important`,
-    '--text-color-secondary': `${textColor} !important`,
-    '--color-heading': `${textColor} !important`,
-    '--p-text-color': `${textColor} !important`
+    color: `${textColor}`,
+    '--text-color': `${textColor}`,
+    '--text-color-secondary': `${textColor}`,
+    '--color-heading': `${textColor}`,
+    '--p-text-color': `${textColor}`
   };
 });
 </script>

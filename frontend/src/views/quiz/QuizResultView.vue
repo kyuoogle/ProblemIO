@@ -202,15 +202,14 @@ const goToHome = () => {
   gap: 0.75rem;
   padding: 1rem;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border);
 }
 
 .stat-chip {
   padding: 0.75rem 0.5rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg-main);
   text-align: center;
 }
 

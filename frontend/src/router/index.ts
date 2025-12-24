@@ -3,7 +3,6 @@ import { useAuthStore } from "@/stores/auth";
 
 // Lazy loading for better performance
 const HomeView = () => import("@/views/HomeView.vue");
-const SearchView = () => import("@/views/SearchView.vue");
 const LoginView = () => import("@/views/auth/LoginView.vue");
 const SignupView = () => import("@/views/auth/SignupView.vue");
 const QuizDetailView = () => import("@/views/quiz/QuizDetailView.vue");
@@ -35,17 +34,11 @@ const router = createRouter({
       component: SignupView,
       meta: { requiresAuth: false },
     },
-    // Main & Search
+    // Main
     {
       path: "/",
       name: "home",
       component: HomeView,
-      meta: { requiresAuth: false },
-    },
-    {
-      path: "/search",
-      name: "search",
-      component: SearchView,
       meta: { requiresAuth: false },
     },
     // Challenge Routes

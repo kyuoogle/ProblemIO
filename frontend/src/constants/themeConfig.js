@@ -20,10 +20,10 @@ export const PROFILE_THEMES = {
     image: withS3Public("public/theme/cybercity.jpg"),
     textColor: "#ffffff",
     style: {
-      textShadow: "0 0 5px #00eaff, 0 0 10px #00eaff !important",
+      textShadow: "0 0 5px #00eaff, 0 0 10px #00eaff",
       WebkitTextStroke: "1px #00eaff",
-      border: "2px solid #00eaff !important",
-      animation: "neon-pulse 2s infinite ease-in-out, border-flow 4s infinite linear !important",
+      border: "2px solid #00eaff",
+      animation: "neon-pulse 2s infinite ease-in-out, border-flow 4s infinite linear",
     },
   },
 
@@ -31,39 +31,39 @@ export const PROFILE_THEMES = {
     name: "Aurora Night",
     textColor: "#e0f7ff",
     style: {
-      background: "linear-gradient(270deg, #1c1c3c, #3b2f63, #355c7d, #1c1c3c) !important",
-      backgroundSize: "400% 400% !important",
-      animation: "gradient-move 10s ease infinite !important",
+      background: "linear-gradient(270deg, #1c1c3c, #3b2f63, #355c7d, #1c1c3c)",
+      backgroundSize: "400% 400%",
+      animation: "gradient-move 10s ease infinite",
     },
   },
   sunset_vibes: {
     name: "Sunset Vibes",
     textColor: "#5d3a3a",
     style: {
-      background: "linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%) !important",
-      backgroundSize: "200% 200% !important",
-      animation: "gradient-move 5s ease infinite alternate !important",
+      background: "linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)",
+      backgroundSize: "200% 200%",
+      animation: "gradient-move 5s ease infinite alternate",
     },
   },
   cyber_punk: {
     name: "Cyber Punk",
     textColor: "#00ff41",
     style: {
-      backgroundColor: "#050505 !important",
+      backgroundColor: "#050505",
       backgroundImage:
-        "linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent) !important",
-      backgroundSize: "50px 50px !important",
-      boxShadow: "inset 0 0 50px #000 !important",
+        "linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent)",
+      backgroundSize: "50px 50px",
+      boxShadow: "inset 0 0 50px #000",
     },
   },
   golden_luxury: {
     name: "Golden Luxury",
     textColor: "#5a3e1a",
     style: {
-      background: "linear-gradient(120deg, #f6d365 0%, #fda085 100%) !important",
-      position: "relative !important",
-      animation: "shimmer 3s infinite linear !important", // restored shimmer for luxury feel
-      backgroundSize: "200% auto !important",
+      background: "linear-gradient(120deg, #f6d365 0%, #fda085 100%)",
+      position: "relative",
+      animation: "shimmer 3s infinite linear", // restored shimmer for luxury feel
+      backgroundSize: "200% auto",
     },
   },
 
@@ -72,10 +72,10 @@ export const PROFILE_THEMES = {
     image: withS3Public("public/theme/cyberpunk.jpg"),
     textColor: "#00FF00",
     style: {
-      backgroundColor: "#000 !important",
-      fontFamily: "monospace !important",
-      border: "2px solid #00FF00 !important",
-      boxShadow: "0 0 10px #00FF00 !important",
+      backgroundColor: "#000",
+      fontFamily: "monospace",
+      border: "2px solid #00FF00",
+      boxShadow: "0 0 10px #00FF00",
     },
   },
 
@@ -83,10 +83,10 @@ export const PROFILE_THEMES = {
     name: "Minimalist Float",
     textColor: "#111827",
     style: {
-      backgroundColor: "#fff !important",
-      backgroundImage: "radial-gradient(#e5e7eb 2px, transparent 2px) !important",
-      backgroundSize: "20px 20px !important",
-      animation: "floating 3s ease-in-out infinite !important",
+      backgroundColor: "#fff",
+      backgroundImage: "radial-gradient(#e5e7eb 2px, transparent 2px)",
+      backgroundSize: "20px 20px",
+      animation: "floating 3s ease-in-out infinite",
     },
   },
 };

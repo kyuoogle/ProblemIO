@@ -225,18 +225,16 @@ onUnmounted(() => {
   container-type: inline-size;
   container-name: ranking;
 
-  background: var(--color-background-soft);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
   overflow: hidden;
 }
 
 :global([data-theme="dark"] .ranking-widget) {
-  background: radial-gradient(circle at 20% 20%, rgba(88, 28, 135, 0.08), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 35%),
-    #0f172a;
-  border: 1px solid rgba(94, 234, 212, 0.25);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(148, 163, 184, 0.1), 0 0 30px rgba(94, 234, 212, 0.18);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 /* Header */
@@ -275,15 +273,15 @@ onUnmounted(() => {
 
 .period-toggle {
   display: inline-flex;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border);
   border-radius: 999px;
   padding: 2px;
 }
 
 :global([data-theme="dark"] .period-toggle) {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--bg-surface-hover);
+  border-color: var(--border);
 }
 
 .period-btn {
@@ -298,15 +296,15 @@ onUnmounted(() => {
 }
 
 .period-btn.active {
-  background: transparent;
-  color: var(--text-main);
-  border-color: var(--text-main);
+  background: var(--primary);
+  color: #ffffff; /* White text on Teal background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-weight: 800;
 }
 
 :global([data-theme="dark"] .period-btn.active) {
-  color: var(--text-main);
-  border-color: var(--text-main);
+  background: var(--primary);
+  color: #ffffff;
   box-shadow: none;
 }
 

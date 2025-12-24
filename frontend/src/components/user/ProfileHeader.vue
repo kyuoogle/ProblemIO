@@ -72,7 +72,7 @@ const props = defineProps({
 .profile-card-content :deep(p),
 .profile-card-content :deep(span),
 .profile-card-content :deep(h1) {
-  color: inherit !important;
+  color: inherit;
 }
 
 /* 통계 부분 */

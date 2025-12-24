@@ -350,16 +350,16 @@ const getOptionLabel = (option: number) => {
   gap: 0.35rem;
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.12);
-  color: var(--color-heading);
+  background: var(--bg-surface-hover);
+  color: var(--text-main);
   font-size: 0.9rem;
 }
 
 .like-button.p-button-danger {
-  color: #ffffff !important;
+  color: white;
 }
 
 .like-button.p-button-danger .pi-heart-fill {
-  color: #ffffff !important;
+  color: white;
 }
 </style>

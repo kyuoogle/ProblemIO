@@ -725,9 +725,9 @@ onMounted(() => {
 }
 
 :global([data-theme="dark"] .question-list-wrapper) {
-  background: #121212;
-  border: 1px solid #2c2c2c;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 /* 문제 카드 그리드 */
@@ -764,9 +764,9 @@ onMounted(() => {
 }
 
 :global([data-theme="dark"] .question-card) {
-  background: #161616;
-  border: 1px solid #262626;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 .question-card:hover {
@@ -777,8 +777,8 @@ onMounted(() => {
 }
 
 :global([data-theme="dark"] .question-card:hover) {
-  background: #1d1d1d;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: var(--bg-surface-hover);
+  box-shadow: var(--shadow-lg);
 }
 
 .card-image-wrapper {
@@ -792,8 +792,8 @@ onMounted(() => {
 }
 
 :global([data-theme="dark"] .card-image-wrapper) {
-  background: #0f0f0f;
-  border-color: #303030;
+  background: var(--bg-main);
+  border-color: var(--border);
 }
 
 .card-image-wrapper img {

@@ -667,19 +667,19 @@ const previewUser = computed(() => {
 }
 
 .action-card {
-  background: var(--color-background-soft, #111827);
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Reduced shadow opacity */
 }
 
 .danger-card {
-  background: rgba(255, 99, 71, 0.08);
+  background: rgba(255, 99, 71, 0.08); /* Keeping functional red for now */
   border: 1px solid rgba(255, 99, 71, 0.26);
   box-shadow: 0 12px 32px rgba(255, 99, 71, 0.15);
 }
 
 .muted-text {
-  color: var(--color-text-muted, #9ca3af);
+  color: var(--text-sub);
 }
 
 .danger-muted {
@@ -687,8 +687,8 @@ const previewUser = computed(() => {
 }
 
 :global([data-theme="dark"] .action-card) {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--bg-surface);
+  border-color: var(--border);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -699,6 +699,6 @@ const previewUser = computed(() => {
 }
 
 :global([data-theme="dark"] .muted-text) {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--text-sub);
 }
 </style>

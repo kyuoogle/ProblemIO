@@ -73,12 +73,11 @@ const handleLogin = async () => {
 <style scoped>
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, var(--primary-50), var(--surface-ground), var(--accent-50));
+  background: var(--bg-main);
 }
 
 :global([data-theme="dark"] .login-container) {
-  /* background: #000; */
-  background: transparent;
+  background: var(--bg-main);
 }
 
 .auth-card {
@@ -171,25 +170,23 @@ const handleLogin = async () => {
 
 :global([data-theme="dark"] .p-inputtext),
 :global([data-theme="dark"] .p-password-input) {
-  background: #1b1b1b !important;
-  border-color: #333 !important;
-  color: var(--color-heading) !important;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02);
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-main);
+  box-shadow: none;
 }
 
 :global([data-theme="dark"] .p-inputtext:focus),
 :global([data-theme="dark"] .p-password-input:focus) {
-  border-color: var(--color-primary) !important;
-  box-shadow:
-    0 0 0 1px rgba(26, 188, 156, 0.45),
-    0 12px 26px rgba(0, 0, 0, 0.35);
+  border-color: var(--primary);
+  box-shadow: none;
 }
 
 :global([data-theme="dark"] .p-password-panel) {
-  background: #111 !important;
-  border-color: #2c2c2c !important;
-  color: var(--color-heading) !important;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-main);
+  box-shadow: var(--shadow-lg);
 }
 
 :global(.p-button) {

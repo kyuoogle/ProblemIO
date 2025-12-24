@@ -30,77 +30,179 @@ textarea {
 }
 
 :root {
-  /* Core Colors */
-  --primary: #10b981;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --bg-page: #ffffff;
-  --bg-surface: #f8fafc;
-  --bg-surface-hover: #f1f5f9;
-  --border: #e2e8f0;
+  /* Vivid Cyan Design System */
+  --primary: #27b5cf;       /* Vivid Cyan - Main */
+  --primary-hover: #1f94ab; /* Darker Cyan */
+  --accent: #ffc831;        /* Gold - Accent */
+  
+  /* Light Mode Defaults - Solid */
+  --bg-main: transparent; /* Let body bg image show */
+  --bg-surface: #FFFFFF; /* Solid White */
+  --text-main: #1F1F1F;
+  --text-sub: #64748B;
+  --border: #E2E8F0;
   
   --shadow-soft: none;
-  
   --skeleton-bg: rgba(0, 0, 0, 0.06);
+
+  --shadow-soft: none;
+  --skeleton-bg: rgba(0, 0, 0, 0.06);
+
+  /* Background Config (Restored Logic) */
+  --app-bg-image: url('/bg-light.png');
+  --app-bg-image-dark: url('/bg-dark.png');
+  --app-bg-overlay: rgba(248, 250, 252, 0.78);
+
+  /* Mapping old variables to new system for backward compatibility */
+  --bg-page: var(--bg-main);
+  --color-heading: var(--text-main);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-sub);
+  --color-border: var(--border);
+  --color-background-soft: var(--bg-surface);
+  --color-background: var(--bg-main); 
+  --bg-surface-hover: #F1F5F9;
+
+  /* PRIME VUE VARIABLE MAPPING */
+  --p-primary-color: var(--primary);
+  --p-primary-500: var(--primary);
+  --p-primary-600: var(--primary-hover);
+  --p-primary-700: var(--primary-hover);
+  
+  /* PrimeVue Button Mappings */
+  --p-button-primary-background: var(--primary);
+  --p-button-primary-border-color: var(--primary);
+  --p-button-primary-hover-background: var(--primary-hover);
+  --p-button-primary-hover-border-color: var(--primary-hover);
+  --p-button-primary-active-background: var(--primary-hover);
+  --p-button-primary-active-border-color: var(--primary-hover);
 }
 
 [data-theme="dark"] {
-  --primary: #34d399;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --bg-page: #0f172a;
-  --bg-surface: #1e293b;
-  --bg-surface-hover: #334155;
-  --border: #334155;
+  /* Dark Mode - Solid */
+  --bg-main: transparent;
+  --bg-surface: #1E293B; /* Solid Dark */
+  --text-main: #F1F5F9;
+  --text-sub: #94A3B8;
+  --border: rgba(255, 255, 255, 0.15);
   
   --skeleton-bg: rgba(255, 255, 255, 0.08);
+  /* PrimeVue Dark Mappings */
+  --p-surface-0: var(--bg-surface);
+  --p-surface-50: var(--bg-surface);
+  --p-surface-100: var(--bg-surface);
+  --p-surface-200: var(--bg-surface);
+  --p-surface-300: var(--bg-surface);
+  --p-surface-400: var(--text-sub);
+  --p-surface-500: var(--text-sub);
+  --p-surface-600: var(--text-sub);
+  --p-surface-700: var(--text-main);
+  --p-surface-800: var(--text-main);
+  --p-surface-900: var(--text-main);
+
+  /* Dark Mode Background Config */
+  --app-bg-image: var(--app-bg-image-dark);
+  --app-bg-overlay: rgba(13, 26, 58, 0.78);
+  --bg-surface-hover: #334155;
+  --primary: #27b5cf;
 }
 
 body {
-  background-color: var(--bg-page);
-  color: var(--text-main);
-  transition: background-color 0.3s, color 0.3s;
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  /* User Requested Config */
+  min-height: 100vh;
+  color: var(--text-main); 
+  background-color: #F8FAFC; /* Fallback color */
+  
+  /* Background Image Setup (Overlay + Image) */
+  background-image: linear-gradient(var(--app-bg-overlay), var(--app-bg-overlay)), var(--app-bg-image);
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Typography & Rendering */
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  
+  /* Transition */
+  transition: color .5s, background-color .5s;
+}
+
+[data-theme="dark"] body {
+  background-color: #0B0E14; /* Fallback for dark mode */
+}
+
+/* GLOBAL RESET: No Shadows (Flat Design) */
+* {
+  box-shadow: none !important;
 }
 
 /* Neutralized Buttons */
-.btn-primary {
-  background: transparent !important;
-  border: 1px solid var(--text-main) !important;
-  color: var(--text-main) !important;
-  box-shadow: none !important;
+body .btn-primary {
+  background: transparent;
+  border: 1px solid var(--text-main);
+  color: var(--text-main);
+  box-shadow: none;
 }
-.btn-primary:hover {
-  background: var(--bg-surface-hover) !important;
+body .btn-primary:hover {
+  background: var(--bg-surface-hover);
 }
 
-/* PrimeVue Overrides */
+/* PrimeVue Overrides - Solid (No Glass) */
+body .p-component,
 body .p-inputtext,
 body .p-textarea,
 body .p-dropdown,
 body .p-multiselect,
-body .p-calendar {
-  background: var(--bg-surface);
-  border-color: var(--border);
-  color: var(--text-main);
-  box-shadow: none !important;
-}
-
-body .p-inputtext:enabled:focus {
-  border-color: var(--text-main);
-}
-
+body .p-calendar,
+body .p-card,
 body .p-button {
   box-shadow: none !important;
 }
 
+body .p-inputtext,
+body .p-textarea,
+body .p-dropdown,
+body .p-multiselect,
+body .p-calendar,
+body .p-card {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-main);
+  /* No backdrop-filter for solid look */
+}
+
+body .p-inputtext:enabled:focus {
+  border-color: var(--primary);
+}
+
+/* Popover Overrides - Transparent Container */
+body .p-popover {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+body .p-popover .p-popover-content {
+  padding: 0;
+  background: transparent;
+}
+
+/* Hide Popover Arrow */
+body .p-popover .p-popover-arrow {
+  display: none !important;
+}
+
+/* Dropdown/Select Highlight Items */
 body .p-dropdown-item.p-highlight,
 body .p-multiselect-item.p-highlight,
 body .p-datepicker table td > span.p-highlight {
   background-color: var(--bg-surface-hover);
-  color: var(--text-main);
+  color: var(--primary);
 }
 
 /* Animations (Restored from editCustom.css) */
