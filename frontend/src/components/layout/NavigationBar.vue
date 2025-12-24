@@ -1,5 +1,5 @@
 <template>
-  <Menubar :model="menuItems" class="border-bottom-1 surface-border app-header">
+  <Menubar :model="menuItems" class="app-header">
     <template #start>
       <router-link to="/" class="flex align-items-center gap-2 no-underline text-dark logo-link">
         <img src="/problemio-logo-light.png" alt="Problem.io" class="logo-img logo-light" />
@@ -177,7 +177,7 @@ const handleLogout = () => {
 
 /* Dark theme header harmonization */
 :global([data-theme="dark"] .p-menubar) {
-  background: transparent !important;
+  background-color: transparent !important;
   border-color: transparent !important;
   color: var(--color-heading) !important;
 }
