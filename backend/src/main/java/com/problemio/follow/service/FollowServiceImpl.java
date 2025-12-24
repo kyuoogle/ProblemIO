@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import com.problemio.global.util.TimeUtils;
+
 import java.util.List;
 
 @Service
@@ -33,7 +34,7 @@ public class FollowServiceImpl implements FollowService {
         Follow follow = Follow.builder()
                 .followerId(followerId)
                 .followingId(targetUserId)
-                .createdAt(LocalDateTime.now())
+                .createdAt(TimeUtils.now())
                 .build();
 
         followMapper.insert(follow);

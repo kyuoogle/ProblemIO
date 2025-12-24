@@ -5,6 +5,7 @@ import com.problemio.challenge.dto.ChallengeCreateRequest;
 import com.problemio.challenge.mapper.ChallengeMapper;
 import com.problemio.global.exception.BusinessException;
 import com.problemio.global.exception.ErrorCode;
+import com.problemio.global.util.TimeUtils;
 import com.problemio.quiz.domain.Quiz;
 import com.problemio.quiz.mapper.QuizMapper;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class AdminService {
         }
 
         Challenge challenge = request.toEntity();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = TimeUtils.now();
         challenge.setCreatedAt(now);
         challenge.setUpdatedAt(now);
         challengeMapper.insert(challenge);

@@ -23,10 +23,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.problemio.global.util.TimeUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +61,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = challengeMapper.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
-        if (challenge.getEndAt() != null && LocalDateTime.now().isAfter(challenge.getEndAt())) {
+        if (challenge.getEndAt() != null && TimeUtils.now().isAfter(challenge.getEndAt())) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
@@ -99,7 +100,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                      .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED));
              
              if (submission.getSubmittedAt() != null) {
-                 long diffSeconds = java.time.Duration.between(submission.getSubmittedAt(), LocalDateTime.now()).getSeconds();
+                 long diffSeconds = java.time.Duration.between(submission.getSubmittedAt(), TimeUtils.now()).getSeconds();
                  // 5s buffer for network latency
                  if (diffSeconds > challenge.getTimeLimit() + 5) { 
                      throw new BusinessException(ErrorCode.ACCESS_DENIED); 
@@ -204,7 +205,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             ranking.setRanking(i + 1);
             ranking.setScore((double) s.getCorrectCount());
             ranking.setPlayTime(s.getPlayTime());
-            ranking.setCreatedAt(LocalDateTime.now());
+            ranking.setCreatedAt(TimeUtils.now());
             
             rankings.add(ranking);
         }
@@ -309,7 +310,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = challengeMapper.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
         
-        boolean isExpired = challenge.getEndAt() != null && LocalDateTime.now().isAfter(challenge.getEndAt());
+        boolean isExpired = challenge.getEndAt() != null && TimeUtils.now().isAfter(challenge.getEndAt());
         
         if (isExpired) {
             // Check if archived
@@ -327,7 +328,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     
     private boolean isChallengeExpired(Long challengeId) {
         Challenge challenge = challengeMapper.findById(challengeId).orElse(null);
-        return challenge != null && challenge.getEndAt() != null && LocalDateTime.now().isAfter(challenge.getEndAt());
+        return challenge != null && challenge.getEndAt() != null && TimeUtils.now().isAfter(challenge.getEndAt());
     }
 
     private final com.problemio.quiz.mapper.QuizMapper quizMapper;

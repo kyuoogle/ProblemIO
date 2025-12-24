@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import com.problemio.global.util.TimeUtils;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -79,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setWriterIp(writerIp);
         comment.setDeleted(false);
         // Time injection
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = TimeUtils.now();
         comment.setCreatedAt(now);
         comment.setUpdatedAt(now);
 
@@ -114,7 +116,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         existing.setContent(request.getContent());
-        existing.setUpdatedAt(LocalDateTime.now());
+        existing.setUpdatedAt(TimeUtils.now());
         commentMapper.updateComment(existing);
     }
 
@@ -155,7 +157,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // 물리 삭제 대신 soft delete
-        commentMapper.softDeleteComment(commentId, LocalDateTime.now());
+        commentMapper.softDeleteComment(commentId, TimeUtils.now());
     }
 
     @Override

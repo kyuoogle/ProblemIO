@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
+import com.problemio.global.util.TimeUtils;
+
 @Service
 @RequiredArgsConstructor
 public class SubmissionServiceImpl implements SubmissionService {
@@ -93,7 +95,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         int correctCount = submissionDetailMapper.countCorrectBySubmissionId(submission.getId());
         
         // Update Play Time in Java
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = TimeUtils.now();
         double playTime = 0.0;
         if (submission.getSubmittedAt() != null) {
             java.time.Duration duration = java.time.Duration.between(submission.getSubmittedAt(), now);
@@ -146,7 +148,7 @@ public class SubmissionServiceImpl implements SubmissionService {
             submission.setUserId(userIdOrNull);
             submission.setTotalQuestions(totalQuestions);
             submission.setCorrectCount(0);
-            submission.setSubmittedAt(LocalDateTime.now());
+            submission.setSubmittedAt(TimeUtils.now());
             submissionMapper.insertSubmission(submission);
             return submission;
         }
@@ -222,7 +224,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setChallengeId(challengeId);
         submission.setTotalQuestions(totalQuestions);
         submission.setCorrectCount(0);
-        submission.setSubmittedAt(LocalDateTime.now()); // Start time
+        submission.setSubmittedAt(TimeUtils.now()); // Start time
         submission.setPlayTime(0.0);
 
         submissionMapper.insertSubmission(submission);

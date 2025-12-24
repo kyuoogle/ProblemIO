@@ -14,7 +14,7 @@ const apiClient = axios.create({
 // JWT 페이로드 파싱 함수
 const parseJwt = (token) => {
   try {
-    return JSON.parse(atob(token.split('.')[1]));
+    return JSON.parse(atob(token.split(".")[1]));
   } catch (e) {
     return null;
   }
@@ -38,45 +38,44 @@ apiClient.interceptors.request.use(
 
       // 만료 5분 전(300초)이거나 이미 만료되었으면 재발급 시도 (Clock Skew 대응)
       if (decoded && decoded.exp < currentTime + 300) {
-        
         // 이미 다른 요청에 의해 재발급 중이라면 대기
         if (isRefreshing) {
-           await new Promise((resolve) => {
-              addRefreshSubscriber((newToken) => {
-                 token = newToken;
-                 resolve();
-              });
-           });
+          await new Promise((resolve) => {
+            addRefreshSubscriber((newToken) => {
+              token = newToken;
+              resolve();
+            });
+          });
         } else {
-             // 아무도 재발급 중이 아니라면 내가 시도
-             isRefreshing = true;
-             try {
-                const response = await axios.post(
-                  `${API_BASE_URL}/auth/reissue`,
-                  {},
-                  { withCredentials: true }
-                );
-                
-                const newAccessToken = response.data.data?.accessToken;
-                if (newAccessToken) {
-                   localStorage.setItem("accessToken", newAccessToken);
-                   token = newAccessToken;
-                   onRefreshed(newAccessToken);
-                }
-             } catch (error) {
-                console.error("Proactive reissue failed", error);
-                // 재발급 실패해도 일단 원래 토큰으로 진행하거나, 로그아웃 처리?
-                // 여기서는 일단 만료된 토큰이라도 보내서 401을 유도하거나, 그냥 진행
-                // 만료된 토큰 보내면 -> Public은 200(Guest), Private은 401(Response Interceptor가 다시 잡음)
-                // 하지만 Response Interceptor가 잡으면 '중복 재발급' 시도가 될 수 있음.
-                // Mutex가 있으니 괜찮음.
-                isRefreshing = false; // 에러 시 플래그 해제 필수
-             } finally {
-                isRefreshing = false;
-             }
+          // 아무도 재발급 중이 아니라면 내가 시도
+          isRefreshing = true;
+          try {
+            const response = await axios.post(`${API_BASE_URL}/auth/reissue`, {}, { withCredentials: true });
+
+            const newAccessToken = response.data.data?.accessToken;
+            if (newAccessToken) {
+              localStorage.setItem("accessToken", newAccessToken);
+              token = newAccessToken;
+              onRefreshed(newAccessToken);
+            }
+          } catch (error) {
+            console.error("Proactive reissue failed", error);
+
+            // 403 Forbidden (Refresh Token 유효하지 않음/만료/없음) 시 강제 로그아웃
+            if (error.response && error.response.status === 403) {
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("user");
+              window.location.href = "/login";
+              return Promise.reject(error);
+            }
+
+            isRefreshing = false;
+          } finally {
+            isRefreshing = false;
+          }
         }
       }
-      
+
       config.headers.set("Authorization", `Bearer ${token}`);
     }
 
@@ -128,20 +127,16 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(
-          `${API_BASE_URL}/auth/reissue`,
-          {},
-          { withCredentials: true }
-        );
+        const response = await axios.post(`${API_BASE_URL}/auth/reissue`, {}, { withCredentials: true });
 
         const newAccessToken = response.data.data?.accessToken;
-        
+
         if (newAccessToken) {
           localStorage.setItem("accessToken", newAccessToken);
-          
+
           // 대기 중이던 요청들 처리
           onRefreshed(newAccessToken);
-          
+
           // 현재 요청 재시도
           originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
           return apiClient(originalRequest);
@@ -159,13 +154,13 @@ apiClient.interceptors.response.use(
 
     // 401이고 재시도했거나, 재발급 실패한 경우
     if (error.response?.status === 401) {
-       // 상단 catch 블록에서 로그아웃 처리하므로 여기서는 패스하거나 중복 방지
-       // 만약 _retry=true인 상태로 다시 401이 왔다면 (새 토큰도 거부됨 -> 정말 만료)
-       if(originalRequest._retry) {
-           localStorage.removeItem("accessToken");
-           localStorage.removeItem("user");
-           window.location.href = "/login";
-       }
+      // 상단 catch 블록에서 로그아웃 처리하므로 여기서는 패스하거나 중복 방지
+      // 만약 _retry=true인 상태로 다시 401이 왔다면 (새 토큰도 거부됨 -> 정말 만료)
+      if (originalRequest._retry) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(error);

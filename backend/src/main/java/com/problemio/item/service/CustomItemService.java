@@ -14,7 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import com.problemio.global.util.TimeUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class CustomItemService {
                     .description(request.getDescription())
                     .config(configJson)
                     .isDefault(request.isDefault())
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(TimeUtils.now())
                     .build();
             
             customItemMapper.save(item);
@@ -69,7 +70,7 @@ public class CustomItemService {
             throw new IllegalStateException("User already owns this item");
         }
 
-        customItemMapper.saveUserItem(userId, itemId, LocalDateTime.now());
+        customItemMapper.saveUserItem(userId, itemId, TimeUtils.now());
     }
 
     /**

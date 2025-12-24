@@ -11,12 +11,11 @@ import com.problemio.user.dto.UserResponse;
 import com.problemio.user.dto.UserSignupRequest;
 import com.problemio.user.mapper.RefreshTokenMapper;
 import com.problemio.user.mapper.UserAuthMapper;
+import com.problemio.global.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +86,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         refreshTokenMapper.save(RefreshToken.builder()
                 .userId(user.getId())
                 .tokenValue(refreshToken)
-                .expiresAt(LocalDateTime.now().plusWeeks(2))
+                .expiresAt(TimeUtils.now().plusWeeks(2))
                 .build());
 
         return new TokenResponse(accessToken, refreshToken);
