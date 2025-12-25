@@ -27,7 +27,7 @@ public class FollowServiceImpl implements FollowService {
 
         int exists = followMapper.exists(followerId, targetUserId);
         if (exists > 0) {
-            // 이미 팔로우 중이면 무시 (또는 예외 던져도 됨)
+            // 중복 팔로우 방지
             return;
         }
 

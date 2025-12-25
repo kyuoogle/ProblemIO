@@ -81,7 +81,7 @@
           </div>
 
           <div class="field">
-            <label class="field-label">설명</label>
+            <label class="field-label">설명 (ai 이미지 생성은  10글자 이상)</label>
             <Textarea v-model="quizForm.description" rows="3" placeholder="퀴즈에 대한 설명을 입력하세요" class="w-full" />
           </div>
 
@@ -252,7 +252,7 @@ const metaDialogVisible = ref(props.mode === "create");
 const questionDialogVisible = ref(false);
 const editingQuestionIndex = ref<number | null>(null);
 
-// file input refs
+// 파일 입력 참조
 const questionImageInputRef = ref<HTMLInputElement | null>(null);
 const thumbnailInputRef = ref<HTMLInputElement | null>(null);
 
@@ -374,14 +374,14 @@ const uploadThumbnailFile = async (file: File) => {
     quizForm.value.thumbnailUrl = url;
     toast.add({
       severity: "success",
-      summary: "Upload success",
+      summary: "업로드 성공",
       detail: "썸네일 이미지가 설정되었습니다.",
       life: 2000,
     });
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Upload failed",
+      summary: "업로드 실패",
       detail: error.response?.data?.message || "이미지 업로드에 실패했습니다.",
       life: 3000,
     });
@@ -421,7 +421,7 @@ const handleGenerateAiCandidates = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Error",
+      summary: "오류",
       detail: "생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
       life: 3000,
     });
@@ -443,14 +443,14 @@ const applyAiCandidate = async () => {
     quizForm.value.thumbnailUrl = data?.thumbnailUrl || "";
     toast.add({
       severity: "success",
-      summary: "Success",
+      summary: "성공",
       detail: "AI 썸네일이 적용되었습니다.",
       life: 2000,
     });
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Error",
+      summary: "오류",
       detail: "적용에 실패했습니다. 다시 시도해 주세요.",
       life: 3000,
     });
@@ -493,7 +493,7 @@ const uploadQuestionImageFile = async (file: File, index: number) => {
   if (!isImageFile(file)) {
     toast.add({
       severity: "warn",
-      summary: "Invalid file",
+      summary: "파일 형식 오류",
       detail: "이미지 파일만 업로드할 수 있습니다.",
       life: 2500,
     });
@@ -507,7 +507,7 @@ const uploadQuestionImageFile = async (file: File, index: number) => {
     quizForm.value.questions[index].imageUrl = url;
     toast.add({
       severity: "success",
-      summary: "Upload success",
+      summary: "업로드 성공",
       detail: `Question ${quizForm.value.questions[index].questionOrder} 이미지가 설정되었습니다.`,
       life: 2000,
     });
@@ -516,7 +516,7 @@ const uploadQuestionImageFile = async (file: File, index: number) => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Upload failed",
+      summary: "업로드 실패",
       detail: error.response?.data?.message || "이미지 업로드에 실패했습니다.",
       life: 3000,
     });
@@ -670,7 +670,7 @@ const handleSubmit = async () => {
       quizStore.resetQuizForm();
       toast.add({
         severity: "success",
-        summary: "Success",
+        summary: "성공",
         detail: "퀴즈가 생성되었습니다.",
         life: 3000,
       });
@@ -680,7 +680,7 @@ const handleSubmit = async () => {
       await updateQuiz(props.quizId, quizForm.value);
       toast.add({
         severity: "success",
-        summary: "Success",
+        summary: "성공",
         detail: "퀴즈가 수정되었습니다.",
         life: 3000,
       });
@@ -689,7 +689,7 @@ const handleSubmit = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Error",
+      summary: "오류",
       detail: error.response?.data?.message || (props.mode === "create" ? "퀴즈 생성에 실패했습니다." : "퀴즈 수정에 실패했습니다."),
       life: 3000,
     });
@@ -1095,13 +1095,13 @@ onMounted(() => {
   opacity: 0.8;
 }
 
-/* Explicit fallback for new structure based on screenshot */
+/* 스크린샷 기반의 새 구조에 대한 명시적 폴백 */
 :global([data-theme="dark"] .p-inputchips-input) {
   background-color: transparent !important;
   color: var(--color-heading) !important;
 }
 
-/* PrimeVue Dialog Dark Mode Fixes */
+/* PrimeVue 다이얼로그 다크 모드 수정 */
 :global([data-theme="dark"] .p-dialog) {
   background: var(--bg-surface) !important;
   color: var(--text-main) !important;

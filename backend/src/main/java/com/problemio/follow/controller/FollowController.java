@@ -20,7 +20,7 @@ public class FollowController {
 
     private final FollowService followService;
 
-    // 팔로우
+    // 팔로우 요청
     @PostMapping("/{targetUserId}")
     public ApiResponse<Void> follow(@AuthenticationPrincipal CustomUserDetails userDetails,
                                     @PathVariable Long targetUserId) {
@@ -29,7 +29,7 @@ public class FollowController {
         return ApiResponse.success(null);
     }
 
-    // 언팔로우
+    // 언팔로우 요청
     @DeleteMapping("/{targetUserId}")
     public ApiResponse<Void> unfollow(@AuthenticationPrincipal CustomUserDetails userDetails,
                                       @PathVariable Long targetUserId) {
@@ -38,7 +38,7 @@ public class FollowController {
         return ApiResponse.success(null);
     }
 
-    // 내가 이 사람을 팔로우하고 있는지 여부
+    // 팔로우 여부 확인
     @GetMapping("/{targetUserId}/status")
     public ApiResponse<Boolean> isFollowing(@AuthenticationPrincipal CustomUserDetails userDetails,
                                             @PathVariable Long targetUserId) {
@@ -47,13 +47,13 @@ public class FollowController {
         return ApiResponse.success(result);
     }
 
-    // 특정 유저의 팔로워 목록
+    // 팔로워 목록 조회
     @GetMapping("/{userId}/followers")
     public ApiResponse<List<FollowUserDto>> getFollowers(@PathVariable Long userId) {
         return ApiResponse.success(followService.getFollowers(userId));
     }
 
-    // 특정 유저가 팔로우하는 목록
+    // 팔로잉 목록 조회
     @GetMapping("/{userId}/followings")
     public ApiResponse<List<FollowUserDto>> getFollowings(@PathVariable Long userId) {
         return ApiResponse.success(followService.getFollowings(userId));

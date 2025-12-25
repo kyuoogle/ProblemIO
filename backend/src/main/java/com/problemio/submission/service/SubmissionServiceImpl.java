@@ -94,7 +94,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         int correctCount = submissionDetailMapper.countCorrectBySubmissionId(submission.getId());
         
-        // Update Play Time in Java
+        // Java에서 플레이 시간 업데이트
         LocalDateTime now = TimeUtils.now();
         double playTime = 0.0;
         if (submission.getSubmittedAt() != null) {
@@ -153,11 +153,11 @@ public class SubmissionServiceImpl implements SubmissionService {
             return submission;
         }
 
-        // Fetch existing submission to get submittedAt
+        // 기존 제출 이력 조회 (제출 시간 확인용)
         Submission submission = submissionMapper.findById(submissionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED));
         
-        // Update totalQuestions if needed?
+        // 필요 시 총 문항 수 업데이트?
         if (requestedTotal != null && !requestedTotal.equals(submission.getTotalQuestions())) {
             // submission.setTotalQuestions(requestedTotal); // Not persisting this update for now as it's not critical
         }
@@ -202,12 +202,12 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         // 퀴즈 단위로 정답을 한 번에 조회해 캐시에 채움
         List<QuestionAnswer> answers = questionAnswerMapper.findByQuizId(quizId);
-        // questionId별 리스트 구성
+        // 문제 ID별 리스트 구성
         java.util.Map<Long, java.util.List<QuestionAnswer>> grouped = new java.util.HashMap<>();
         for (QuestionAnswer a : answers) {
             grouped.computeIfAbsent(a.getQuestionId(), k -> new java.util.ArrayList<>()).add(a);
         }
-        // 캐시에 넣기 (빈 정답도 빈 리스트로 채워 캐시 미스 방지)
+        // 캐시에 저장 (빈 정답도 빈 리스트로 처리하여 캐시 미스 방지)
         for (Question q : questions) {
             java.util.List<QuestionAnswer> list = grouped.getOrDefault(q.getId(), java.util.List.of());
             answerCache.put(q.getId(), list);

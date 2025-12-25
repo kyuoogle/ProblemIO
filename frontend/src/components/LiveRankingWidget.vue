@@ -237,7 +237,7 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-/* Header */
+/* 헤더 */
 .ranking-header {
   display: flex;
   align-items: center;
@@ -320,7 +320,7 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-/* Table */
+/* 테이블 */
 .ranking-table {
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -390,7 +390,7 @@ onUnmounted(() => {
   border-color: color-mix(in srgb, var(--text-sub), transparent 80%);
 }
 
-/* Cells */
+/* 셀 */
 .col-rank,
 .col-avatar {
   display: flex;

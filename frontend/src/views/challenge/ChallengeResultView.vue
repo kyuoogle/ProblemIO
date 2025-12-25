@@ -6,7 +6,7 @@
       </div>
 
       <div v-else class="flex flex-col lg:flex-row justify-center gap-6 items-start relative">
-        <!-- Main Result Card -->
+        <!-- 메인 결과 카드 -->
         <div class="w-full max-w-3xl flex flex-col gap-6 text-center">
         <Card>
           <template #content>
@@ -41,7 +41,7 @@
         </Card>
       </div>
 
-      <!-- Right Column: Ranking Widget (Fixed Width) -->
+      <!-- 우측 컬럼: 랭킹 위젯 (고정 너비) -->
       <div class="w-full lg:w-[380px] shrink-0 hidden lg:block">
            <div class="sticky top-6">
                <ChallengeRankingWidget :challengeId="Number(challengeId)" />
@@ -79,7 +79,7 @@ onMounted(async () => {
         result.value = data
     } catch (error) {
         console.error(error)
-        // Error handling or redirect
+        // 에러 처리 또는 리다이렉트
     } finally {
         loading.value = false
     }

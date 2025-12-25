@@ -27,7 +27,7 @@ public class S3Config {
 
     @Bean
     public S3Client s3Client() {
-        // SDK v2 방식의 인증 객체 생성
+        // SDK v2 인증 객체 생성
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         return S3Client.builder()
@@ -39,7 +39,7 @@ public class S3Config {
     @Value("${spring.cloud.aws.s3.url}")
     private String s3Url;
 
-    // 앱 시작 시 유틸리티에 설정 주입
+    // 앱 시작 시 유틸리티 설정 초기화
     @PostConstruct
     public void initS3UrlSerializer() {
         S3UrlSerializer.setS3Url(s3Url);

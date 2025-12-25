@@ -72,7 +72,7 @@ const avatarSrc = computed(() => {
 
 const customItemStore = useCustomItemStore();
 
-// Reuse store logic to get button style for the slots (since slots are in parent scope)
+// 슬롯에 대한 버튼 스타일을 가져오기 위해 스토어 로직 재사용 (슬롯은 부모 스코프에 있으므로)
 const computedButtonStyle = computed(() => {
   if (!profile.popoverDecoration) return {};
   const deco = customItemStore.getItemConfig("POPOVER", profile.popoverDecoration);

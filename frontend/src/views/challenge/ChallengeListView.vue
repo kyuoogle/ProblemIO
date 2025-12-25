@@ -30,21 +30,7 @@ onMounted(async () => {
 })
 
 const goDetail = (id) => {
-  // 상세 페이지가 따로 있다면 거기로, 없다면 바로 play? 
-  // 기획상: 1. 목록 -> 2. 상세(ChallengeDetail??) -> 3. Start -> 4. Play
-  // 현재 상세View를 안 만들었음. 바로 Play로 가기엔 "도전하기" 버튼이 Start를 의미하므로,
-  // 중간에 설명 페이지가 있으면 좋겠지만, 
-  // 1-3. Controller: GET /challenges/{id} (상세) 가 있음.
-  // ChallengeCard에서도 "도전하기" 누르면 바로 시작?
-  // User Requirements 2-2: "ChallengePlayView: 실제 게임 플레이 화면"
-  // "ChallengeDetailView" was not explicitly asked but usually needed.
-  // For now, let's simplify: Click card -> Go to Play view directly?
-  // Or maybe a modal? 
-  // "POST /api/challenges/{id}/start" is called in ChallengePlayView onMounted.
-  // So navigating to /challenges/{id}/play triggers start.
-  // Let's go to play directly for MVP.
-  // Wait, startChallenge is POST. If I navigate to page invoke it on mount, standard page refresh will re-start? Yes.
-  // Usually acceptable for simple web games.
+  // 챌린지 상세 페이지로 이동
   router.push(`/challenges/${id}`)
 }
 </script>

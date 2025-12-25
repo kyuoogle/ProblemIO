@@ -225,7 +225,7 @@ async function submit() {
   display: none;
 }
 
-/* data-theme overrides removed as they are now handled by variables */
+/* 테마 오버라이드는 이제 변수로 처리되므로 제거됨 */
 
 .action-row {
   display: flex;

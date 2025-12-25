@@ -6,12 +6,12 @@
       </div>
 
       <div v-else-if="quiz" class="flex flex-col gap-6">
-        <!-- 1. Image Section (Separated) -->
+        <!-- 1. 이미지 섹션 (분리됨) -->
         <div class="thumbnail-frame">
           <img :src="quiz.thumbnailUrl || '/placeholder.svg'" :alt="quiz.title" class="thumbnail-image" />
         </div>
 
-        <!-- 2. Content Card (Title & Description) -->
+        <!-- 2. 콘텐츠 카드 (제목 & 설명) -->
         <Card class="quiz-card">
           <template #content>
             <div class="flex flex-col gap-6 items-center text-center py-4">
@@ -25,9 +25,9 @@
                 </p>
               </div>
 
-              <!-- Unified Meta Info Row (Centered) -->
+              <!-- 통합 메타 정보 행 (중앙 정렬) -->
               <div class="flex flex-wrap items-center justify-center gap-4 mt-2 text-color-secondary text-sm">
-                <!-- Author -->
+                <!-- 작성자 -->
                 <div class="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors" @click="openAuthorPopover">
                    <UserAvatar :user="quiz.author" size="small" />
                    <span class="font-bold">{{ quiz.author?.nickname }}</span>
@@ -35,7 +35,7 @@
                 
                 <span class="opacity-30">|</span>
 
-                <!-- Stats -->
+                <!-- 통계 -->
                 <span>문제 {{ quiz.questions?.length || 0 }}개</span>
                 
                 <span class="opacity-30">|</span>
@@ -44,7 +44,7 @@
 
                 <span class="opacity-30">|</span>
 
-                <!-- Like Button (Minimal) -->
+                <!-- 좋아요 버튼 (심플) -->
                 <div 
                   class="flex items-center gap-1 transition-colors"
                   :class="isMyQuiz ? 'opacity-50 cursor-default' : 'cursor-pointer hover:text-red-500'"
@@ -55,7 +55,7 @@
                 </div>
               </div>
 
-              <!-- Start Buttons -->
+              <!-- 시작 버튼 -->
               <div class="start-button-grid mt-6 w-full max-w-md">
                 <Button
                   v-for="option in questionOptions"

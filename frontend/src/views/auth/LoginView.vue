@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="flex items-center justify-center min-h-screen px-4">
-      <Card class="w-full max-w-md shadow-5 auth-card">
+      <Card class="w-full max-w-md shadow-5">
         <template #header>
           <div class="p-6 text-center">
             <router-link to="/" class="no-underline">
@@ -18,7 +18,7 @@
               </div>
               <div class="flex flex-col gap-2">
                 <label for="password" class="text-sm font-medium">비밀번호</label>
-                <Password id="password" v-model="password" toggleMask  required class="w-full" inputClass="w-full" />
+                <Password id="password" v-model="password" :feedback="false" toggleMask  required class="w-full" inputClass="w-full" />
               </div>
               <Button type="submit" label="로그인" :loading="loading" class="w-full" size="large" />
             </form>
@@ -76,29 +76,7 @@ const handleLogin = async () => {
   background: var(--bg-main);
 }
 
-:global([data-theme="dark"] .login-container) {
-  background: var(--bg-main);
-}
 
-.auth-card {
-  background: var(--color-background-soft);
-  border: 1px solid var(--color-border);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-}
-
-:global([data-theme="dark"] .auth-card) {
-  background: #111;
-  border: 1px solid #2c2c2c;
-  box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.auth-card:hover {
-  /* transform: translateY(-3px); Removed per user request */
-  border-color: var(--color-border-hover);
-  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.18);
-}
 
 .max-w-md {
   max-width: 28rem;
@@ -168,37 +146,5 @@ const handleLogin = async () => {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-:global([data-theme="dark"] .p-inputtext),
-:global([data-theme="dark"] .p-password-input) {
-  background: var(--bg-surface);
-  border-color: var(--border);
-  color: var(--text-main);
-  box-shadow: none;
-}
 
-:global([data-theme="dark"] .p-inputtext:focus),
-:global([data-theme="dark"] .p-password-input:focus) {
-  border-color: var(--primary);
-  box-shadow: none;
-}
-
-:global([data-theme="dark"] .p-password-panel) {
-  background: var(--bg-surface);
-  border-color: var(--border);
-  color: var(--text-main);
-  box-shadow: var(--shadow-lg);
-}
-
-:global(.p-button) {
-  transition: transform 0.12s ease, box-shadow 0.15s ease;
-}
-
-:global(.p-button:hover) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
-}
-
-:global(.p-button:active) {
-  transform: translateY(0);
-}
 </style>

@@ -38,19 +38,16 @@ public class AdminService {
         Quiz quiz = quizMapper.findById(quizId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
         
-        // Toggle isHidden
+        // 숨김 상태 토글
         quiz.setHidden(!quiz.isHidden());
         
-        // Update quiz
-        // Note: updateQuiz updates all fields. Ensure mapping is correct.
-        // If we want to update ONLY isHidden, we might want a specific update method, 
-        // but using updateQuiz is fine if object is fully populated.
+        // 퀴즈 정보 업데이트
         quizMapper.updateQuiz(quiz);
     }
 
     @Transactional
     public void createChallenge(ChallengeCreateRequest request) {
-        // Validation: Check if quiz exists
+        // 유효성 검사: 퀴즈 존재 여부
         if (quizMapper.findById(request.getTargetQuizId()).isEmpty()) {
             throw new BusinessException(ErrorCode.QUIZ_NOT_FOUND);
         }

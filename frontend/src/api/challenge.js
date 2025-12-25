@@ -13,14 +13,14 @@ export const getChallenge = async (id) => {
 }
 
 // 챌린지 시작 (로그인 필요)
-// Returns: ChallengeStartResponse (submissionId, timeLimit, questions, etc.)
+// 반환: ChallengeStartResponse (submissionId, timeLimit, questions 등)
 export const startChallenge = async (id) => {
     const { data } = await axios.post(`/challenges/${id}/start`)
     return data
 }
 
 // 답안 제출 (로그인 필요)
-// request: { submissionId, questionId, answerText }
+// 요청: { submissionId, questionId, answerText }
 export const submitAnswer = async (id, request) => {
     const response = await axios.post(`/challenges/${id}/submit`, request)
     return { 

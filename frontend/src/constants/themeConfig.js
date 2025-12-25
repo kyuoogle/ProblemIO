@@ -3,7 +3,7 @@ const S3_PUBLIC_BASE = "https://s3.ap-northeast-2.amazonaws.com/s3-problemio";
 
 const withS3Public = (path) => {
   if (!path) return path;
-  if (!S3_PUBLIC_BASE) return path; // fallback to original path when env is missing
+  if (!S3_PUBLIC_BASE) return path; // 환경 변수가 없을 경우 원래 경로로 폴백
 
   // S3 URL 생성
   const clean = path.startsWith("/") ? path.slice(1) : path;
@@ -13,7 +13,7 @@ const withS3Public = (path) => {
 export const PROFILE_THEMES = {
   default: {
     name: "Default",
-    // No specific style needed, adapts to global Light/Dark mode
+    // 특정 스타일 필요 없음, 전역 라이트/다크 모드에 적응
   },
   cybercity: {
     name: "Cybercity",
@@ -62,7 +62,7 @@ export const PROFILE_THEMES = {
     style: {
       background: "linear-gradient(120deg, #f6d365 0%, #fda085 100%)",
       position: "relative",
-      animation: "shimmer 3s infinite linear", // restored shimmer for luxury feel
+      animation: "shimmer 3s infinite linear", // 고급스러운 느낌을 위해 쉬머 효과 복구
       backgroundSize: "200% auto",
     },
   },

@@ -7,14 +7,14 @@
         <!-- 닉네임 / 상태메시지 + 우측 상단 버튼 슬롯 -->
         <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 md:gap-0">
           <div class="min-w-0 w-full md:w-auto">
-            <!-- truncate class added to prevent overflow -->
+            <!-- 오버플로우 방지를 위한 truncate 클래스 추가 -->
             <h1 class="text-3xl font-bold mb-2 truncate">{{ user?.nickname || "닉네임 없음" }}</h1>
             <p v-if="user?.statusMessage" class="text-lg opacity-80 mb-4 break-words">
               {{ user.statusMessage }}
             </p>
           </div>
 
-          <!-- Action Buttons Slot (MyPage only) -->
+          <!-- 액션 버튼 슬롯 (마이페이지 전용) -->
           <div v-if="$slots.actions" class="flex gap-2 flex-shrink-0">
             <slot name="actions"></slot>
           </div>

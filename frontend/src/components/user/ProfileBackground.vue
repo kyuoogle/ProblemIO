@@ -97,7 +97,7 @@ const contentStyle = computed(() => {
 <style scoped>
 .profile-background {
   border-radius: 12px;
-  overflow: hidden; /* Ensure background doesn't bleed */
+  overflow: hidden; /* 배경이 삐져나오지 않도록 보장 */
   transition: all 0.3s ease;
   position: relative;
 }

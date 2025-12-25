@@ -28,7 +28,7 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  // PrimeVue Avatar size prop (normal, large, xlarge - or explicit styling)
+  // PrimeVue Avatar 크기 prop (normal, large, xlarge - 또는 명시적 스타일링)
   size: {
     type: String,
     default: 'xlarge',
@@ -67,8 +67,8 @@ const decorationUrl = computed(() => {
   return deco ? resolveImageUrl(deco.image) : null
 })
 
-// Size mapping: PrimeVue Avatar size classes aren't always enough for custom wrapper sizing
-// We'll map 'size' prop to explicit pixel sizes for the wrapper to container the decoration
+// 크기 매핑: PrimeVue Avatar 크기 클래스는 커스텀 래퍼 크기 조정에 충분하지 않을 수 있음
+// 데코레이션을 포함하기 위해 'size' prop을 래퍼의 명시적 픽셀 크기로 매핑함
 const sizeMap = {
   small: '1.5rem',
   normal: '2rem', // 32px
@@ -78,7 +78,7 @@ const sizeMap = {
 }
 
 const containerStyle = computed(() => {
-  const s = sizeMap[props.size] || '4rem' // default to xlarge if unknown
+  const s = sizeMap[props.size] || '4rem' // 알 수 없는 경우 기본값 xlarge
   return { width: s, height: s }
 })
 
@@ -92,11 +92,11 @@ const avatarStyle = computed(() => {
   return { 
     width: '100%', 
     height: '100%',
-    // Reset inherited text styles that might come from themes (prevent neon effects on avatar text)
+    // 테마에서 상속된 텍스트 스타일 초기화 (아바타 텍스트에 네온 효과 방지)
     textShadow: 'none',
     WebkitTextStroke: '0',
-    color: '#374151', // Force dark text (gray-700) for readability inside avatar
-    objectFit: 'cover', // Force image to not stretch
+    color: '#374151', // 아바타 내부 가독성을 위해 어두운 텍스트 강제 (gray-700)
+    objectFit: 'cover', // 이미지 늘어짐 방지
   }
 })
 </script>

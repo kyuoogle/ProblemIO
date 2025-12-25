@@ -12,16 +12,16 @@ export const resolveImageUrl = (url) => {
   }
   if (url.startsWith('blob:') || url.startsWith('data:')) return url
   
-  // Public S3 paths
+  // Public S3 경로
   if (url.startsWith('public/') || url.startsWith('/public/')) {
       const cleanPath = url.startsWith('/') ? url.substring(1) : url;
-      // Ensure we don't double slash if s3BaseUrl has trailing slash (handled by regex above but good to be safe)
-      // Also check if s3BaseUrl is just '/' or empty, though environment variable should be set.
+      // s3BaseUrl에 슬래시가 포함되어 있어도 이중 슬래시가 되지 않도록 처리 (regex로 처리되지만 안전을 위해)
+      // s3BaseUrl이 '/'이거나 비어있는지 확인 (환경변수가 설정되어 있어야 함)
       if (!s3BaseUrl || s3BaseUrl === '/') return `/${cleanPath}`; 
       return `${s3BaseUrl}/${cleanPath}`;
   }
 
-  // Local static assets (Frontend public folder)
+  // 로컬 정적 자산 (Frontend public 폴더)
   if (url.startsWith('/theme/') || url.startsWith('/popover/')) {
       return url;
   }
@@ -74,6 +74,6 @@ const buildS3FromUploads = (path) => {
     return `${s3BaseUrl}/public/upload/questions/${rest}`
   }
 
-  // fallback: uploads/* → public/upload/*
+  // 기본값: uploads/* → public/upload/*
   return `${s3BaseUrl}/public/upload/${clean}`
 }

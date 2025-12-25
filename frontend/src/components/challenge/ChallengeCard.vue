@@ -57,7 +57,7 @@ const isExpired = computed(() => {
 });
 
 const handleClick = () => {
-  // if (isExpired.value) return; // Allow click even if expired
+  // if (isExpired.value) return; // 만료되어도 클릭 허용
   emit("click");
 };
 
@@ -80,38 +80,38 @@ const formatTime = (seconds) => {
   padding: 0.25rem 0.75rem;
   font-weight: 700;
   text-align: center;
-  border-radius: 0; /* Header shape */
+  border-radius: 0; /* 헤더 모양 */
 }
 
-/* Time Attack: Accent (Gold) */
+/* 타임어택: 강조 (골드) */
 .badge-time-attack {
   background-color: var(--bg-surface-hover);
   color: var(--accent);
   border: 1px solid var(--accent);
 }
 
-/* Survival: Primary (Soft Teal) */
+/* 서바이벌: 기본 (부드러운 청록색) */
 .badge-survival {
   background-color: var(--bg-surface-hover);
   color: var(--primary);
   border: 1px solid var(--primary);
 }
 
-/* Event: Gray */
+/* 이벤트: 회색 */
 .badge-event {
   background-color: var(--bg-surface-hover);
   color: var(--text-sub);
   border: 1px solid var(--border);
 }
 
-/* Dark Mode Overrides (Simplification via Variables) */
+/* 다크 모드 오버라이드 (변수를 통한 단순화) */
 :global([data-theme="dark"]) .badge-time-attack {
-  background-color: rgba(255, 200, 49, 0.1); /* Low opacity Accent */
+  background-color: rgba(255, 200, 49, 0.1); /* 낮은 불투명도 강조 */
   color: var(--accent);
 }
 
 :global([data-theme="dark"]) .badge-survival {
-  background-color: rgba(100, 189, 172, 0.1); /* Low opacity Primary */
+  background-color: rgba(100, 189, 172, 0.1); /* 낮은 불투명도 기본 */
   color: var(--primary);
 }
 

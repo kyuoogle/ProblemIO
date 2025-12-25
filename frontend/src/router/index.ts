@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
-// Lazy loading for better performance
+// 성능 향상을 위한 지연 로딩
 const HomeView = () => import("@/views/HomeView.vue");
 const LoginView = () => import("@/views/auth/LoginView.vue");
 const SignupView = () => import("@/views/auth/SignupView.vue");
@@ -21,7 +21,7 @@ const ChallengeDetailView = () => import("@/views/challenge/ChallengeDetailView.
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // Auth Routes
+    // 인증 라우트
     {
       path: "/login",
       name: "login",
@@ -34,14 +34,14 @@ const router = createRouter({
       component: SignupView,
       meta: { requiresAuth: false },
     },
-    // Main
+    // 메인
     {
       path: "/",
       name: "home",
       component: HomeView,
       meta: { requiresAuth: false },
     },
-    // Challenge Routes
+    // 챌린지 라우트
     {
       path: "/challenges",
       name: "challenges",
@@ -66,7 +66,7 @@ const router = createRouter({
       component: ChallengeResultView,
       meta: { requiresAuth: true },
     },
-    // Quiz Routes
+    // 퀴즈 라우트
     {
       path: "/quiz/:id",
       name: "quiz-detail",
@@ -101,7 +101,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
       props: true,
     },
-    // User Routes
+    // 사용자 라우트
     {
       path: "/users/:id",
       name: "user-profile",
@@ -127,7 +127,7 @@ const router = createRouter({
       component: () => import("@/views/admin/AdminPageView.vue"),
       meta: { requiresAuth: true, requiresAdmin: true },
     },
-    // Redirect old routes
+    // 이전 라우트 리다이렉트
     {
       path: "/feed",
       redirect: "/",
@@ -148,7 +148,7 @@ const router = createRouter({
       path: "/profile",
       redirect: "/mypage",
     },
-    // Catch-all for 404
+    // 404 처리를 위한 Catch-all
     {
       path: "/:pathMatch(.*)*",
       redirect: "/",
@@ -160,7 +160,7 @@ const router = createRouter({
   },
 });
 
-// Navigation Guard
+// 네비게이션 가드
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 
@@ -182,7 +182,7 @@ router.beforeEach((to, from, next) => {
     });
   }
 
-  // [Admin Security] 관리자 권한 확인
+  // [관리자 보안] 관리자 권한 확인
   if (to.meta.requiresAdmin && authStore.user?.role !== "ROLE_ADMIN") {
     // alert('관리자 권한이 필요합니다.'); // UX상 조용히 홈으로 보내거나 404처럼 처리하는게 나을 수 있음
     return next({ name: "home" });

@@ -35,9 +35,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private final ChallengeMapper challengeMapper;
     private final SubmissionService submissionService;
-    private final SubmissionMapper submissionMapper; // For general submission checks
+    private final SubmissionMapper submissionMapper; // 제출 로직 전반 검증용
     private final QuestionMapper questionMapper; 
-    private final ChallengeRankingMapper challengeRankingMapper; // For challenge specific logic
+    private final ChallengeRankingMapper challengeRankingMapper; // 챌린지 랭킹 전용
 
     @Override
     @Transactional(readOnly = true)
@@ -94,14 +94,14 @@ public class ChallengeServiceImpl implements ChallengeService {
         Challenge challenge = challengeMapper.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
-        // Time Attack Verification
+        // 타임어택 검증
         if ("TIME_ATTACK".equals(challenge.getChallengeType()) && request.getSubmissionId() != null) {
              Submission submission = submissionMapper.findById(request.getSubmissionId())
                      .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED));
              
              if (submission.getSubmittedAt() != null) {
                  long diffSeconds = java.time.Duration.between(submission.getSubmittedAt(), TimeUtils.now()).getSeconds();
-                 // 5s buffer for network latency
+                 // 네트워크 지연 고려 5초 버퍼
                  if (diffSeconds > challenge.getTimeLimit() + 5) { 
                      throw new BusinessException(ErrorCode.ACCESS_DENIED); 
                  }
@@ -145,15 +145,14 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public void finalizeChallenge(Long challengeId) {
-        // 1. Get all submissions
+        // 1. 전체 제출 내역 조회
         List<Submission> submissions = challengeRankingMapper.findSubmissionsByChallengeId(challengeId);
 
         if (submissions.isEmpty()) {
             return;
         }
 
-        // 2. Filter Best Submission per User
-        // Use a Map to keep the best one: Key=UserId
+        // 2. 사용자별 최고 기록 필터링 (Map 사용)
         java.util.Map<Long, Submission> bestSubmissionsMap = new java.util.HashMap<>();
         
         for (Submission s : submissions) {
@@ -161,7 +160,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 bestSubmissionsMap.put(s.getUserId(), s);
             } else {
                 Submission existing = bestSubmissionsMap.get(s.getUserId());
-                // Compare: Correct DESC, PlayTime ASC, SubmittedAt ASC
+                // 비교: 정답수 내림차순, 소요시간 오름차순, 제출일시 오름차순
                 boolean isBetter = false;
                 if (s.getCorrectCount() > existing.getCorrectCount()) {
                     isBetter = true;
@@ -183,7 +182,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         
         List<Submission> bestSubmissions = new java.util.ArrayList<>(bestSubmissionsMap.values());
 
-        // 3. Sort Best Submissions
+        // 3. 최고 기록 정렬
         bestSubmissions.sort((s1, s2) -> {
             if (s1.getCorrectCount() != s2.getCorrectCount()) {
                 return s2.getCorrectCount() - s1.getCorrectCount(); 
@@ -194,7 +193,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             return s1.getSubmittedAt().compareTo(s2.getSubmittedAt()); 
         });
 
-        // 3. Prepare Ranking Entities
+        // 4. 랭킹 엔티티 생성
         List<ChallengeRanking> rankings = new java.util.ArrayList<>();
         for (int i = 0; i < bestSubmissions.size(); i++) {
             Submission s = bestSubmissions.get(i);
@@ -210,16 +209,16 @@ public class ChallengeServiceImpl implements ChallengeService {
             rankings.add(ranking);
         }
 
-        // 4. Reset and Insert
+        // 5. 기존 랭킹 초기화 및 저장
         challengeRankingMapper.deleteRankingsByChallengeId(challengeId);
         challengeRankingMapper.insertRankings(rankings);
     }
 
     @Override
-    @Transactional // removed readOnly=true because it might trigger lazy finalization (write)
+    @Transactional // 지연 확정(쓰기) 발생 가능하므로 readOnly 제외
     @Cacheable(value = "leaderboard", key = "#challengeId")
     public List<ChallengeRankingResponse> getTopRankings(Long challengeId) {
-        // Enriched DTOs with challengeType
+        // DTO에 챌린지 타입 포함
         List<ChallengeRankingResponse> topRankings = resolveTopRankings(challengeId);
         
         String type = challengeMapper.findById(challengeId).map(Challenge::getChallengeType).orElse("UNKNOWN");
@@ -229,25 +228,25 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    @Transactional // removed readOnly=true
+    @Transactional // readOnly 제외
     public LeaderboardResponse getLeaderboard(Long challengeId, Long userId) {
-        // 1. Top Rankings (Lazy Finalization if needed)
+        // 1. 상위 랭킹 조회 (필요 시 지연 확정)
         List<ChallengeRankingResponse> topRankings = resolveTopRankings(challengeId);
         
         String type = challengeMapper.findById(challengeId).map(Challenge::getChallengeType).orElse("UNKNOWN");
         topRankings.forEach(r -> r.setChallengeType(type));
 
-        // 2. My Ranking
+        // 2. 내 랭킹 조회
         ChallengeRankingResponse myRanking = null;
         if (userId != null) {
             myRanking = findMyBestRanking(userId, challengeId, type);
         }
         
-        // Return 0-score ranking if user has no record (User request: "10등 + 내 기록 0점")
+        // 기록 없음 시 0점 반환 ("10등 + 내 기록 0점" 요청 반영)
         if (myRanking == null) {
              myRanking = ChallengeRankingResponse.builder()
                 .challengeId(challengeId)
-                .userId(userId) // Can be null if guest
+                .userId(userId) // 게스트인 경우 null
                 .ranking(0)
                 .score(0.0)
                 .playTime(0.0)
@@ -262,26 +261,21 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .build();
     }
     
-    // Unifies logic for finding "My Ranking" whether Active or Archived
+    // 진행중/종료 상태 무관하게 내 최고 랭킹 조회
     private ChallengeRankingResponse findMyBestRanking(Long userId, Long challengeId, String challengeType) {
          boolean isExpired = isChallengeExpired(challengeId);
          
          if (isExpired) {
-             // 1. Try Archive
+             // 1. 아카이브(종료됨) 확인
              ChallengeRankingResponse ranking = challengeRankingMapper.loginUserRanking(userId, challengeId);
              if (ranking != null) {
                  ranking.setChallengeType(challengeType);
                  return ranking;
              }
-             // If not in archive, fallback to Live logic below? 
-             // Logic: If finalizeChallenge ran, it used live submissions. 
-             // If "lazy finalization" happens in resolveTopRankings just before this, key submissions are in archive.
-             // If user was duplicate or somehow missed, checking live is safer fallback?
-             // Actually if finalized, Archive IS the source of truth.
-             // But for safety/robustness, if Archive is empty for user, maybe they are not in valid set.
+             // 아카이브에 없으면 안전장치로 라이브 데이터 확인
          }
          
-         // 2. Try Live (Active or Fallback)
+         // 2. 라이브 데이터 확인 (진행중 또는 폴백)
          Submission s = challengeRankingMapper.findSubmissionByUserIdAndChallengeId(userId, challengeId);
          if (s != null) {
              int rank = challengeRankingMapper.getLiveRanking(
@@ -305,7 +299,7 @@ public class ChallengeServiceImpl implements ChallengeService {
          return null;
     }
     
-    // Helper method for Lazy Finalization
+    // 지연 확정을 위한 헬퍼 메서드
     private List<ChallengeRankingResponse> resolveTopRankings(Long challengeId) {
         Challenge challenge = challengeMapper.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
@@ -313,15 +307,15 @@ public class ChallengeServiceImpl implements ChallengeService {
         boolean isExpired = challenge.getEndAt() != null && TimeUtils.now().isAfter(challenge.getEndAt());
         
         if (isExpired) {
-            // Check if archived
+            // 아카이브 여부 확인
             if (!challengeRankingMapper.existsByChallengeId(challengeId)) {
-                // Lazy Finalization
+                // 지연 확정 실행
                 finalizeChallenge(challengeId);
             }
-            // Return from Archive
+            // 아카이브 데이터 반환
             return challengeRankingMapper.challengeTotalRanking(challengeId, 10);
         } else {
-            // Return from Live
+            // 라이브 데이터 반환
             return challengeRankingMapper.findLiveTopRankingsByChallengeId(challengeId, 10);
         }
     }
@@ -334,7 +328,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final com.problemio.quiz.mapper.QuizMapper quizMapper;
 
     private ChallengeDto toDto(Challenge challenge) {
-        // Fetch target quiz
+        // 타겟 퀴즈 조회
         com.problemio.quiz.domain.Quiz quiz = quizMapper.findById(challenge.getTargetQuizId()).orElse(null);
         com.problemio.quiz.dto.QuizResponse quizResponse = null;
         
@@ -343,7 +337,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .id(quiz.getId())
                 .title(quiz.getTitle())
                 .thumbnailUrl(quiz.getThumbnailUrl())
-                // Basic fields enough for thumbnail display
+                // 썸네일 표시에 필요한 기본 필드만 포함
                 .build();
         }
 

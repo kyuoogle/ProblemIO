@@ -63,7 +63,7 @@ public class CommentServiceImpl implements CommentService {
             comment.setGuestPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
 
-        // parent/root 처리
+        // 상위/루트 댓글 처리
         if (request.getParentCommentId() != null) {
             Comment parent = commentMapper.findById(request.getParentCommentId());
             if (parent == null || parent.isDeleted()) {
@@ -87,7 +87,7 @@ public class CommentServiceImpl implements CommentService {
 
         commentMapper.insertComment(comment);
 
-        // 루트 댓글이면 root_comment_id 자기 자신으로 설정
+        // 루트 댓글: root_comment_id를 자신의 ID로 설정
         if (request.getParentCommentId() == null) {
             commentMapper.updateRootCommentId(comment.getId(), comment.getId());
         }
@@ -106,7 +106,7 @@ public class CommentServiceImpl implements CommentService {
                 throw new BusinessException(ErrorCode.COMMENT_FORBIDDEN);
             }
         } else {
-            // 게스트 댓글
+            // 게스트 댓글 검증
             if (request.getPassword() == null || request.getPassword().isBlank()) {
                 throw new BusinessException(ErrorCode.COMMENT_PASSWORD_REQUIRED);
             }
@@ -129,12 +129,12 @@ public class CommentServiceImpl implements CommentService {
         }
 
         if (existing.getUserId() != null) {
-            // 회원 댓글
+            // 회원 댓글 권한 검사
             if (user == null) {
-                throw new BusinessException(ErrorCode.COMMENT_FORBIDDEN); // 남의 댓글 삭제 시도 (로그인 안함)
+                throw new BusinessException(ErrorCode.COMMENT_FORBIDDEN); // 타인 댓글 삭제 시도 (비로그인)
             }
 
-            // 본인이 아니고 관리자도 아니면 거부
+            // 작성자 또는 관리자가 아니면 거부
             boolean isOwner = existing.getUserId().equals(user.getId());
             boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
 
@@ -142,8 +142,8 @@ public class CommentServiceImpl implements CommentService {
                 throw new BusinessException(ErrorCode.COMMENT_FORBIDDEN);
             }
         } else {
-            // 게스트 댓글
-            // 관리자면 비밀번호 없이 삭제 가능
+            // 게스트 댓글 권한 검사
+            // 관리자: 비밀번호 없이 삭제 가능
             boolean isAdmin = user != null && "ROLE_ADMIN".equals(user.getRole());
 
             if (!isAdmin) {
@@ -156,7 +156,7 @@ public class CommentServiceImpl implements CommentService {
             }
         }
 
-        // 물리 삭제 대신 soft delete
+        // 물리 삭제 대신 논리 삭제(Soft Delete)
         commentMapper.softDeleteComment(commentId, TimeUtils.now());
     }
 
@@ -311,7 +311,7 @@ public class CommentServiceImpl implements CommentService {
             commentLikeMapper.delete(userId, commentId);
             commentMapper.decreaseLikeCount(commentId);
         } else {
-            // 좋아요 추가
+            // 좋아요 등록
             CommentLike like = new CommentLike();
             like.setUserId(userId);
             like.setCommentId(commentId);

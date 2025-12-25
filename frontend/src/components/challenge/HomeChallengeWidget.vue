@@ -53,7 +53,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Challenge Widget Styling (Matches Ranking Widget) */
+/* 챌린지 위젯 스타일링 (랭킹 위젯과 일치) */
 .challenge-widget {
   position: relative;
   width: 100%;

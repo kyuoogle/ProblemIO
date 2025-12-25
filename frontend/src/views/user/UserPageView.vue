@@ -7,13 +7,12 @@
       </div>
 
       <div v-else-if="user" class="flex flex-col gap-6">
-        <!-- Profile Header -->
-        <!-- Profile Header -->
+        <!-- 프로필 헤더 -->
         <ProfileBackground :user="user" class="shadow-4 profile-card-content p-6">
             <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
               <UserAvatar :user="user" class="w-32 h-32" />
               <div class="flex-1 w-full text-center md:text-left">
-                <!-- Nickname & Follow Button Row -->
+                <!-- 닉네임 & 팔로우 버튼 행 -->
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-start">
                   <div>
                     <h1 class="text-3xl font-bold mb-2">{{ user.nickname }}</h1>
@@ -22,7 +21,7 @@
                     </p>
                   </div>
                   
-                  <!-- Follow Button -->
+                  <!-- 팔로우 버튼 -->
                   <Button
                     v-if="authStore.isAuthenticated && authStore.user?.id !== user.id"
                     :label="isFollowing ? 'Following' : 'Follow'"
@@ -34,7 +33,7 @@
                   />
                 </div>
                 
-                <!-- Stats Area -->
+                <!-- 통계 영역 -->
                 <div class="flex justify-center md:justify-start gap-8 mt-2">
                   <div class="stat-box">
                     <p class="text-2xl font-bold m-0">{{ user.quizCount || 0 }}</p>
@@ -53,7 +52,7 @@
             </div>
         </ProfileBackground>
 
-        <!-- User's Quizzes -->
+        <!-- 유저 퀴즈 목록 -->
         <div>
           <h2 class="text-2xl font-bold mb-4">퀴즈</h2>
           <div v-if="loadingQuizzes" class="text-center py-8">
@@ -206,13 +205,13 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-/* Stats */
+/* 통계 */
 .stat-box {
   width: 80px;          
   text-align: center;
 }
 
-/* Grid Layout */
+/* 그리드 레이아웃 */
 .quiz-grid-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -232,7 +231,7 @@ onMounted(() => {
   }
 }
 
-/* Quiz Card Styles */
+/* 퀴즈 카드 스타일 */
 .quiz-card {
   background: var(--color-background-soft);
   border-radius: 18px;
