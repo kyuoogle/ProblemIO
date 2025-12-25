@@ -108,7 +108,7 @@ public class GmsOpenAiClient {
                 log.warn("GMS response missing base64. contentPreview={}", truncate(content));
             } catch (Exception e) {
                 log.warn("GMS request attempt {} failed: {}", attempt + 1, e.toString());
-                // Fall through to retry once
+                // 재시도를 위해 계속 진행
             }
         }
 

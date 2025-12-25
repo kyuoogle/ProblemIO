@@ -24,7 +24,7 @@
                     <i class="pi pi-camera text-white text-4xl"></i>
                   </div>
                 </div>
-                <!-- Hidden File Input -->
+                <!-- 숨겨진 파일 입력 -->
                 <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleFileChange" style="display: none" />
 
                 <span class="text-sm text-gray-500 cursor-pointer hover:text-white underline" @click="triggerFileUpload">프로필 사진 바꾸기</span>
@@ -101,7 +101,7 @@
             <Divider />
 
             <!-- SECTION 3: 비밀번호/탈퇴 -->
-            <!-- ... existing password/delete sections ... -->
+            <!-- ... 기존 비밀번호/탈퇴 섹션 ... -->
             <section class="flex items-center justify-between p-4 rounded-lg action-card">
               <div class="flex flex-col">
                 <h3 class="text-lg font-bold">비밀번호 변경</h3>
@@ -121,7 +121,7 @@
         </template>
       </Card>
 
-      <!-- 비밀번호 변경 모달 & 탈퇴 모달 (Existing) -->
+      <!-- 비밀번호 변경 모달 & 탈퇴 모달 (기존) -->
       <Dialog v-model:visible="showPasswordDialog" modal header="비밀번호 변경" :style="{ width: '90vw', maxWidth: '400px' }">
         <div class="flex flex-col gap-4 pt-2">
           <div class="flex flex-col gap-2">
@@ -171,20 +171,20 @@
         </template>
       </Dialog>
 
-      <!-- Customization Modal (Generic for Avatar/Theme/Popover) -->
+      <!-- 커스터마이징 모달 (아바타/테마/팝오버 공용) -->
       <Dialog v-model:visible="showCustomDialog" :header="customDialogTitle" :modal="true" :style="{ width: '90vw', maxWidth: '600px' }" :draggable="false">
         <div class="flex flex-col gap-6">
-          <!-- Preview Area -->
+          <!-- 미리보기 영역 -->
           <div class="preview-area bg-surface-ground p-6 rounded-xl border flex items-center justify-center relative overflow-hidden" :style="previewContainerStyle">
-            <!-- Theme Preview -->
+            <!-- 테마 미리보기 -->
             <div v-if="customType === 'THEME'" class="w-full overflow-hidden rounded-xl border relative bg-gray-50 dark:bg-gray-900" style="height: 300px">
-              <!-- Scaled Container for Desktop View equivalent -->
+              <!-- PC 화면 대응을 위한 축소된 컨테이너 -->
               <div class="origin-top-left transform scale-[0.65] w-[154%] h-[154%] p-4">
                 <ProfileHeader :user="tempPreviewUser" :previewThemeId="tempSelection" class="!mb-0 shadow-lg" />
               </div>
             </div>
 
-            <!-- Popover Preview -->
+            <!-- 팝오버 미리보기 -->
             <div v-if="customType === 'POPOVER'" class="text-center p-4">
               <UserPopoverCard :profile="tempPreviewUser" :previewDecorationId="tempSelection">
                 <template #action-button>
@@ -197,7 +197,7 @@
             </div>
           </div>
 
-          <!-- Item Selector using Carousel/Grid -->
+          <!-- 아이템 선택기 (캐러셀/그리드) -->
           <div>
             <h3 class="text-lg font-bold mb-3">보유한 아이템</h3>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -210,7 +210,7 @@
                 v-tooltip.bottom="item.description || item.name"
               >
                 <div v-if="item.isDefault" class="absolute top-1 left-1 bg-gray-600/80 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 font-bold">기본</div>
-                <!-- Item Thumbnail -->
+                <!-- 아이템 썸네일 -->
                 <div class="flex-1 w-full flex items-center justify-center overflow-hidden">
                   <img v-if="item.image" :src="resolveImageUrl(item.image)" class="w-full h-full object-contain" />
                   <div v-else class="w-full h-full rounded bg-surface-200" :style="item.style"></div>
@@ -221,7 +221,7 @@
                   {{ item.description }}
                 </div>
 
-                <!-- Checkmark if selected -->
+                <!-- 선택 시 체크 표시 -->
                 <div v-if="isItemSelected(item)" class="absolute top-1 right-1 bg-surface-900 dark:bg-surface-0 text-surface-0 dark:text-surface-900 rounded-full w-5 h-5 flex items-center justify-center text-xs">
                   <i class="pi pi-check" style="font-size: 0.6rem"></i>
                 </div>
@@ -243,7 +243,7 @@ import { ref, onMounted, computed, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
-import { useCustomItemStore } from "@/stores/customItemStore"; // Import Store
+import { useCustomItemStore } from "@/stores/customItemStore"; // 스토어 가져오기
 import { updateMyProfile, changePassword, deleteAccount, getMe, checkNickname } from "@/api/user";
 import ProfileHeader from "@/components/user/ProfileHeader.vue";
 import UserPopoverCard from "@/components/common/UserPopoverCard.vue";
@@ -262,11 +262,11 @@ const toast = useToast();
 const authStore = useAuthStore();
 const customItemStore = useCustomItemStore();
 
-// UI Control
+// UI 제어
 const showPasswordDialog = ref(false);
 const showDeleteDialog = ref(false);
 
-// Customization Dialog State
+// 커스터마이징 대화상자 상태
 const showCustomDialog = ref(false);
 const customType = ref<"THEME" | "POPOVER">("THEME");
 
@@ -277,7 +277,7 @@ const profileForm = ref({
   popoverDecoration: null,
 });
 
-// Temp state for modal
+// 모달 임시 상태
 const tempSelection = ref<string | number | null>(null);
 const tempFile = ref<File | null>(null);
 const tempPreviewUrl = ref<string>("");
@@ -332,16 +332,16 @@ const loadProfile = async () => {
   }
 };
 
-// --- Customization Logic ---
+// --- 커스터마이징 로직 ---
 onMounted(async () => {
   await Promise.all([
     loadProfile(),
     customItemStore.fetchUserItems(),
-    customItemStore.fetchItemDefinitions(), // Ensure definitions are loaded
+    customItemStore.fetchItemDefinitions(), // 정의 로드 보장
   ]);
 });
 
-// Computed available items based on type
+// 타입에 따른 사용 가능한 아이템 계산
 const availableItems = computed(() => {
   let items = [];
   if (customType.value === "THEME") items = Object.values(customItemStore.themeItems);
@@ -355,21 +355,21 @@ const customDialogTitle = computed(() => {
   return "팝오버 디자인 설정";
 });
 
-// Helper to get current item names for the button labels
+// 버튼 라벨용 현재 아이템 이름 가져오기 도우미
 const currentThemeName = computed(() => {
   if (!profileForm.value.profileTheme) return "기본";
-  // customItemStore.themeItems is an Array, not a Dictionary
+  // customItemStore.themeItems는 딕셔너리가 아닌 배열임
   const item = customItemStore.themeItems.find((i) => i.id == profileForm.value.profileTheme || i.key == profileForm.value.profileTheme);
   return item ? item.name : "Unknown";
 });
 const currentPopoverName = computed(() => {
   if (!profileForm.value.popoverDecoration) return "기본";
-  // customItemStore.popoverItems is an Array
+  // customItemStore.popoverItems는 배열임
   const item = customItemStore.popoverItems.find((i) => i.id == profileForm.value.popoverDecoration || i.key == profileForm.value.popoverDecoration);
   return item ? item.name : "Unknown";
 });
 
-// Open Editors
+// 편집기 열기
 const openThemeEditor = () => {
   customType.value = "THEME";
   tempSelection.value = profileForm.value.profileTheme;
@@ -419,12 +419,12 @@ const tempPreviewUser = computed(() => {
 });
 
 const previewContainerStyle = computed(() => {
-  // If Theme preview, apply theme background to container?
-  // No, keep preview area neutral, just show component.
+  // 테마 미리보기인 경우 컨테이너에 테마 배경 적용?
+  // 아니오, 미리보기 영역은 중립 유지, 컴포넌트만 표시.
   return {};
 });
 
-// File Upload in Modal (Avatar)
+// 모달 내 파일 업로드 (아바타)
 const onFileCustomSelect = (event: any) => {
   const file = event.files[0];
   if (file) {
@@ -433,7 +433,7 @@ const onFileCustomSelect = (event: any) => {
   }
 };
 
-// Apply Changes from Modal
+// 모달에서 변경 사항 적용
 // 변경사항 적용 (즉시 저장)
 const applyCustomization = async () => {
   try {
@@ -470,9 +470,9 @@ const applyCustomization = async () => {
   }
 };
 
-// --- Existing Logic ---
+// --- 기존 로직 ---
 
-// File Upload Logic
+// 파일 업로드 로직
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const triggerFileUpload = () => {
@@ -605,7 +605,7 @@ const handleDeleteAccount = async () => {
   }
 };
 
-// Top-level value for templates
+// 템플릿용 최상위 값
 const previewUser = computed(() => {
   return {
     ...authStore.user,
@@ -625,13 +625,13 @@ const previewUser = computed(() => {
   display: none;
 }
 
-/* Modal specific */
+/* 모달 전용 */
 .preview-area {
   min-height: 200px;
   background-color: var(--surface-100);
 }
 
-/* ... existing styles ... */
+/* ... 기존 스타일 ... */
 :deep(.custom-upload input[type="file"]) {
   opacity: 0 !important;
   width: 0 !important;
@@ -654,7 +654,7 @@ const previewUser = computed(() => {
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
+  -ms-overflow-style: none; /* IE, Edge */
   scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
@@ -669,11 +669,11 @@ const previewUser = computed(() => {
 .action-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Reduced shadow opacity */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 그림자 투명도 조정 */
 }
 
 .danger-card {
-  background: rgba(255, 99, 71, 0.08); /* Keeping functional red for now */
+  background: rgba(255, 99, 71, 0.08); /* 기능적 빨간색 유지 */
   border: 1px solid rgba(255, 99, 71, 0.26);
   box-shadow: 0 12px 32px rgba(255, 99, 71, 0.15);
 }

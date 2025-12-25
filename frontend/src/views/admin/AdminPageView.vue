@@ -3,16 +3,16 @@
     <div class="container mx-auto px-4">
       <h1 class="page-title">관리자 대시보드</h1>
 
-      <!-- Tabs -->
+      <!-- 탭 -->
       <div class="tab-navbar">
         <button :class="['tab-button', { active: activeTab === 'quizzes' }]" @click="activeTab = 'quizzes'">퀴즈 관리</button>
         <button :class="['tab-button', { active: activeTab === 'challenges' }]" @click="activeTab = 'challenges'">챌린지 관리</button>
         <button :class="['tab-button', { active: activeTab === 'custom-items' }]" @click="activeTab = 'custom-items'">커스텀 관리</button>
       </div>
 
-      <!-- Quiz Management Tab -->
+      <!-- 퀴즈 관리 탭 -->
       <div v-show="activeTab === 'quizzes'" class="tab-content">
-        <!-- Search Bar -->
+        <!-- 검색 바 -->
         <div class="search-bar-wide w-full mb-6 flex justify-center">
           <span class="p-input-icon-right search-input-wrapper" style="max-width: 600px; width: 100%">
             <InputText v-model="searchKeyword" placeholder="퀴즈 검색..." class="search-input w-full" @keyup.enter="loadQuizzes" />
@@ -67,7 +67,7 @@
         />
       </div>
 
-      <!-- Challenge Management Tab -->
+      <!-- 챌린지 관리 탭 -->
       <div v-show="activeTab === 'challenges'" class="tab-content">
         <div class="challenge-form-card">
           <h2 class="form-title">새 챌린지 생성</h2>
@@ -96,7 +96,7 @@
             <Textarea v-model="challengeForm.description" rows="3" class="w-full search-input" placeholder="챌린지 설명을 입력하세요" />
           </div>
 
-          <!-- Quiz Picker -->
+          <!-- 퀴즈 선택기 -->
           <div class="field mb-4">
             <label class="field-label">대상 퀴즈</label>
             <div class="flex gap-2">
@@ -133,12 +133,12 @@
         </div>
       </div>
 
-      <!-- Custom Items Tab -->
+      <!-- 커스텀 아이템 탭 -->
       <div v-show="activeTab === 'custom-items'" class="tab-content">
         <div class="challenge-form-card mb-6">
           <h2 class="form-title">커스텀 아이템 생성</h2>
           <div class="grid grid-cols-1 gap-6">
-            <!-- 1. Metadata Fields (Topmost) -->
+            <!-- 1. 메타데이터 필드 (최상단) -->
             <div class="grid grid-cols-1 gap-4">
               <div class="field">
                 <label class="field-label">아이템 유형</label>
@@ -154,7 +154,7 @@
               </div>
             </div>
 
-            <!-- 2. Image Upload (Top) -->
+            <!-- 2. 이미지 업로드 (상단) -->
             <div class="bg-surface-card border rounded-xl p-4 flex flex-col gap-4 shadow-sm border-surface-border">
               <div class="flex justify-between items-center">
                 <h3 class="font-bold text-sm text-secondary flex items-center gap-2">
@@ -182,7 +182,7 @@
               <input type="file" ref="fileInput" @change="onFileSelect" accept="image/*" class="hidden" />
             </div>
 
-            <!-- 3. Preview Section (Middle) -->
+            <!-- 3. 미리보기 섹션 (중간) -->
             <div class="flex flex-col gap-2">
               <div class="flex justify-between items-center px-1">
                 <label class="field-label m-0">라이브 미리보기</label>
@@ -190,10 +190,10 @@
               </div>
 
               <div class="preview-area border border-surface-border p-6 rounded-xl flex items-center justify-center relative overflow-hidden min-h-[400px]">
-                <!-- Label -->
+                <!-- 라벨 -->
                 <div class="absolute top-4 left-4 z-10 bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur-md">Live Preview</div>
 
-                <!-- Theme Preview: Scaled Container -->
+                <!-- 테마 미리보기: 축소된 컨테이너 -->
                 <div v-if="newItem.itemType === 'THEME'" class="w-full overflow-hidden rounded-xl border relative shadow-sm" style="height: 300px">
                   <div class="origin-top-left transform scale-[0.65] w-[154%] h-[154%] p-4 flex items-center justify-center">
                     <ProfileHeader
@@ -211,7 +211,7 @@
                   </div>
                 </div>
 
-                <!-- Popover Preview -->
+                <!-- 팝오버 미리보기 -->
                 <div v-if="newItem.itemType === 'POPOVER'" class="flex items-center justify-center h-full w-full overflow-hidden p-6">
                   <div class="transform scale-110 origin-center transition-transform hover:scale-110">
                     <UserPopoverCard
@@ -231,16 +231,16 @@
               </div>
             </div>
 
-            <!-- 4. Style Settings (Bottom) -->
+            <!-- 4. 스타일 설정 (하단) -->
             <div class="flex flex-col gap-4 mb-4">
-              <!-- Style Builder -->
+              <!-- 스타일 빌더 -->
               <div class="flex flex-col gap-2 mt-2">
                 <div class="flex justify-between items-center px-1">
                   <label class="field-label m-0">스타일 설정</label>
                 </div>
 
                 <div class="p-5 border rounded-xl bg-surface-card flex flex-col gap-6 shadow-sm" style="background: var(--color-background-soft); border-color: var(--color-border)">
-                  <!-- Background Group -->
+                  <!-- 배경 그룹 -->
                   <div class="pb-4 border-b border-dashed border-surface-border" :class="{ 'opacity-40 pointer-events-none grayscale': uploadedImageUrl || localPreviewUrl }">
                     <div class="flex justify-between items-center mb-3">
                       <span class="text-sm font-bold opacity-80 flex items-center gap-2">
@@ -266,7 +266,7 @@
                     </div>
                   </div>
 
-                  <!-- Colors & Border Group -->
+                  <!-- 색상 & 테두리 그룹 -->
                   <div class="grid grid-cols-2 gap-4 pb-4 border-b border-dashed border-surface-border">
                     <div>
                       <label class="block text-xs font-bold mb-2 opacity-80">텍스트 색상</label>
@@ -291,7 +291,7 @@
                     </div>
                   </div>
 
-                  <!-- Animation Group -->
+                  <!-- 애니메이션 그룹 -->
                   <div>
                     <label class="block text-sm font-bold mb-3 opacity-80 flex items-center gap-2">
                       <i class="pi pi-bolt"></i>
@@ -369,7 +369,7 @@
             </div>
             <div v-if="item.isDefault" class="default-item-badge absolute top-2 right-2 bg-surface-900 dark:bg-surface-0 text-surface-0 dark:text-surface-900 text-xs px-2 py-1 rounded shadow-sm font-bold z-10">Default</div>
             <div class="text-sm mb-2" style="color: var(--text-color-secondary)">{{ item.itemType }}</div>
-            <!-- Mini Preview of JSON for reference, or removed if too cluttered. Keeping for admin debug. -->
+            <!-- JSON 미리보기 (관리자 디버그용). -->
             <div class="text-xs bg-black/5 p-2 rounded overflow-hidden h-16 mb-2 opacity-50 font-mono">
               {{ item.config ? item.config.substring(0, 100) + "..." : "{}" }}
             </div>
@@ -389,7 +389,7 @@
       </div>
     </div>
 
-    <!-- User Management Dialog -->
+    <!-- 유저 관리 다이얼로그 -->
     <Dialog v-model:visible="showUserDialog" header="할당된 유저 관리" :style="{ width: '40rem' }" :modal="true">
       <div class="p-4">
         <div v-if="loadingUsers" class="text-center">
@@ -411,7 +411,7 @@
       </div>
     </Dialog>
 
-    <!-- User Assign Dialog -->
+    <!-- 유저 할당 다이얼로그 -->
     <Dialog v-model:visible="showAssignDialog" header="유저에게 아이템 할당" :style="{ width: '30rem' }" :modal="true">
       <div class="p-4">
         <div class="mb-4">
@@ -428,7 +428,7 @@
       </div>
     </Dialog>
 
-    <!-- Quiz Picker Dialog -->
+    <!-- 퀴즈 선택기 다이얼로그 -->
     <Dialog v-model:visible="showQuizPicker" header="퀴즈 선택" :style="{ width: '50rem' }" :modal="true" :draggable="false">
       <div class="p-4">
         <div class="search-bar-wide w-full mb-4">
@@ -505,7 +505,7 @@ const loading = ref(false);
 
 const submitting = ref(false);
 
-// --- Custom Item Logic ---
+// --- 커스텀 아이템 로직 ---
 const customItems = ref([]);
 const newItem = reactive({
   itemType: "THEME",
@@ -533,11 +533,11 @@ const defaultConfigs = {
   },
 };
 
-// Auto-fill config JSON when type changes
+// 타입 변경 시 설정 JSON 자동 채움
 watch(
   () => newItem.itemType,
   (newType) => {
-    // Only set if empty to avoid overwriting user's custom edits
+    // 유저의 커스텀 수정을 덮어쓰지 않도록 비어있을 때만 설정
     if (!newItem.configStr) {
       newItem.configStr = JSON.stringify(defaultConfigs[newType] || {}, null, 2);
     }
@@ -545,8 +545,8 @@ watch(
   { immediate: true }
 );
 
-// --- Visual Builder State ---
-const useBuilder = ref(true); // Default to Builder mode
+// --- 비주얼 빌더 상태 ---
+const useBuilder = ref(true); // 빌더 모드 기본값
 const builderForm = reactive({
   backgroundColor: "255, 255, 255", // RGB for ColorPicker (PrimeVue uses HEX by default? No, ColorPicker default is HEX but can be configurable. Let's assume HEX)
   // Actually PrimeVue ColorPicker default is HEX string if format not specified?
@@ -584,18 +584,18 @@ const animationOptions = ref([
   { label: "테두리 댄스 (Border Dance)", value: "border-dance" },
 ]);
 
-// Auto-sync Builder -> ConfigStr & Preview
+// 빌더 -> 설정 문자열 & 미리보기 자동 동기화
 watch(
   builderForm,
   () => {
-    // Only generate if we are in builder mode/editing.
-    // Since we removed the toggle, we assume we are using the builder essentially.
+    // 빌더 모드/수정 중일 때만 생성.
+    // 토글을 제거했으므로 기본적으로 빌더를 사용한다고 가정.
     generateConfigFromBuilder();
   },
   { deep: true }
 );
 
-// Auto-sync configStr -> Preview (React to direct JSON edits OR Builder updates)
+// 설정 문자열 -> 미리보기 자동 동기화 (직접 JSON 편집 또는 빌더 업데이트 반응)
 watch(
   () => newItem.configStr,
   () => {
@@ -603,21 +603,21 @@ watch(
   }
 );
 
-// Auto-sync JSON -> Builder when switching modes or loading
+// 모드 전환 또는 로딩 시 JSON -> 빌더 자동 동기화
 const parseConfigToBuilder = () => {
-  // Avoid re-parsing if we just generated it from builder to prevent loops?
-  // Actually, if we type in JSON, we want builder to update.
-  // Ideally we track 'source' of change.
+  // 루프 방지를 위해 빌더에서 생성한 경우 재파싱 방지?
+  // 사실 JSON을 입력하면 빌더가 업데이트되길 원함.
+  // 이상적으로는 변경 소스를 추적해야 함.
 
   if (!newItem.configStr) return;
   try {
     const config = JSON.parse(newItem.configStr);
     const style = config.style || {};
 
-    // Background
+    // 배경
     if (style.background && style.background.includes("linear-gradient")) {
       builderForm.useGradient = true;
-      // Best effort extraction: linear-gradient(45deg, #ffffff, #000000)
+      // 최선의 추출 노력: linear-gradient(45deg, #ffffff, #000000)
       const matches = style.background.match(/#([a-fA-F0-9]{3,6})/g);
       if (matches && matches.length >= 2) {
         builderForm.gradientStart = matches[0].replace("#", "");
@@ -628,12 +628,12 @@ const parseConfigToBuilder = () => {
       builderForm.bgColor = style.backgroundColor.replace("#", "");
     }
 
-    // Text Color
+    // 텍스트 색상
     if (config.textColor) {
       builderForm.textColor = config.textColor.replace("#", "");
     }
 
-    // Border
+    // 테두리
     if (style.border && style.border !== "none") {
       // "1px solid #cccccc"
       const parts = style.border.split(" ");
@@ -645,7 +645,7 @@ const parseConfigToBuilder = () => {
       builderForm.borderWidth = 0;
     }
 
-    // Animation
+    // 애니메이션
     if (style.animation) {
       // "bounce 2s infinite linear, pulse 2s infinite linear"
       // Split by comma
@@ -658,7 +658,7 @@ const parseConfigToBuilder = () => {
         if (parts.length > 0) {
           const name = parts[0];
           if (name !== "gradient-flow") {
-            // internal use
+            // 내부 사용
             names.push(name);
           }
           if (parts.length > 1) {
@@ -684,12 +684,12 @@ watch(useBuilder, (val) => {
 });
 
 const generateConfigFromBuilder = () => {
-  // Construct configuration object based on builder state
+  // 빌더 상태를 기반으로 설정 객체 구성
   const style = {};
-  const textStyle = {}; // Some animations/styles apply to text
+  const textStyle = {}; // 일부 애니메이션/스타일은 텍스트에 적용됨
 
-  // Background - Force color if NO image is uploaded
-  // Check both uploadedImageUrl and localPreviewUrl
+  // 배경 - 이미지가 업로드되지 않은 경우 색상 강제
+  // uploadedImageUrl과 localPreviewUrl 모두 확인
   if (!uploadedImageUrl.value && !localPreviewUrl.value) {
     if (builderForm.useGradient) {
       style.background = `linear-gradient(45deg, #${builderForm.gradientStart}, #${builderForm.gradientEnd}) !important`;
@@ -700,7 +700,7 @@ const generateConfigFromBuilder = () => {
     }
   }
 
-  // Border
+  // 테두리
   if (builderForm.borderWidth > 0) {
     style.border = `${builderForm.borderWidth}px solid #${builderForm.borderColor} !important`;
   } else {
@@ -708,8 +708,8 @@ const generateConfigFromBuilder = () => {
   }
 
   // Animation
-  // Animation
-  // Multiple animations joined by comma
+  // 애니메이션
+  // 쉼표로 연결된 다중 애니메이션
   if (builderForm.animationNames && builderForm.animationNames.length > 0) {
     const duration = builderForm.animationDuration || 2;
 
@@ -734,8 +734,8 @@ const generateConfigFromBuilder = () => {
   const config = {
     style: style,
     textColor: `#${builderForm.textColor}`,
-    // Fix: Do NOT include localPreviewUrl (Blob) in configStr to prevent saving it to DB.
-    // applyPreview() handles the visual preview of the Blob separately.
+    // 수정: DB 저장을 방지하기 위해 configStr에 localPreviewUrl (Blob) 포함 안 함.
+    // applyPreview()가 Blob의 시각적 미리보기를 별도로 처리함.
     image: uploadedImageUrl.value || null,
   };
 
@@ -743,20 +743,20 @@ const generateConfigFromBuilder = () => {
   // applyPreview(); // handled by watch(newItem.configStr)
 };
 
-// Quiz Tab State
+// 퀴즈 탭 상태
 const quizzes = ref([]);
 const searchKeyword = ref("");
 const page = ref(1);
 const size = ref(21);
 
-// Quiz Picker State
+// 퀴즈 선택기 상태
 const showQuizPicker = ref(false);
 const pickerQuizzes = ref([]);
 const pickerKeyword = ref("");
 const pickerLoading = ref(false);
 const selectedQuiz = ref(null);
 
-// Challenge Tab State
+// 챌린지 탭 상태
 const challengeForm = reactive({
   title: "",
   description: "",
@@ -767,10 +767,10 @@ const challengeForm = reactive({
   endAt: null,
 });
 
-// --- Main Quiz List ---
+// --- 메인 퀴즈 목록 ---
 const totalRecords = ref(0);
 
-// --- Main Quiz List ---
+
 const loadQuizzes = async () => {
   loading.value = true;
   try {
@@ -779,12 +779,12 @@ const loadQuizzes = async () => {
       size: size.value,
       keyword: searchKeyword.value,
     });
-    // Backend now returns PageResponse { content, totalElements, ... }
+    // 백엔드는 이제 PageResponse { content, totalElements, ... }를 반환함
     if (data && data.content) {
       quizzes.value = data.content;
       totalRecords.value = data.totalElements;
     } else {
-      // Fallback or empty
+      // 폴백 또는 비어있음
       quizzes.value = [];
       totalRecords.value = 0;
     }
@@ -811,7 +811,7 @@ const onPageChange = (event) => {
   loadQuizzes();
 };
 
-// --- Quiz Picker ---
+// --- 퀴즈 선택기 ---
 const openQuizPicker = () => {
   showQuizPicker.value = true;
   if (pickerQuizzes.value.length === 0) {
@@ -824,17 +824,17 @@ const loadPickerQuizzes = async () => {
   try {
     const data = await getAdminQuizzes({
       page: 1,
-      size: 50, // Load more for picker
+      size: 50, // 선택기를 위해 더 많이 로드
       keyword: pickerKeyword.value,
     });
-    // Handle PageResponse structure for picker too if API returns it
+    // API가 반환하는 경우 선택기에 대해서도 PageResponse 구조 처리
     if (data && data.content) {
       pickerQuizzes.value = data.content;
     } else if (Array.isArray(data)) {
       pickerQuizzes.value = data;
     }
   } catch (error) {
-    // silent or toast
+    // 조용히 또는 토스트
   } finally {
     pickerLoading.value = false;
   }
@@ -851,9 +851,9 @@ const clearSelectedQuiz = () => {
   challengeForm.targetQuizId = null;
 };
 
-// --- Challenge Submit ---
+// --- 챌린지 제출 ---
 const submitChallenge = async () => {
-  // Manual Validation
+  // 수동 유효성 검사
   if (!challengeForm.targetQuizId) {
     toast.add({ severity: "warn", summary: "알림", detail: "대상 퀴즈를 선택해주세요.", life: 3000 });
     return;
@@ -867,7 +867,7 @@ const submitChallenge = async () => {
   try {
     await createChallenge(challengeForm);
     toast.add({ severity: "success", summary: "성공", detail: "챌린지가 성공적으로 생성되었습니다.", life: 3000 });
-    // Reset form
+    // 폼 초기화
     challengeForm.title = "";
     challengeForm.description = "";
     clearSelectedQuiz();
@@ -881,9 +881,9 @@ const submitChallenge = async () => {
   }
 };
 
-// --- Custom Item Logic Variables Moved to Top ---
+// --- 커스텀 아이템 로직 변수 상단으로 이동됨 ---
 
-// Watcher moved to top
+// Watcher 상단으로 이동됨
 
 const creatingItem = ref(false);
 const showAssignDialog = ref(false);
@@ -891,17 +891,17 @@ const selectedItemToAssign = ref(null);
 const assignUserId = ref(null);
 const assignedUsers = ref([]);
 
-const assigning = ref(false); // Restore assigning state
-const uploadedImageUrl = ref(""); // Restore uploadedImageUrl
-const localPreviewUrl = ref(""); // For immediate preview
-// --- Edit & User Management Logic Definitions (Hoisted) ---
+const assigning = ref(false); // 할당 상태 복원
+const uploadedImageUrl = ref(""); // uploadedImageUrl 복원
+const localPreviewUrl = ref(""); // 즉시 미리보기용
+// --- 수정 & 유저 관리 로직 정의 (호이스팅됨) ---
 const isEditMode = ref(false);
 const editingItemId = ref(null);
 const showUserDialog = ref(false);
 const loadingUsers = ref(false);
 
 watch(localPreviewUrl, () => {
-  // When image changes, re-generate config to apply 'disabled' background logic
+  // 이미지가 변경되면 '비활성화된' 배경 로직을 적용하기 위해 설정 재생성
   generateConfigFromBuilder();
 });
 const fileInput = ref(null);
@@ -921,13 +921,13 @@ const loadCustomItems = async () => {
 
 const currentPreviewConfig = ref({ image: null });
 
-// Apply Preview Logic
+// 미리보기 로직 적용
 const applyPreview = () => {
   try {
     const config = newItem.configStr ? JSON.parse(newItem.configStr) : {};
 
-    // Inject uploaded image into config if present and not already manually set (or just force overwrite/merge?)
-    // Let's merge: if uploaded exists, it takes precedence for the 'image' field for preview convenience
+    // 이미지가 존재하고 수동으로 설정되지 않은 경우 설정에 주입 (또는 강제 덮어쓰기/병합?)
+    // 병합: 업로드된 이미지가 존재하면 미리보기 편의를 위해 'image' 필드 우선순위
     if (localPreviewUrl.value) {
       config.image = localPreviewUrl.value;
     } else if (uploadedImageUrl.value) {
@@ -936,33 +936,33 @@ const applyPreview = () => {
 
     currentPreviewConfig.value = config;
 
-    // Also update the JSON text box to reflect the image path if it wasn't there?
-    // Maybe better to keep them separate, but usually user wants to see the path in JSON.
-    // Let's NOT auto-update JSON text on preview to avoid overwriting user edits,
-    // but we DID auto-update it on upload completion.
+    // 이미지 경로가 없다면 JSON 텍스트 박스도 업데이트해서 반영할까?
+    // 분리하는 게 나을 수도 있지만, 보통 유저는 JSON에서 경로를 보고 싶어함.
+    // 유저 수정을 덮어쓰지 않기 위해 미리보기 시 JSON 텍스트 자동 업데이트 금지,
+    // 하지만 업로드 완료 시에는 자동 업데이트했음.
   } catch (e) {
     toast.add({ severity: "error", summary: "JSON 오류", detail: "설정 JSON 형식이 올바르지 않습니다.", life: 3000 });
     currentPreviewConfig.value = { image: null };
   }
 };
 
-// Handle File Upload
+// 파일 업로드 처리
 const onFileSelect = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  // Immediate local preview
+  // 즉시 로컬 미리보기
   localPreviewUrl.value = URL.createObjectURL(file);
   // Immediate local preview
   localPreviewUrl.value = URL.createObjectURL(file);
-  // applyPreview(); // Explicit update handled by watcher on localPreviewUrl/configStr now
+  // applyPreview(); // 이제 localPreviewUrl/configStr 감시자가 명시적 업데이트 처리
 
   try {
-    creatingItem.value = true; // Use loading state
+    creatingItem.value = true; // 로딩 상태 사용
     const path = await uploadItemImage(file, newItem.itemType);
     uploadedImageUrl.value = path;
 
-    // Auto-inject into JSON config
+    // JSON 설정에 자동 주입
     let config = {};
     try {
       config = newItem.configStr ? JSON.parse(newItem.configStr) : {};
@@ -970,18 +970,18 @@ const onFileSelect = async (event) => {
       /* ignore */
     }
 
-    config.image = path; // Set image path
+    config.image = path; // 이미지 경로 설정
     newItem.configStr = JSON.stringify(config, null, 2);
 
-    // Trigger preview update (fallback to path if local blob somehow failed or just to ensure config consistency)
-    // We keep using localPreviewUrl for display until page reload or reset
+    // 미리보기 업데이트 트리거 (로컬 blob이 실패했거나 설정 일관성을 보장하기 위해 경로로 폴백)
+    // 페이지 새로고침이나 초기화 전까지 표시를 위해 localPreviewUrl 유지
 
     toast.add({ severity: "info", summary: "업로드 완료", detail: "이미지 경로가 설정에 추가되었습니다.", life: 3000 });
   } catch (e) {
     toast.add({ severity: "error", summary: "업로드 실패", detail: "이미지 업로드 중 오류가 발생했습니다.", life: 3000 });
   } finally {
     creatingItem.value = false;
-    // Reset file input
+    // 파일 입력 초기화
     if (fileInput.value) fileInput.value.value = "";
   }
 };
@@ -990,7 +990,7 @@ const removeImage = () => {
   uploadedImageUrl.value = "";
   localPreviewUrl.value = "";
 
-  // Trigger config regeneration to restore color
+  // 색상 복원을 위해 설정 재생성 트리거
   generateConfigFromBuilder();
 
   toast.add({ severity: "info", summary: "삭제 완료", detail: "이미지가 삭제되었습니다.", life: 3000 });
@@ -1018,7 +1018,7 @@ const createItem = async () => {
 
     toast.add({ severity: "success", summary: "생성 완료", detail: "새로운 아이템이 생성되었습니다.", life: 3000 });
 
-    // Reset and reload
+    // 초기화 및 재로딩
     isEditMode.value = false;
     newItem.itemType = "THEME";
     newItem.name = "";
@@ -1040,8 +1040,8 @@ const createItem = async () => {
   }
 };
 
-// --- Edit & User Management Logic ---
-// Variables moved to top for hoisting safety
+// --- 수정 & 유저 관리 로직 ---
+// 호이스팅 안전을 위해 변수 상단으로 이동
 
 const startEdit = (item) => {
   isEditMode.value = true;
@@ -1051,11 +1051,11 @@ const startEdit = (item) => {
   newItem.description = item.description;
   newItem.isDefault = item.isDefault;
 
-  // Config comes as Object from API (mapped in Mapper/Service) or String?
-  // In getAllItems mapper result, config is String (JSON).
+  // 설정은 API에서 객체(매퍼/서비스에서 매핑됨) 또는 문자열로 오나?
+  // getAllItems 매퍼 결과에서 설정은 문자열(JSON)임.
   newItem.configStr = item.config;
 
-  // Determine image for preview if possible
+  // 가능하면 미리보기용 이미지 결정
   try {
     const conf = JSON.parse(item.config);
     if (conf.image) uploadedImageUrl.value = conf.image;
@@ -1063,14 +1063,14 @@ const startEdit = (item) => {
     /* ignore */
   }
 
-  // Initial Parse for Builder
+  // 빌더를 위한 초기 파싱
   if (useBuilder.value) {
     parseConfigToBuilder();
   }
 
   applyPreview();
 
-  // Scroll to top
+  // 맨 위로 스크롤
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -1109,7 +1109,7 @@ const updateItem = async () => {
 
     toast.add({ severity: "success", summary: "수정 완료", detail: "아이템이 수정되었습니다.", life: 3000 });
 
-    cancelEdit(); // Reset
+    cancelEdit(); // 초기화
     await loadCustomItems();
   } catch (e) {
     toast.add({ severity: "error", summary: "수정 실패", detail: "아이템 수정 중 오류가 발생했습니다.", life: 3000 });
@@ -1135,7 +1135,7 @@ const removeUser = async (userId) => {
   try {
     await revokeUserItem(selectedItemToAssign.value.id, userId);
     toast.add({ severity: "success", summary: "해제 완료", detail: "유저 아이템 할당이 해제되었습니다." });
-    // Refresh list
+    // 목록 새로고침
     assignedUsers.value = assignedUsers.value.filter((u) => u.id !== userId);
   } catch (e) {
     toast.add({ severity: "error", summary: "오류", detail: "할당 해제 실패" });
@@ -1168,13 +1168,13 @@ const confirmDelete = async (item) => {
   try {
     await deleteCustomItem(item.id);
     toast.add({ severity: "success", summary: "삭제 완료", detail: "아이템이 삭제되었습니다." });
-    await loadCustomItems(); // Refresh List
+    await loadCustomItems(); // 목록 새로고침
   } catch (e) {
     toast.add({ severity: "error", summary: "오류", detail: "삭제 실패" });
   }
 };
 
-// Watch tab to load items
+// 아이템 로드를 위해 탭 감시
 watch(activeTab, (val) => {
   if (val === "custom-items") {
     loadCustomItems();
@@ -1187,7 +1187,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Global Layout */
+/* 전역 레이아웃 */
 .admin-container {
   min-height: calc(100vh - 200px);
   padding: 1rem 0 3rem;
@@ -1205,19 +1205,19 @@ onMounted(() => {
   text-align: center;
 }
 
-/* Tabs */
+/* 탭 */
 .tab-navbar {
   display: flex;
   gap: 0;
   border-bottom: 2px solid var(--surface-border);
   margin-bottom: 2rem;
-  /* justify-content: center; Removed to allow full width fill */
+  /* justify-content: center; 전체 너비 채우기를 위해 제거됨 */
   background: var(--surface-ground);
 }
 
 .tab-button {
   flex: 1;
-  /* max-width: 200px; Removed to fill full width */
+  /* max-width: 200px; 전체 너비 채우기를 위해 제거됨 */
   padding: 1rem 1.5rem;
   background: transparent;
   border: none;
@@ -1230,7 +1230,7 @@ onMounted(() => {
   border-radius: 12px 12px 0 0;
 }
 
-/* ... existing hover/active styles ... */
+/* ... 기존 호버/활성 스타일 ... */
 .tab-button:hover {
   background: var(--surface-hover);
   color: var(--text-color);
@@ -1242,7 +1242,7 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* Search Bar positioning */
+/* 검색 바 위치 지정 */
 .search-input-wrapper {
   position: relative;
   display: block;
@@ -1257,7 +1257,7 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* Tab Content Animation */
+/* 탭 콘텐츠 애니메이션 */
 .tab-content {
   animation: fadeIn 0.3s ease;
 }
@@ -1273,15 +1273,15 @@ onMounted(() => {
   }
 }
 
-/* Quiz Grid (Matches MyPage) */
+/* 퀴즈 그리드 (마이페이지와 일치) */
 .quiz-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Keep responsive */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 반응형 유지 */
   gap: 1rem;
   padding: 0.5rem;
 }
 
-/* Quiz Card (Matches MyPage) */
+/* 퀴즈 카드 (마이페이지와 일치) */
 .quiz-card {
   background: var(--color-background-soft);
   border-radius: 18px;
@@ -1292,7 +1292,7 @@ onMounted(() => {
   gap: 0.5rem;
   box-shadow: var(--surface-glow);
   transition: transform 0.2s, box-shadow 0.2s;
-  overflow: visible; /* Adjust if needed */
+  overflow: visible; /* 필요 시 조정 */
 }
 
 .quiz-card:hover {
@@ -1381,7 +1381,7 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-/* Forms */
+/* 폼 */
 .challenge-form-card {
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
@@ -1421,14 +1421,14 @@ onMounted(() => {
   color: var(--color-text-muted);
 }
 
-/* Input Styles */
+/* 입력 스타일 */
 .search-input {
   background: var(--color-background-soft);
   border-color: var(--color-border);
   color: var(--color-text);
 }
 
-/* Picker List */
+/* 선택기 목록 */
 .quiz-list-compact {
   max-height: 400px;
   overflow-y: auto;

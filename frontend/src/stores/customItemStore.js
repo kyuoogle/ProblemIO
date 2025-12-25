@@ -6,13 +6,13 @@ import { POPOVER_DECORATIONS } from '@/constants/popoverConfig';
 import { PROFILE_THEMES } from '@/constants/themeConfig';
 
 export const useCustomItemStore = defineStore('customItem', () => {
-    // State
+    // 상태 (State)
     const avatarItems = ref([]);
     const popoverItems = ref([]);
     const themeItems = ref([]);
     const loading = ref(false);
 
-    // Dictionary of all items by DB id: { [id]: mergedConfig }
+    // 모든 아이템 딕셔너리 (DB ID 기준): { [id]: mergedConfig }
     const itemDefinitions = ref({});
 
     const safeParseConfig = (config, itemForLog) => {
@@ -43,7 +43,7 @@ export const useCustomItemStore = defineStore('customItem', () => {
         return baseConfig;
     };
 
-    // Actions
+    // 액션 (Actions)
     const fetchItemDefinitions = async () => {
         try {
             const res = await axios.get('/items/definitions');
@@ -70,7 +70,7 @@ export const useCustomItemStore = defineStore('customItem', () => {
     const fetchUserItems = async () => {
         loading.value = true;
 
-        // definitions가 비어있으면 먼저 로드 (Admin preview / config merge 용)
+        // definitions가 비어있으면 먼저 로드 (관리자 미리보기 / 설정 병합용)
         if (Object.keys(itemDefinitions.value).length === 0) {
             await fetchItemDefinitions();
         }
@@ -88,7 +88,7 @@ export const useCustomItemStore = defineStore('customItem', () => {
         } catch (error) {
             console.error('Failed to fetch user items', error);
 
-            // Fallback to just static defaults
+            // 정적 기본값으로 대체 (Fallback)
             avatarItems.value = formatMyItems([], 'AVATAR', AVATAR_DECORATIONS);
             popoverItems.value = formatMyItems([], 'POPOVER', POPOVER_DECORATIONS);
             themeItems.value = formatMyItems([], 'THEME', PROFILE_THEMES);
@@ -101,7 +101,7 @@ export const useCustomItemStore = defineStore('customItem', () => {
         const result = [];
         const added = new Set();
 
-        // 1) Static defaults (항상 보이도록 먼저 주입)
+        // 1) 정적 기본값 (항상 보이도록 먼저 주입)
         if (staticDefaults) {
             Object.keys(staticDefaults).forEach((key) => {
                 if (added.has(key)) return;
@@ -117,7 +117,7 @@ export const useCustomItemStore = defineStore('customItem', () => {
             });
         }
 
-        // 2) Backend items (정적 뒤에 append)
+        // 2) 백엔드 아이템 (정적 뒤에 추가)
         (backendItems || []).forEach((item) => {
             const idKey = String(item.id);
             if (added.has(item.id) || added.has(idKey)) return;
@@ -150,11 +150,11 @@ export const useCustomItemStore = defineStore('customItem', () => {
 
         const k = typeof key === 'string' ? key : String(key);
 
-        // 1) dynamic definitions 우선
+        // 1) 동적 정의 우선
         if (itemDefinitions.value[key]) return itemDefinitions.value[key];
         if (itemDefinitions.value[k]) return itemDefinitions.value[k];
 
-        // 2) static fallback
+        // 2) 정적 폴백
         if (type === 'AVATAR') return AVATAR_DECORATIONS[k] || AVATAR_DECORATIONS[key];
         if (type === 'POPOVER') return POPOVER_DECORATIONS[k] || POPOVER_DECORATIONS[key];
         if (type === 'THEME') return PROFILE_THEMES[k] || PROFILE_THEMES[key];

@@ -28,11 +28,9 @@ import java.nio.file.Paths;
 public class AdminController {
 
     private final AdminService adminService;
-    private final UserMapper userMapper; // To fetch author details for response if needed
+    private final UserMapper userMapper; // 응답용 작성자 정보 fetch
 
-    // Check Admin Role helper (Optional, assuming Spring Security handles it via separate config or PreAuthorize)
-    // But since we didn't add @PreAuthorize, we might want to check here or rely on SecurityContext
-    // We already added User.role field, but SecurityConfig might need update to secure /api/admin/**
+    // 관리자 권한 확인 (SecurityConfig 또는 @PreAuthorize 처리 필요)
     
     @GetMapping("/quizzes")
     public PageResponse<QuizResponse> getAdminQuizzes(
@@ -45,11 +43,10 @@ public class AdminController {
         int totalPages = (int) Math.ceil((double) totalElements / size);
         
         // Convert to QuizResponse
-        // Note: This matches QuizService logic slightly but without complex like/follow checks for efficiency or reuse logic
-        // For Admin view, basic info + isHidden is key.
+        // Admin 뷰를 위한 기본 정보 및 숨김 상태 조회 (효율성을 위해 좋아요/팔로우 체크 제외)
         
         List<QuizResponse> content = quizzes.stream().map(quiz -> {
-            // Need author info?
+            // 작성자 정보 매핑
              UserResponse author = userMapper.findById(quiz.getUserId())
                      .map(u -> UserResponse.builder()
                              .id(u.getId())
@@ -94,7 +91,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // --- Custom Item Management ---
+    // --- 커스텀 아이템 관리 ---
 
     @Autowired
     private com.problemio.item.service.CustomItemService customItemService;
@@ -149,21 +146,20 @@ public class AdminController {
         }
 
         try {
-            // Determine directory based on type
+            // 타입별 디렉토리 결정
             String subDir = "theme";
             if ("POPOVER".equalsIgnoreCase(type)) subDir = "popover";
             else if ("AVATAR".equalsIgnoreCase(type)) subDir = "avatar";
             
-            // Format: public/{subDir}/{timestamp}_{originalName}
+            // 형식: public/{subDir}/{timestamp}_{originalName}
             String originalFilename = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
             String filename = System.currentTimeMillis() + "_" + originalFilename;
             String s3Key = "public/" + subDir + "/" + filename;
             
-            // Upload to S3
+            // S3 업로드
             String uploadedPath = s3Service.upload(file, s3Key);
             
-            // Return path (s3Key) to be stored in config
-            // Frontend resolveImageUrl handles "public/..." path by prepending S3 Base URL
+            // DB 저장용 경로(s3Key) 반환 (프론트엔드에서 Base URL 연결)
             return ResponseEntity.ok(uploadedPath);
 
         } catch (Exception e) {

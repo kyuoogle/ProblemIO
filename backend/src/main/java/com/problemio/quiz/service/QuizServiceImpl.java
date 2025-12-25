@@ -43,35 +43,24 @@ import com.problemio.global.util.TimeUtils;
 @Transactional
 public class QuizServiceImpl implements QuizService {
 
-    // ===== Repositories / collaborators =====
-    // 퀴즈 기본 정보 CRUD 및 검색을 담당하는 매퍼
+    // 퀴즈 기본 정보, 좋아요, 문제, 정답 매퍼
     private final QuizMapper quizMapper;
-    // 퀴즈 좋아요(Like) 관련 매퍼
     private final QuizLikeMapper quizLikeMapper;
-    // 문제(Question) 관련 매퍼 - 퀴즈 내부 질문을 다룸
     private final QuestionMapper questionMapper;
-    // 문제 정답(QuestionAnswer) 관련 매퍼 - 퀴즈 내부 보기/정답을 다룸
     private final QuestionAnswerMapper questionAnswerMapper;
-    // 유저 정보 조회 매퍼
+    // 유저, 팔로우, 제출 관련 매퍼
     private final UserMapper userMapper;
-    // 팔로우 관계 조회 매퍼
     private final FollowMapper followMapper;
-    // 제출(Submission) 관련 매퍼
     private final SubmissionMapper submissionMapper;
-    // 제출 상세(SubmissionDetail) 관련 매퍼
     private final SubmissionDetailMapper submissionDetailMapper;
-    // 댓글 수 집계용
+    // 댓글 관련 매퍼
     private final CommentMapper commentMapper;
-    // 댓글 좋아요 정리용
     private final CommentLikeMapper commentLikeMapper;
-    // 캐시 관리자 (userProfile 캐시 활용)
+    // 캐시 관리
     private final CacheManager cacheManager;
 
     /**
-     * 퀴즈 목록 조회 (페이징 + 정렬 + 검색)
-     * - page, size를 기반으로 offset 계산
-     * - 정렬 기준(sort)과 검색 키워드(keyword)를 이용해 퀴즈 목록 조회
-     * - QuizSummaryDto 리스트와 페이지 정보(totalPages, totalElements) 반환
+     * 퀴즈 목록 조회 (페이징, 정렬, 검색)
      */
     @Override
     @Transactional(readOnly = true)
@@ -80,9 +69,8 @@ public class QuizServiceImpl implements QuizService {
         int safeSize = Math.max(size, 1);   // 최소 1건 이상 보장
         int offset = (safePage - 1) * safeSize;
 
-        // 조건에 맞는 퀴즈 목록 조회 (Question/Answer는 포함하지 않음)
+        // 퀴즈 목록 검색 및 전체 개수 조회
         List<Quiz> quizzes = quizMapper.searchQuizzes(offset, safeSize, sort, keyword);
-        // 전체 개수 조회
         int total = quizMapper.countQuizzes(keyword);
 
         Map<Long, Integer> commentCountMap = quizzes.isEmpty()
@@ -106,7 +94,7 @@ public class QuizServiceImpl implements QuizService {
         );
     }
 
-    // ===== Quiz 생성/수정/삭제 (퀴즈 + 하위 질문/정답까지 한 번에 처리) =====
+    // ===== 퀴즈 생성/수정/삭제 =====
     @Override
     public QuizResponse createQuiz(Long userId, QuizCreateRequest request) {
         Quiz quiz = new Quiz();
@@ -122,12 +110,10 @@ public class QuizServiceImpl implements QuizService {
         quiz.setCreatedAt(now);
         quiz.setUpdatedAt(now);
 
-        // 퀴즈 기본 정보 저장
+        // 퀴즈 삽입 -> 문제/정답 저장 -> 응답 생성
         quizMapper.insertQuiz(quiz);
-        // 하위 문제/정답 저장
         saveQuestions(quiz.getId(), request.getQuestions());
 
-        // 방금 생성한 퀴즈에 대한 응답 DTO 구성 (질문/작성자 정보는 지금은 null)
         return buildQuizResponse(quiz, null, null, null);
     }
 
@@ -141,7 +127,7 @@ public class QuizServiceImpl implements QuizService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        // null이 아닌 필드들만 선택적으로 수정
+        // 필드 부분 업데이트
         if (request.getTitle() != null) {
             quiz.setTitle(request.getTitle());
         }
@@ -155,24 +141,24 @@ public class QuizServiceImpl implements QuizService {
             quiz.setPublic(request.getIsPublic());
         }
 
-        // 퀴즈 기본 정보 업데이트
+        // 기본 정보 업데이트
         quiz.setUpdatedAt(TimeUtils.now());
         quizMapper.updateQuiz(quiz);
 
-        // 질문 리스트가 넘어온 경우 기존 질문/정답 전부 삭제 후 새로 저장
+        // 질문 목록 재설정 (삭제 후 재생성)
         if (request.getQuestions() != null) {
             List<Question> existing = questionMapper.findByQuizId(quizId);
-            // 각 질문에 연결된 정답 삭제
+            // 기존 질문, 정답 삭제
             for (Question question : existing) {
                 questionAnswerMapper.deleteByQuestionId(question.getId());
             }
-            // 질문 목록 삭제
+
             questionMapper.deleteByQuizId(quizId);
-            // 요청 기반으로 질문/정답 다시 저장
+            // 새 질문/정답 저장
             saveQuestions(quizId, request.getQuestions());
         }
 
-        // 수정된 퀴즈 + 질문 목록 + 작성자 정보 포함한 응답
+        // 응답 생성
         return buildQuizResponse(quiz, loadQuestions(quizId), findAuthor(quiz.getUserId()), null);
     }
 
@@ -186,17 +172,17 @@ public class QuizServiceImpl implements QuizService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        // 관련 댓글/댓글 좋아요 정리
+        // 댓글 및 관련 데이터 삭제
         List<Long> commentIds = commentMapper.findIdsByQuizId(quizId);
         if (!commentIds.isEmpty()) {
             commentLikeMapper.deleteByCommentIds(commentIds);
             commentMapper.softDeleteByQuizId(quizId, TimeUtils.now());
         }
 
-        // 관련 좋아요 제거
+        // 퀴즈 좋아요 삭제
         quizLikeMapper.deleteByQuizId(quizId);
 
-        // 제출 기록 선삭제 (FK 충돌 방지)
+        // 제출 기록 삭제 (FK 제약 고려)
         List<Question> questions = questionMapper.findByQuizId(quizId);
         List<Long> questionIds = questions.stream()
                 .map(Question::getId)
@@ -206,7 +192,7 @@ public class QuizServiceImpl implements QuizService {
         }
         submissionMapper.deleteByQuizId(quizId);
 
-        // 하위 질문/정답 삭제
+        // 질문 및 정답 삭제
         for (Question question : questions) {
             questionAnswerMapper.deleteByQuestionId(question.getId());
         }
@@ -216,14 +202,14 @@ public class QuizServiceImpl implements QuizService {
         quizMapper.deleteQuiz(quizId);
     }
 
-    // ===== Quiz 조회 (퀴즈 + 질문/정답 + 작성자 + 좋아요/팔로우 상태) =====
+    // ===== 퀴즈 조회 =====
     @Override
     @Transactional
     public QuizResponse getQuiz(Long quizId, Long viewerId) {
         Quiz quiz = quizMapper.findById(quizId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
-        // 조회 시 조회수 1 증가
+        // 조회수 증가
         quizMapper.incrementPlayCount(quizId);
         quiz.setPlayCount(quiz.getPlayCount() + 1);
 
@@ -233,7 +219,7 @@ public class QuizServiceImpl implements QuizService {
         Boolean isLikedByMe = null;
         Boolean isFollowedByMe = null;
 
-        // 로그인한 사용자일 때만 좋아요/팔로우 여부 계산
+        // 상태 정보 확인 (좋아요, 팔로우)
         if (viewerId != null) {
             isLikedByMe = quizLikeMapper.findByUserIdAndQuizId(viewerId, quizId).isPresent();
             isFollowedByMe = followMapper.exists(viewerId, quiz.getUserId()) > 0;
@@ -242,7 +228,7 @@ public class QuizServiceImpl implements QuizService {
         return buildQuizResponse(quiz, questions, author, isLikedByMe, isFollowedByMe);
     }
 
-    // ===== 조회 전용 목록 =====
+    // ===== 공개 목록 조회 =====
     @Override
     @Transactional(readOnly = true)
     public List<QuizSummaryDto> getPublicQuizzes() {
@@ -252,8 +238,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     /**
-     * 특정 유저가 만든 퀴즈 목록 조회
-     * - 제작자 프로필 화면에서 사용
+     * 특정 유저의 퀴즈 목록 조회
      */
     @Override
     @Transactional(readOnly = true)
@@ -264,10 +249,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     /**
-     * 퀴즈 좋아요 등록
-     * - 퀴즈 존재 여부 확인
-     * - 이미 좋아요 했으면 무시
-     * - 좋아요 insert 후 likeCount 증가
+     * 퀴즈 좋아요
      */
     @Override
     public void likeQuiz(Long userId, Long quizId) {
@@ -275,15 +257,15 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = quizMapper.findById(quizId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
-        // 자기 퀴즈면 좋아요 금지
+        // 본인 퀴즈 좋아요 불가
         if (Objects.equals(quiz.getUserId(), userId)) {
             throw new BusinessException(ErrorCode.CANNOT_LIKE_OWN_QUIZ);
         }
 
-        // 이미 좋아요를 눌렀는지 체크
+        // 이미 좋아요 여부 확인
         boolean alreadyLiked = quizLikeMapper.findByUserIdAndQuizId(userId, quizId).isPresent();
         if (alreadyLiked) {
-            return; // 중복 좋아요 방지
+            return; 
         }
 
         // 좋아요 레코드 생성 후 카운트 증가
@@ -293,8 +275,6 @@ public class QuizServiceImpl implements QuizService {
 
     /**
      * 퀴즈 좋아요 취소
-     * - 퀴즈 존재 여부 확인
-     * - 좋아요 레코드 삭제 후 likeCount 감소
      */
     @Override
     public void unlikeQuiz(Long userId, Long quizId) {
@@ -305,7 +285,7 @@ public class QuizServiceImpl implements QuizService {
         quizMapper.decrementLikeCount(quizId);
     }
 
-    // ===== 내부 헬퍼: Quiz → DTO =====
+    // ===== DTO 변환 헬퍼 =====
     private QuizSummaryDto toSummaryDto(Quiz quiz, Map<Long, Integer> commentCountMap) {
         int commentCount = commentCountMap != null
                 ? commentCountMap.getOrDefault(quiz.getId(), 0)
@@ -322,13 +302,13 @@ public class QuizServiceImpl implements QuizService {
                 .build();
     }
 
-    // 기존 호출 호환용 (댓글 수 정보 없을 때)
+    // 댓글 수 정보가 없을 때의 호환용 메서드
     private QuizSummaryDto toSummaryDto(Quiz quiz) {
         return toSummaryDto(quiz, Map.of());
     }
 
     /**
-     * QuizResponse를 생성하는 헬퍼 메서드 (isFollowedByMe 없는 버전)
+     * 응답 객체 생성 (팔로우 여부 미포함)
      */
     private QuizResponse buildQuizResponse(Quiz quiz,
                                            List<QuestionResponse> questions,
@@ -338,8 +318,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     /**
-     * QuizResponse를 생성하는 공통 헬퍼 메서드
-     * - 퀴즈 기본 정보 + 질문 목록 + 작성자 정보 + 좋아요/팔로우 여부를 포함한 응답 DTO 생성
+     * 응답 객체 생성 (공통)
      */
     private QuizResponse buildQuizResponse(Quiz quiz,
                                            List<QuestionResponse> questions,
@@ -362,7 +341,7 @@ public class QuizServiceImpl implements QuizService {
                 .build();
     }
 
-    // ===== 내부 헬퍼: Quiz 하위 Question/Answer 저장/로딩 =====
+    // ===== 질문/정답 저장 및 로딩 헬퍼 =====
     private void saveQuestions(Long quizId, List<QuestionCreateRequest> questions) {
         if (questions == null || questions.isEmpty()) {
             return;
@@ -372,17 +351,14 @@ public class QuizServiceImpl implements QuizService {
         for (QuestionCreateRequest request : questions) {
             Question question = new Question();
             question.setQuizId(quizId);
-            // 요청에 order가 없으면 index 값 사용
+            // 순서 미지정 시 인덱스 사용
             int order = request.getQuestionOrder() != null ? request.getQuestionOrder() : index;
             question.setQuestionOrder(order);
             question.setImageUrl(request.getImageUrl());
             question.setDescription(request.getDescription());
             question.setCreatedAt(TimeUtils.now());
 
-            // 질문 저장
             questionMapper.insertQuestion(question);
-
-            // 질문에 대한 정답 목록 저장
             saveAnswers(question.getId(), request.getAnswers());
             index++;
         }
@@ -395,7 +371,7 @@ public class QuizServiceImpl implements QuizService {
 
         int idx = 1;
         for (AnswerCreateRequest answerRequest : answers) {
-            // 빈 문자열 정답은 무시
+            // 빈 정답 제외
             if (answerRequest.getAnswerText() == null || answerRequest.getAnswerText().isBlank()) {
                 continue;
             }
@@ -403,10 +379,9 @@ public class QuizServiceImpl implements QuizService {
             QuestionAnswer answer = new QuestionAnswer();
             answer.setQuestionId(questionId);
             answer.setAnswerText(answerRequest.getAnswerText());
-            // sortOrder가 없으면 idx 사용
+            answer.setAnswerText(answerRequest.getAnswerText());
             answer.setSortOrder(answerRequest.getSortOrder() != null ? answerRequest.getSortOrder() : idx);
 
-            // 정답 저장
             questionAnswerMapper.insertAnswer(answer);
             idx++;
         }
@@ -446,7 +421,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     /**
-     * 지정된 질문 ID들의 정답을 한 번에 조회해 맵으로 반환한다.
+     * 복수의 질문 ID에 대한 정답 조회
      */
     private Map<Long, List<QuestionAnswerDto>> loadAnswersByQuestionIds(List<Long> questionIds) {
         if (questionIds == null || questionIds.isEmpty()) {
@@ -485,8 +460,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     /**
-     * QuizLike 엔티티를 생성하는 헬퍼 메서드
-     * - userId, quizId만 세팅
+     * 좋아요 엔티티 생성 헬퍼
      */
     private com.problemio.quiz.domain.QuizLike buildQuizLike(Long userId, Long quizId) {
         com.problemio.quiz.domain.QuizLike like = new com.problemio.quiz.domain.QuizLike();
@@ -497,7 +471,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     /*
-     * 마이 페이지 내 좋아요한 퀴즈, 유저가 팔로우하는 유저의 퀴즈 목록 조회 위한 메서드
+     * 팔로우한 유저의 퀴즈 목록 조회
      */
     @Override
     @Transactional(readOnly = true)
@@ -519,7 +493,7 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = quizMapper.findById(quizId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUIZ_NOT_FOUND));
 
-        // 비공개 퀴즈 접근 제어: 제작자만 접근 가능
+        // 비공개 퀴즈 접근 제어
         if (!quiz.isPublic() && (viewerId == null || !quiz.getUserId().equals(viewerId))) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
@@ -535,7 +509,7 @@ public class QuizServiceImpl implements QuizService {
         for (int val : allowed) {
             if (val == limit) return val;
         }
-        // 가장 가까운 상한으로 보정
+        // 근접한 상한 값으로 보정
         int closest = allowed[allowed.length - 1];
         for (int val : allowed) {
             if (limit <= val) {

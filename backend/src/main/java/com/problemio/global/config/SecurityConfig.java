@@ -32,7 +32,7 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        // HTTPS 도메인 및 로컬 개발 환경 허용
+        // HTTPS 및 로컬 개발 환경 CORS 허용
         configuration.setAllowedOriginPatterns(java.util.Arrays.asList(
             "https://problemio.cloud", 
             "https://www.problemio.cloud", 
@@ -41,7 +41,7 @@ public class SecurityConfig {
         ));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
-        configuration.setAllowCredentials(true); // 쿠키/인증정보 포함 허용
+        configuration.setAllowCredentials(true); // 인증 정보(쿠키 등) 포함 허용
 
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -74,24 +74,24 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Auth endpoints (로그인, 회원가입 등)
+                        // 1. 인증 엔드포인트 (로그인, 회원가입)
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/reissue").permitAll()
-                        .requestMatchers("/api/auth/email/**").permitAll() // 이메일 인증 관련
+                        .requestMatchers("/api/auth/email/**").permitAll() // 이메일 인증
                         
-                        // [Front] Frontend Static Resources
+                        // [Front] 프론트엔드 정적 리소스
                         .requestMatchers("/", "/index.html", "/assets/**", "/*.ico", "/*.png", "/*.svg").permitAll()
 
-                        // [Admin] 관리자 전용
+                        // [Admin] 관리자 페이지
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // 2. Static/file access
+                        // 2. 정적 파일 접근
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/theme/**").permitAll()    
                         .requestMatchers("/popover/**").permitAll()  
                         .requestMatchers("/avatar/**").permitAll()   
                         .requestMatchers(HttpMethod.POST, "/api/files/**").authenticated()
 
-                        // 3. Comments (댓글: 조회/작성/수정/삭제는 허용, 좋아요는 인증 필요)
+                        // 3. 댓글 (조회/작성/삭제 허용, 좋아요는 인증 필요)
                         .requestMatchers(HttpMethod.GET, "/api/quizzes/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/*/replies").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/*/comments").permitAll()
@@ -99,8 +99,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/comments/*/likes").authenticated()
 
-                        // 4. Public quiz and submission endpoints
-                        // (퀴즈 조회, 제출, 결과 조회는 누구나 가능)
+                        // 4. 공개 퀴즈 및 제출 (누구나 가능)
                         .requestMatchers(HttpMethod.GET, "/api/quizzes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/*/submissions").permitAll()
                         .requestMatchers("/api/submissions/**").permitAll()
@@ -110,36 +109,35 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/challenges", "/api/challenges/*").permitAll()
                         .requestMatchers("/api/challenges/**").authenticated()
 
-                        // (퀴즈 생성/수정/삭제는 인증된 유저만)
+                        // 퀴즈 생성/수정/삭제: 인증 필요
                         .requestMatchers(HttpMethod.POST, "/api/quizzes/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/quizzes/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/quizzes/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/quizzes/**").authenticated()
 
-                        // 5. User lookups (유저 정보 조회 관련)
-                        // '/me'는 구체적인 경로이므로 와일드카드(*)보다 위에 있어야 함
+                        // 5. 유저 정보 조회 ('/me' 우선 순위 주의)
                         .requestMatchers("/api/users/checkNickname").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/**").authenticated()
 
-                        // [추가됨] 팝오버 정보 조회 (게스트 허용)
+                        // 팝오버 조회 (게스트 허용)
                         .requestMatchers(HttpMethod.GET, "/api/users/*/popover").permitAll()
 
-                        // 커스텀 아이템 정보 조회 (누구나 가능)
+                        // 커스텀 아이템 조회 (전체 공개)
                         .requestMatchers(HttpMethod.GET, "/api/items/definitions").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/items/my").authenticated()
 
-                        // 타인 퀴즈 목록 및 프로필 조회 (게스트 허용)
+                        // 타인 퀴즈/프로필 조회 (게스트 허용)
                         .requestMatchers(HttpMethod.GET, "/api/users/*/quizzes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
 
-                        // 6. 그 외 나머지 요청
+                        // 6. 기타 요청
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/follows/**").authenticated()
 
-                        // [중요] 모든 /api/** 요청은 인증 필요 (위에서 허용된 것 제외)
+                        // [중요] 나머지 API 요청 인증 필수
                         .requestMatchers("/api/**").authenticated()
 
-                        // [중요] 그 외 모든 요청(프론트엔드 라우트)은 허용 -> WebController가 index.html로 보냄
+                        // [중요] 프론트엔드 라우트 허용 (WebController 위임)
                         .anyRequest().permitAll()
                 )
                 .httpBasic(basic -> basic.disable())

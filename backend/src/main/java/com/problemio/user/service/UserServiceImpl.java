@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateProfile(Long userId, UserResponse request, MultipartFile file) {
         UserResponse oldUser = getUserById(userId);
         
-        // 금칙어 검사 (회원가입 로직과 동일)
+        // 금칙어 검사
         String nickname = request.getNickname();
         if (nickname != null
                 && !nickname.equals(oldUser.getNickname())
@@ -96,10 +96,10 @@ public class UserServiceImpl implements UserService {
 
         if (file != null && !file.isEmpty()) {
             
-            // 기존 파일 삭제 (Service에 위임)
+            // 기존 파일 삭제
             s3Service.delete(oldFilePath);
 
-            // 새 파일 저장 (Service에 위임)
+            // 새 파일 저장
             String originalFilename = file.getOriginalFilename();
             String extension = "";
             if (originalFilename != null && originalFilename.lastIndexOf('.') > -1) {
@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
-        // decoration/theme 값이 URL로 넘어오면 ID만 남기도록 정규화
+        // URL 형태의 설정값 정규화 (ID만 추출)
         request.setProfileTheme(normalizeDecorationValue(request.getProfileTheme()));
         request.setAvatarDecoration(normalizeDecorationValue(request.getAvatarDecoration()));
         request.setPopoverDecoration(normalizeDecorationValue(request.getPopoverDecoration()));
@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 인증 캐시(UserDetails) 무효화 - 이메일 단위 캐시이므로 이메일 키로 제거한다.
+     * 인증 캐시(UserDetails) 무효화 (이메일 및 ID 기준)
      */
     private void evictUserCaches(String email, Long userId) {
         Cache cache = cacheManager.getCache("userDetails");
@@ -267,8 +267,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 프로필 테마/아바타/팝오버 값이 URL로 전달되면 파일명(확장자 제거)만 남기도록 정규화한다.
-     * 이미 ID 형태면 그대로 반환.
+     * 프로필 설정값 정규화: URL에서 파일명(ID) 추출
+     * 이미 ID 형태인 경우 그대로 반환
      */
     private String normalizeDecorationValue(String value) {
         if (value == null || value.isBlank()) {

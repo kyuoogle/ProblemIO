@@ -47,7 +47,7 @@ app.use(PrimeVue, {
               100: "#cff4f8",
               200: "#a5e9f2",
               300: "#6cd9e8",
-              400: "#27b5cf", /* Vivid Cyan Main */
+              400: "#27b5cf", /* 선명한 시안(Cyan) 메인 */
               500: "#0ea0bc",
               600: "#10809a",
               700: "#13687f",
@@ -101,8 +101,8 @@ app.use(PrimeVue, {
   },
 });
 
-// [Environment Variable Setup]
-// Set global CSS variables for Start Background Images using Env Var
+// [환경 변수 설정]
+// 환경 변수를 사용하여 시작 배경 이미지용 전역 CSS 변수 설정
 const s3BaseUrl = import.meta.env.VITE_S3_BASE_URL;
 if (s3BaseUrl) {
   const bgLight = `url('${s3BaseUrl}/public/asset/bg-light.png')`;

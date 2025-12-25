@@ -101,7 +101,7 @@ onMounted(() => {
   }
 })
 
-// ===== Derived Data =====
+// ===== 파생 데이터 (Derived Data) =====
 const totalQuestions = computed(
   () => quizStore.quizResult?.totalQuestions || 0,
 )
@@ -131,7 +131,7 @@ const resultMessage = computed(() => {
   return 'Keep Practicing!'
 })
 
-// ===== Actions =====
+// ===== 액션 (Actions) =====
 const goAuthorQuizzes = () => {
   if (!authorId.value) return
   router.push(`/users/${authorId.value}`)

@@ -265,7 +265,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   flex-shrink: 0;
-  background: var(--bg-surface); /* Changed from --color-bg-card to --bg-surface (White) */
+  background: var(--bg-surface); /* --color-bg-card에서 --bg-surface(흰색)로 변경됨 */
   border: 1px solid var(--color-border);
   color: var(--color-text-main);
 }
@@ -360,7 +360,7 @@ onMounted(() => {
 
 .filter-button.p-button {
   color: var(--color-text-muted);
-  background: var(--bg-surface); /* Changed from --color-bg-card to --bg-surface (White) */
+  background: var(--bg-surface); /* --color-bg-card에서 --bg-surface(흰색)로 변경됨 */
   border-color: var(--color-border);
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   height: 48px;
@@ -405,7 +405,7 @@ onMounted(() => {
   }
 }
 
-/* Card UI(기존 유지) */
+/* 카드 UI(기존 유지) */
 .quiz-thumbnail {
   width: 100%;
   height: 200px;

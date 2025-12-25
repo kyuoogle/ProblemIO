@@ -122,6 +122,7 @@
                 <Password
                   id="confirmPassword"
                   v-model="formData.confirmPassword"
+                  :feedback="false"
                   toggleMask
                   placeholder="••••••••"
                   :class="{ 'p-invalid': errors.confirmPassword }"
@@ -196,7 +197,7 @@ const loading = ref(false);
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const bannedNicknames = ["admin", "관리자", "운영자"];
 
-// Computed Properties
+// 계산된 속성 (Computed Properties)
 const isEmailValid = computed(() => emailRegex.test(formData.value.email));
 
 const isVerificationCodeValid = computed(() => /^\d{6}$/.test(formData.value.verificationCode));
@@ -224,7 +225,7 @@ const isFormValid = computed(() => {
   );
 });
 
-// --- Validation Functions ---
+// --- 유효성 검사 함수 ---
 
 const validateEmail = () => {
   if (!formData.value.email) {
@@ -299,7 +300,7 @@ const clearError = (field: string) => {
   delete errors.value[field];
 };
 
-// --- Handlers ---
+// --- 핸들러 ---
 
 // 1. 이메일 인증코드 전송
 const handleSendVerificationCode = async () => {

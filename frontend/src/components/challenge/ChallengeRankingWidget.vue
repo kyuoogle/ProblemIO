@@ -117,7 +117,7 @@ const lastUpdatedText = computed(() => formatDateTime(lastUpdated.value));
 const formatPlayTime = (ms) => {
   if (ms === null || ms === undefined) return "-";
 
-  // Check if it's a number
+  // 숫자인지 확인
   const val = Number(ms);
   if (isNaN(val)) return "-";
 
@@ -133,7 +133,7 @@ const displayName = (row) => {
   const name = (row?.nickname ?? "").trim();
   if (name) return name;
   if (row?.userId) return `사용자#${row.userId}`;
-  return "Guest"; // For dummy rank
+  return "Guest"; // 더미 랭크용
 };
 
 const rankEmoji = (rank) => {
@@ -172,16 +172,16 @@ const authStore = useAuthStore();
 const fetchRanking = async () => {
   if (!props.challengeId) return;
 
-  // Don't show loading on polling, only first load
+  // 폴링 시 로딩 표시 안 함, 첫 로드 시에만 표시
   if (!lastUpdated.value) loading.value = true;
   error.value = "";
 
   try {
     const data = await getLeaderboard(props.challengeId);
-    // data structure: { topRankings: [], myRanking: {} }
+    // 데이터 구조: { topRankings: [], myRanking: {} }
     topRankings.value = data.topRankings || [];
 
-    // Merge backend ranking data with local auth data for better display
+    // 더 나은 표시를 위해 백엔드 랭킹 데이터와 로컬 인증 데이터 병합
     if (data.myRanking) {
       myRanking.value = {
         ...data.myRanking,
@@ -210,7 +210,7 @@ const clearTimer = () => {
 
 const setupPolling = () => {
   clearTimer();
-  // Poll every 10 seconds (matches backend cache)
+  // 10초마다 폴링 (백엔드 캐시와 일치)
   timerId.value = setInterval(fetchRanking, 10000);
 };
 
@@ -239,7 +239,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   box-sizing: border-box;
-  padding: 20px; /* Original padding */
+  padding: 20px; /* 원래 패딩 */
   border-radius: 16px;
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
@@ -300,17 +300,17 @@ onUnmounted(() => {
 
 .table-row {
   display: grid;
-  grid-template-columns: 50px 40px minmax(0, 1fr); /* Original Grid */
+  grid-template-columns: 50px 40px minmax(0, 1fr); /* 원래 그리드 */
   align-items: center;
   gap: 8px;
-  padding: 10px; /* Original Padding */
+  padding: 10px; /* 원래 패딩 */
   border-radius: 10px;
   background: var(--color-background-mute);
   transition: transform 0.1s;
 }
 
-/* Updated Colors (Vivid Cyan) */
-/* Updated Colors (Theme Variables) */
+/* 업데이트된 색상 (비비드 시안) */
+/* 업데이트된 색상 (테마 변수) */
 .table-row.rank-gold {
   background: color-mix(in srgb, var(--primary), transparent 85%);
   border: 1px solid color-mix(in srgb, var(--primary), transparent 40%);
@@ -384,11 +384,11 @@ onUnmounted(() => {
 .nick-text {
   font-weight: 700;
   color: var(--color-heading);
-  font-size: 0.95rem; /* Original Font Size */
+  font-size: 0.95rem; /* 원래 폰트 크기 */
 }
 
 .score-big {
-  color: var(--primary); /* Updated to Vivid Cyan */
+  color: var(--primary); /* 비비드 시안으로 업데이트됨 */
   font-weight: 800;
   font-family: monospace;
 }
@@ -406,7 +406,7 @@ onUnmounted(() => {
   color: var(--color-text-muted);
 }
 
-/* My Ranking Section */
+/* 내 랭킹 섹션 */
 .my-ranking-divider {
   display: flex;
   align-items: center;
@@ -421,7 +421,7 @@ onUnmounted(() => {
   background: var(--color-border);
 }
 .table-row.my-rank {
-  border: 2px solid var(--primary); /* Updated to Vivid Cyan */
-  background: var(--bg-surface-hover); /* Updated background */
+  border: 2px solid var(--primary); /* 비비드 시안으로 업데이트됨 */
+  background: var(--bg-surface-hover); /* 업데이트된 배경 */
 }
 </style>

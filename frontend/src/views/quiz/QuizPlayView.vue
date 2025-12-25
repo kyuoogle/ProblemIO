@@ -6,7 +6,7 @@
       </div>
 
       <div v-else class="flex flex-col gap-4 items-center">
-        <!-- 상단 제목 + 진행도 (Centered) -->
+        <!-- 상단 제목 + 진행도 (중앙 정렬) -->
         <div class="w-full max-w-2xl mb-1">
           <div class="flex justify-between items-center mb-1">
             <h2 class="text-2xl font-bold m-0 text-center w-full">
@@ -18,7 +18,7 @@
           </div>
         </div>
 
-        <!-- 1. Question Image (Separated & Fixed Size) -->
+        <!-- 1. 문제 이미지 (분리됨 & 고정 크기) -->
         <div v-if="currentQuestion?.imageUrl" class="thumbnail-frame">
           <img
             :src="currentQuestion.imageUrl"
@@ -27,20 +27,20 @@
           />
         </div>
 
-        <!-- 2. Content Card (Question & Input) -->
+        <!-- 2. 콘텐츠 카드 (질문 & 입력) -->
         <Card class="quiz-card w-full max-w-2xl">
           <template #content>
             <div class="flex flex-col h-full justify-between items-center text-center w-full">
               <!-- 1) 평소 문제 풀이 화면 -->
               <template v-if="!quizStore.showAnswerCard">
-                <!-- Top Content: Description & Input -->
+                <!-- 상단 콘텐츠: 설명 & 입력 -->
                 <div class="flex-1 flex flex-col justify-center items-center w-full max-w-md gap-6">
-                   <!-- Question Description -->
+                   <!-- 질문 설명 -->
                   <div v-if="currentQuestion?.description" class="text-xl font-medium leading-relaxed max-w-lg question-description">
                     {{ currentQuestion.description }}
                   </div>
 
-                  <!-- Input -->
+                  <!-- 입력 -->
                   <div class="w-full">
                     <label class="block text-left text-sm font-bold mb-2 ml-1 text-color-secondary">정답 입력</label>
                     <InputText
@@ -52,7 +52,7 @@
                   </div>
                 </div>
 
-                <!-- Bottom Action: Button -->
+                <!-- 하단 액션: 버튼 -->
                 <div class="w-full max-w-md mt-4">
                   <Button
                     label="제출하기"
@@ -67,9 +67,9 @@
 
               <!-- 2) 한 문제에 대한 정답/오답 카드 -->
               <template v-else>
-                <!-- Top Content: Result Info -->
+                <!-- 상단 콘텐츠: 결과 정보 -->
                 <div class="flex-1 flex flex-col justify-center items-center w-full max-w-md gap-2">
-                   <!-- Result Status -->
+                   <!-- 결과 상태 -->
                   <div
                     class="text-2xl font-extrabold"
                     :class="quizStore.lastAnswerResult.correct ? 'text-green-500' : 'text-red-500'"
@@ -97,7 +97,7 @@
                   </div>
                 </div>
 
-                <!-- Bottom Action: Next Button -->
+                <!-- 하단 액션: 다음 버튼 -->
                 <div class="w-full max-w-md mt-2">
                   <Button
                     v-if="!isLastQuestion"
@@ -382,7 +382,7 @@ onUnmounted(() => {
 }
 
 .quiz-card :deep(.p-card-body) {
-  height: 300px; /* Fixed height for the card body */
+  height: 300px; /* 카드 바디 높이 고정 */
   display: flex;
   flex-direction: column;
 }
@@ -394,7 +394,7 @@ onUnmounted(() => {
   color: var(--color-heading);
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Pin content and buttons */
+  justify-content: space-between; /* 콘텐츠와 버튼 고정 */
 }
 
 .thumbnail-frame {
@@ -406,7 +406,7 @@ onUnmounted(() => {
 
 .thumbnail-image {
   width: 606px;
-  height: 344px; /* Reverted to original fixed height */
+  height: 344px; /* 기존 고정 높이 복구 */
   max-width: 100%;
   object-fit: contain;
   border-radius: 12px;
@@ -421,6 +421,6 @@ onUnmounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word; /* Ensure long words don't break layout */
+  word-break: break-word; /* 긴 단어로 인한 레이아웃 깨짐 방지 */
 }
 </style>

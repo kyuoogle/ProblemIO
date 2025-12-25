@@ -13,14 +13,14 @@
       </div>
 
       <div v-else-if="challenge" class="flex flex-col lg:flex-row justify-center gap-6 items-start relative">
-        <!-- Left Column: Challenge Info (Centered Fixed Width) -->
+        <!-- 좌측 컬럼: 챌린지 정보 (중앙 정렬 고정 너비) -->
         <div class="w-full max-w-3xl flex flex-col gap-6">
           <Card class="challenge-info-card shadow-lg border-0 rounded-2xl overflow-hidden">
             <template #header>
               <div class="aspect-video bg-surface-100 overflow-hidden thumbnail-frame relative">
                 <img v-if="challenge.targetQuiz?.thumbnailUrl" :src="resolveImageUrl(challenge.targetQuiz.thumbnailUrl)" class="w-full h-full object-scale-down" alt="Challenge Thumbnail" />
                 <div v-else class="w-full h-full flex items-center justify-center bg-surface-100 text-gray-400">
-                  <!-- Placeholder Icon -->
+                  <!-- 플레이스홀더 아이콘 -->
                   <i class="pi pi-bolt text-6xl text-gray-400"></i>
                 </div>
                 <div class="absolute top-4 left-4 flex gap-2">
@@ -77,7 +77,7 @@
           </Card>
         </div>
 
-        <!-- Right Column: Ranking Widget (Fixed Width) -->
+        <!-- 우측 컬럼: 랭킹 위젯 (고정 너비) -->
         <div class="w-full lg:w-[380px] shrink-0">
           <div class="sticky top-6">
             <ChallengeRankingWidget :challengeId="challengeId" />
@@ -154,7 +154,7 @@ onMounted(() => {
   color: var(--color-heading);
 }
 
-/* Card Styling overrides */
+/* 카드 스타일링 오버라이드 */
 .challenge-info-card :deep(.p-card-body) {
   padding: 0;
 }
@@ -162,7 +162,7 @@ onMounted(() => {
   padding: 1.5rem;
 }
 
-/* Badge Styles (Consistent with ChallengeCard) */
+/* 배지 스타일 (ChallengeCard와 일치) */
 .badge-time-attack {
   background-color: var(--bg-surface-hover);
   color: var(--accent);
@@ -181,7 +181,7 @@ onMounted(() => {
   border-color: var(--border);
 }
 
-/* Dark Mode Overrides */
+/* 다크 모드 오버라이드 */
 :global([data-theme="dark"]) .badge-time-attack {
   background-color: rgba(255, 200, 49, 0.1);
   color: var(--accent);

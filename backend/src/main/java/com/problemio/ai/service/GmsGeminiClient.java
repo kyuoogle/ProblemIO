@@ -48,7 +48,7 @@ public class GmsGeminiClient {
         log.info("GMS Gemini request baseUrl={} model={}", baseUrl, model);
         String endpoint = buildEndpoint();
 
-        // Gemini 2.0 Flash Image Generation Payload
+        // Gemini 2.0 Flash 이미지 생성 페이로드
         // https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent
         Map<String, Object> payload = Map.of(
                 "contents", List.of(
@@ -60,7 +60,7 @@ public class GmsGeminiClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // GMS uses query param 'key' for Gemini models
+        // GMS: Gemini 모델은 쿼리 파라미터 'key' 사용
         String url = UriComponentsBuilder.fromHttpUrl(endpoint)
                 .queryParam("key", apiKey)
                 .toUriString();
@@ -92,9 +92,9 @@ public class GmsGeminiClient {
     private byte[] extractImageBytes(String responseBody) throws Exception {
         JsonNode root = objectMapper.readTree(responseBody);
 
-        // Gemini Response Structure:
+        // Gemini 응답 구조:
         // candidates[0].content.parts[0].inlineData.data (Base64)
-        // OR candidates[0].content.parts[0].inline_data.data (Base64)
+        // 또는 candidates[0].content.parts[0].inline_data.data (Base64)
 
         JsonNode candidates = root.get("candidates");
         if (candidates != null && candidates.isArray() && !candidates.isEmpty()) {
@@ -121,20 +121,17 @@ public class GmsGeminiClient {
     }
 
     private String buildEndpoint() {
-        // gms.base-url might already contain the full path
-        // e.g.,
-        // https://gms.ssafy.io/gmsapi/generativelanguage.googleapis.com/v1beta/models/
+        // gms.base-url에 전체 경로가 포함될 수 있음 (예: .../models/)
 
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String targetPath = "generativelanguage.googleapis.com/v1beta/models/";
 
         if (base.contains(targetPath)) {
-            // If base url already contains the target path, just append the model and
-            // method
+            // Base URL에 타겟 경로가 포함된 경우 모델과 메서드만 추가
             return base + model + ":generateContent";
         }
 
-        // Otherwise append the full path
+        // 그렇지 않으면 전체 경로 추가
         return base + targetPath + model + ":generateContent";
     }
 

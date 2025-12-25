@@ -268,7 +268,7 @@ async function remove() {
   const commentId = resolveCommentId();
   if (!commentId) return;
 
-  // Admin bypass
+  // 관리자 우회
   if (isAdmin.value) {
      modalMode.value = "delete";
      showPasswordModal.value = true;
@@ -304,7 +304,7 @@ async function confirmModal() {
     return;
   }
 
-  // Admin does not need password
+  // 관리자는 비밀번호 불필요
   if (!isAdmin.value && !password.value.trim()) {
     error.value = "비밀번호를 입력하세요.";
     return;

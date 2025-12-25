@@ -50,7 +50,7 @@ public class AiQuizThumbnailService {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
-        // DEBUG LOG
+        // 디버그 로그
         System.out.println("Confirming Candidate ID: " + candidateId);
 
         byte[] bytes = candidateCache.get(candidateId);
@@ -77,7 +77,7 @@ public class AiQuizThumbnailService {
         byte[] bytes = gmsGeminiClient.generatePngBytes(title, description, styleHint);
         String candidateId = UUID.randomUUID().toString();
 
-        // DEBUG LOG
+        // 디버그 로그
         System.out.println(
                 "Generated Candidate ID: " + candidateId + ", bytes: " + (bytes != null ? bytes.length : "null"));
 

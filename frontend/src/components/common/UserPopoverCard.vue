@@ -70,7 +70,7 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    // Optional override for decoration, used for preview
+    // 데코레이션에 대한 선택적 오버라이드, 미리보기에 사용됨
     previewDecorationId: {
         type: [String, Number],
         default: null
@@ -118,7 +118,7 @@ const popoverStyle = computed(() => {
       return baseStyle;
   }
 
-  // 2. ID Based
+  // 2. ID 기반
   const decoId = props.previewDecorationId !== null ? props.previewDecorationId : props.profile?.popoverDecoration;
   
   if (decoId) {
@@ -149,7 +149,7 @@ const popoverStyle = computed(() => {
         }
         return baseStyle;
     }
-    // Fallback: 서버에서 URL이나 파일 경로가 넘어온 경우 그대로 배경으로 사용
+    // 폴백: 서버에서 URL이나 파일 경로가 넘어온 경우 그대로 배경으로 사용
     return {
         backgroundImage: `url('${resolveImageUrl(decoId)}')`,
         backgroundSize: 'cover',

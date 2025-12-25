@@ -112,7 +112,7 @@ const handleLogout = () => {
   font-weight: 600;
 }
 
-/* Force ALL navigation text to use heading color */
+/* 모든 네비게이션 텍스트에 제목 색상 강제 적용 */
 .app-header,
 .app-header :deep(*) {
   color: var(--text-main) !important;
@@ -182,7 +182,7 @@ const handleLogout = () => {
   color: var(--text-main);
 }
 
-/* Dark theme header harmonization */
+/* 다크 테마 헤더 조화 */
 :global([data-theme="dark"] .p-menubar) {
   background-color: transparent !important;
   border-color: transparent !important;

@@ -41,11 +41,11 @@ export const uploadItemImage = async (file, type) => {
     formData.append('file', file);
     formData.append('type', type);
     
-    // Content-Type is auto set by axios when FormData is used
+    // FormData 사용 시 axios가 Content-Type을 자동 설정함
     const response = await instance.post('/admin/items/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return response.data; // returns relative path string
+    return response.data; // 상대 경로 문자열 반환
 }
 
 // 아이템 수정

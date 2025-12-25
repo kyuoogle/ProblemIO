@@ -6,7 +6,7 @@
       </div>
 
       <div v-else class="flex flex-col lg:flex-row justify-center gap-6 items-start relative">
-        <!-- Main Game Area -->
+        <!-- 메인 게임 영역 -->
         <div class="w-full max-w-3xl flex flex-col gap-6">
             <!-- 상단 타이머 및 정보 -->
 
@@ -14,7 +14,7 @@
         <Card>
           <template #content>
             <div class="flex flex-col gap-6">
-              <!-- 상단 타이머 및 정보 (Moved Inside) -->
+              <!-- 상단 타이머 및 정보 (내부로 이동됨) -->
               <div class="mb-2">
                    <div class="flex justify-between items-center">
                       <div class="font-bold text-xl">
@@ -68,7 +68,7 @@
         </Card>
       </div>
 
-      <!-- Right Column: Ranking Widget (Fixed Width) -->
+      <!-- 우측 컬럼: 랭킹 위젯 (고정 너비) -->
       <div class="w-full lg:w-[380px] shrink-0 hidden lg:block">
            <div class="sticky top-6">
                <ChallengeRankingWidget :challengeId="Number(challengeId)" />
@@ -105,8 +105,8 @@ const currentIndex = ref(0)
 const timeLimit = ref(0)
 const startTime = ref(null)
 
-// Timer variables
-const timerValue = ref(0) // Seconds (remaining or elapsed)
+// 타이머 변수
+const timerValue = ref(0) // 초 단위 (남은 시간 또는 경과 시간)
 const timerInterval = ref(null)
 
 const currentAnswer = ref("")
@@ -114,7 +114,7 @@ const answerInput = ref(null)
 
 const currentQuestion = computed(() => questions.value[currentIndex.value])
 
-// Timer Format (MM:SS)
+// 타이머 형식 (MM:SS)
 const formattedTimer = computed(() => {
     const min = Math.floor(timerValue.value / 60).toString().padStart(2, '0')
     const sec = (timerValue.value % 60).toString().padStart(2, '0')
@@ -143,7 +143,7 @@ const startTimer = () => {
             }
         }, 1000)
     } else {
-        // SURVIVAL: Count Up
+        // 서바이벌: 카운트 업
         timerValue.value = 0
         timerInterval.value = setInterval(() => {
             timerValue.value++
@@ -166,7 +166,7 @@ const initChallenge = async () => {
         challengeType.value = data.challengeType
         timeLimit.value = data.timeLimit || 0
         
-        // Start Timer
+        // 타이머 시작
         startTimer()
         
         loading.value = false
@@ -184,17 +184,17 @@ const submitAnswer = async () => {
     submitting.value = true
     try {
         const payload = {
-            submissionId: submissionId.value, // ChallengeStartResponse returns this
+            submissionId: submissionId.value, // ChallengeStartResponse에서 반환됨
             questionId: currentQuestion.value.id,
             answerText: currentAnswer.value.trim()
         }
         
         const { data: result } = await submitAnswerAPI(challengeId, payload)
         
-        // Logic Branch
+        // 로직 분기
         if (challengeType.value === 'SURVIVAL') {
             if (!result.correct) {
-                // Game Over
+                // 게임 오버
                 clearInterval(timerInterval.value)
                 toast.add({ severity: 'error', summary: 'Game Over', detail: '오답입니다! 챌린지가 종료됩니다.', life: 2000 })
                 setTimeout(() => {
@@ -204,13 +204,13 @@ const submitAnswer = async () => {
             }
         }
         
-        // Next Question
+        // 다음 문제
         if (currentIndex.value < questions.value.length - 1) {
             currentIndex.value++
             currentAnswer.value = ""
             focusInput()
         } else {
-            // All Cleared
+            // 모든 문제 해결
             clearInterval(timerInterval.value)
             toast.add({ severity: 'success', summary: 'Clear!', detail: '모든 문제를 풀었습니다!', life: 2000 })
             setTimeout(() => {
@@ -220,7 +220,7 @@ const submitAnswer = async () => {
         
     } catch (error) {
         console.error(error)
-        // Check for specific error code (e.g. TIME_OVER) logic if backend throws
+        // 백엔드에서 에러 발생 시 특정 에러 코드(예: TIME_OVER) 로직 확인
         toast.add({ severity: 'error', summary: 'Error', detail: '제출 중 오류가 발생했습니다.', life: 3000 })
     } finally {
         submitting.value = false
@@ -229,7 +229,7 @@ const submitAnswer = async () => {
 
 const focusInput = () => {
     nextTick(() => {
-        // Simple DOM focus logic adjusted for PrimeVue InputText
+        // PrimeVue InputText에 맞춰 조정된 간단한 DOM 포커스 로직
         const el = document.querySelector('input.p-inputtext') as HTMLElement
         if (el) el.focus()
     })
