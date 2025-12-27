@@ -1,11 +1,12 @@
 # 📸 Problem.io — 이미지 기반 퀴즈 플랫폼
 
 <p align="center">
-  <a href="https://problem.io">
+  <a href="https://problemio.cloud">
     <img src="readmeImageSet/main.jpg" alt="ProblemIO" width="800"/>
   </a>
+  <br/>
+  <sub>이미지 클릭 시 서비스 페이지로 라우팅됩니다.</sub>
 </p>
-
 
 - Problem.io는 **이미지 한 장으로 직관적·시각적인 퀴즈를 만들고 풀 수 있는 UGC 기반 플랫폼**입니다.
 - Google Gemini 기반의 **생성형 AI(GenAI)** 기술을 도입하여 퀴즈 제작 경험을 혁신하고, 좋아요·팔로우·댓글 등 **SNS형 상호작용**을 통해 제작자와 플레이어가 자연스럽게 연결되는 커뮤니티를 지향합니다.
